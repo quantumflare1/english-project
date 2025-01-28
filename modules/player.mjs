@@ -2,10 +2,10 @@
     import * as Level from "./level.mjs";
 
     const SIZE = 10;
-    const ACCEL_PER_TICK = 0.4;
+    const ACCEL_PER_TICK = 0.3;
     const MAX_VEL = 2.5;
     const GRAVITY = 0.3;
-    const MAX_FALL_VEL = 7;
+    const MAX_FALL_VEL = 3.5;
     const TOUCH_THRESHOLD = 0.01;
 
     class Player extends Thing.Visible {
@@ -119,10 +119,10 @@
                 else if (moveX < 0) kickX = (i.x + i.width) - this.x;
                 if (moveY > 0) kickY = i.y - (this.y + SIZE);
                 else if (moveY < 0) kickY = (i.y + i.width) - this.y;
-                console.log(moveX, moveY, "m")
-                console.log(this.x, this.y, "t")
-                console.log(i.x, i.y, "i")
-                console.log(kickX, kickY, "k")
+                //console.log(moveX, moveY, "m")
+                //console.log(this.x, this.y, "t")
+                //console.log(i.x, i.y, "i")
+                //console.log(kickX, kickY, "k")
 
                 if (!kickX && kickY) {
                     this.y += kickY;

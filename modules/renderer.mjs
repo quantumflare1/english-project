@@ -1,14 +1,24 @@
 import * as Thing from "./thing.mjs";
 
+const BASE_SCALE = 20;
+
 class Renderer {
     constructor() {
         this.canvas = document.createElement("canvas");
         this.ctx = this.canvas.getContext("2d");
 
-        this.canvas.width = innerWidth;
-        this.canvas.height = innerHeight;
+        this.scale = Math.min(innerHeight / (9 * BASE_SCALE), innerWidth / (16 * BASE_SCALE)) / 2;
+        this.canvas.width = 16 * BASE_SCALE * this.scale;
+        this.canvas.height = 9 * BASE_SCALE * this.scale;
+        this.canvas.style = "display:block;position:absolute;top:0;left:0;bottom:0;right:0;margin:auto;";
+        this.canvas.style.width = this.canvas.width;
+        this.canvas.style.height = this.canvas.height;
+
         document.body.appendChild(this.canvas);
         const resize = this.resize.bind(this);
+
+        this.ctx.imageSmoothingEnabled = false;
+        this.ctx.setTransform(this.scale, 0, 0, this.scale, 0, 0);
 
         addEventListener("resize", resize);
     }
@@ -18,7 +28,7 @@ class Renderer {
      */
     draw(tickPercent, ...objs) {
         this.ctx.fillStyle = "white";
-        this.ctx.fillRect(0, 0, innerWidth, innerHeight);
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         this.ctx.fillStyle = "black";
         for (const i of objs) {
             /*const diffX = i.x - i.prevX;
@@ -29,8 +39,12 @@ class Renderer {
         }
     }
     resize() {
-        this.canvas.width = innerWidth;
-        this.canvas.height = innerHeight;
+        this.scale = Math.min(innerHeight / (9 * BASE_SCALE), innerWidth / (16 * BASE_SCALE)) / 2;
+        this.canvas.width = 16 * BASE_SCALE * this.scale;
+        this.canvas.height = 9 * BASE_SCALE * this.scale;
+        this.canvas.style.width = this.canvas.width;
+        this.canvas.style.height = this.canvas.height;
+        this.ctx.setTransform(this.scale, 0, 0, this.scale, 0, 0);
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
     }
 }
