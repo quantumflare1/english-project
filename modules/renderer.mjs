@@ -28,7 +28,7 @@ class Renderer {
      */
     draw(tickPercent, ...objs) {
         this.ctx.fillStyle = "white";
-        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.fillRect(0, 0, this.canvas.width / this.scale, this.canvas.height / this.scale);
         this.ctx.fillStyle = "black";
         for (const i of objs) {
             /*const diffX = i.x - i.prevX;
@@ -45,7 +45,7 @@ class Renderer {
         this.canvas.style.width = this.canvas.width;
         this.canvas.style.height = this.canvas.height;
         this.ctx.setTransform(this.scale, 0, 0, this.scale, 0, 0);
-        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.fillRect(0, 0, this.canvas.width / this.scale, this.canvas.height / this.scale);
     }
 }
 export { Renderer }
