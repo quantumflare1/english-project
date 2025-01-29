@@ -2,8 +2,9 @@ import * as Thing from "./thing.mjs";
 import * as Level from "./level.mjs";
 
 const SIZE = 10;
-const ACCEL_PER_TICK = 0.3;
-const MAX_VEL = 2.5;
+const MAX_VEL_TIME = 8;
+const MAX_VEL = 2;
+const ACCEL_PER_TICK = MAX_VEL / MAX_VEL_TIME;
 const TOUCH_THRESHOLD = 0.01;
 
 const JUMP_HEIGHT = 32;
@@ -11,6 +12,8 @@ const JUMP_APEX_TIME = 24;
 const GRAVITY = (JUMP_HEIGHT * 2) / (JUMP_APEX_TIME * JUMP_APEX_TIME);
 const BASE_JUMP_VEL = Math.sqrt(2 * GRAVITY * JUMP_HEIGHT);
 const MAX_FALL_VEL = 3.5;
+
+const RESPAWN_TIME = 40;
 
 const COYOTE_TICKS = 5;
 const BUFFER_TICKS = 5;
@@ -28,8 +31,8 @@ initJumpVelocity = 2.67px/tick
 */
 
 class Player extends Thing.Visible {
-    constructor(x, y, w, h) {
-        super(x, y, w, h);
+    constructor(x, y, w, h, c) {
+        super(x, y, w, h, c);
         this.velX = 0;
         this.velY = 0;
         this.touching = new Map();
@@ -37,6 +40,12 @@ class Player extends Thing.Visible {
         this.jumpTimer = 20;
         this.jumpBufferTime = BUFFER_TICKS;
         this.coyoteTime = COYOTE_TICKS;
+
+        this.spawnX = x;
+        this.spawnY = y;
+
+        this.isDead = false;
+        this.respawnTime = RESPAWN_TIME;
 
         this.touching.set("down", false);
         this.touching.set("up", false);
@@ -49,6 +58,18 @@ class Player extends Thing.Visible {
     keydown = (e) => this.inputs.add(e.key);
     keyup = (e) => this.inputs.delete(e.key);
     tick() {
+        if (this.isDead) {
+            this.respawnTime--;
+            if (this.respawnTime <= 0) {
+                this.isDead = false;
+                this.x = this.spawnX;
+                this.y = this.spawnY;
+                this.jumpBufferTime = 0;
+                this.coyoteTime = 0;
+                this.respawnTime = RESPAWN_TIME;
+            }
+            return;
+        }
         if (this.touching.get("up")) {
             this.velY = 0;
         }
@@ -128,6 +149,9 @@ class Player extends Thing.Visible {
         for (const i of Level.tiles) {
             if (this.x + SIZE > i.x && this.x < i.x + i.width && this.y + SIZE > i.y && this.y < i.y + i.height) {
                 overlappingTiles.push(i);
+                if (i.id === 2) {
+                    this.isDead = true;
+                }
             }
         }
         // narrow phase
@@ -209,7 +233,7 @@ class Player extends Thing.Visible {
 let player;
 
 function init() {
-    player = new Player(10, 10, SIZE, SIZE);
+    player = new Player(10, 10, SIZE, SIZE, "red");
 }
 
 export { player, init }

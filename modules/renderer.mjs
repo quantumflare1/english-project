@@ -31,6 +31,7 @@ class Renderer {
         this.ctx.fillRect(0, 0, this.canvas.width / this.scale, this.canvas.height / this.scale);
         this.ctx.fillStyle = "black";
         for (const i of objs) {
+            this.ctx.fillStyle = i.color;
             /*const diffX = i.x - i.prevX;
             const diffY = i.y - i.prevY;*/
             const diffX = 0;
