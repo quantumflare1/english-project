@@ -13,7 +13,7 @@ const renderer = new Renderer.Renderer();
 let sdhjlf = 0;
 
 function tick(ms) {
-    const tickTime = ms - lastTickTime;
+    let tickTime = ms - lastTickTime;
 
     if (tickTime > msPerTick) {
         performance.mark("tick");
@@ -21,7 +21,12 @@ function tick(ms) {
         
         // avoid speedup if you tab out (or lag for more than 3 ticks)
         if (tickTime > 3 * msPerTick) lastTickTime = ms;
-        Player.player.tick();
+
+        // if refresh rate < tick rate, hurry it up
+        while (tickTime > msPerTick) {
+            Player.player.tick();
+            tickTime -= msPerTick;
+        }
         sdhjlf++;
         //console.log(performance.measure("tick"));
     }
