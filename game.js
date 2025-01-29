@@ -10,12 +10,12 @@ let lastSecondTime = document.timeline.currentTime;
 
 const renderer = new Renderer.Renderer();
 
-let sdhjlf = 0;
+let sdhjlf = 0; // very well named tps variable
 
 function tick(ms) {
     let tickTime = ms - lastTickTime;
 
-    if (tickTime > msPerTick) {
+    while (tickTime > msPerTick) {
         performance.mark("tick");
         lastTickTime += msPerTick;
         
@@ -23,11 +23,10 @@ function tick(ms) {
         if (tickTime > 3 * msPerTick) lastTickTime = ms;
 
         // if refresh rate < tick rate, hurry it up
-        while (tickTime > msPerTick) {
-            Player.player.tick();
-            tickTime -= msPerTick;
-        }
+        Player.player.tick();
         sdhjlf++;
+        tickTime -= msPerTick;
+        
         //console.log(performance.measure("tick"));
     }
     if (ms - lastSecondTime > 1000) {
