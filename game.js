@@ -25,7 +25,7 @@ function tick(ms) {
         // if refresh rate < tick rate, hurry it up
         Player.player.tick();
         sdhjlf++;
-        tickTime -= msPerTick;
+        tickTime = ms - lastTickTime;
         
         //console.log(performance.measure("tick"));
     }

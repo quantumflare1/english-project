@@ -11,24 +11,39 @@ const JUMP_HEIGHT = 32;
 const JUMP_APEX_TIME = 24;
 const GRAVITY = (JUMP_HEIGHT * 2) / (JUMP_APEX_TIME * JUMP_APEX_TIME);
 const BASE_JUMP_VEL = Math.sqrt(2 * GRAVITY * JUMP_HEIGHT);
-const MAX_FALL_VEL = 3.5;
+const MAX_FALL_VEL = 3;
+const MIN_JUMP_SCALE = 0.3;
 
 const RESPAWN_TIME = 40;
 
-const COYOTE_TICKS = 5;
-const BUFFER_TICKS = 5;
+const COYOTE_TICKS = 6;
+const BUFFER_TICKS = 6;
 
-// g = (2*jumpHeight)/(timeToApex^2)
-// initJumpVelocity = math.sqrt(2*g*jumpHeight)
-// timeToApex = initJumpVelocity/g
+/**
+ * 
+ * @param {number} sx 
+ * @param {number} sy 
+ * @param {number} dx 
+ * @param {number} dy 
+ * @returns 
+ */
+function raycast(sx, sy, dx, dy) {
+    // dda implementation basically taken straight from wikipedia
+    let posX = sx / 10;
+    let posY = sy / 10;
+    const step = Math.abs(dx) > Math.abs(dy) ? Math.abs(dx) : Math.abs(dy);
+    const deltaX = dx / step;
+    const deltaY = dy / step;
 
-/*
-jumpHeight = 32px
-timeToApex = 24t
-therefore
-g = 64px/576t^2
-initJumpVelocity = 2.67px/tick
-*/
+    while (Level.level[posY][posX] === 0) {
+        posX += deltaX;
+        posY += deltaY;
+        if (posY >= Level.level.length || posX >= Level.level[posY].length) {
+            return { x: null, y: null };
+        }
+    }
+    return { x: posX, y: posY };
+}
 
 class Player extends Thing.Visible {
     constructor(x, y, w, h, c) {
@@ -93,7 +108,9 @@ class Player extends Thing.Visible {
             this.jumpBufferTime = BUFFER_TICKS;
         }
         if (!this.inputs.has(" ") && this.velY < 0) {
-            this.velY /= 1.6;
+            if (this.velY < -BASE_JUMP_VEL * MIN_JUMP_SCALE) {
+                this.velY = -BASE_JUMP_VEL * MIN_JUMP_SCALE;
+            }
         }
 
         if (this.jumpBufferTime >= 0 && this.coyoteTime >= 0 && this.inputs.has(" ")) { // start jump
@@ -149,13 +166,16 @@ class Player extends Thing.Visible {
         for (const i of Level.tiles) {
             if (this.x + SIZE > i.x && this.x < i.x + i.width && this.y + SIZE > i.y && this.y < i.y + i.height) {
                 overlappingTiles.push(i);
-                if (i.id === 2) {
-                    this.isDead = true;
-                }
             }
         }
         // narrow phase
         for (const i of overlappingTiles) {
+            if (i.id === 2) {
+                if (overlappingTiles.length === 1) {
+                    this.isDead = true;
+                }
+                overlappingTiles.splice(overlappingTiles.indexOf(i), 1);
+            }
             let kickX, kickY;
 
             if (moveX > 0) kickX = i.x - (this.x + SIZE);
@@ -233,7 +253,7 @@ class Player extends Thing.Visible {
 let player;
 
 function init() {
-    player = new Player(10, 10, SIZE, SIZE, "red");
+    player = new Player(230, 30, SIZE, SIZE, "red");
 }
 
 export { player, init }
