@@ -5,7 +5,7 @@ const SIZE = 10;
 const MAX_VEL_TIME = 8;
 const MAX_VEL = 2;
 const ACCEL_PER_TICK = MAX_VEL / MAX_VEL_TIME;
-const TOUCH_THRESHOLD = 0.01;
+const TOUCH_THRESHOLD = 0.01;   // magic floating point error fixer
 
 const JUMP_HEIGHT = 32;
 const JUMP_APEX_TIME = 24;
@@ -35,13 +35,17 @@ function raycast(sx, sy, dx, dy) {
     const deltaX = dx / step;
     const deltaY = dy / step;
 
-    while (Level.level[posY][posX] === 0) {
+    while (Level.level[Math.floor(posY)][Math.floor(posX)] !== 1) {
         posX += deltaX;
         posY += deltaY;
-        if (posY >= Level.level.length || posX >= Level.level[posY].length) {
+
+        if (posY >= Level.level.length || posY < 0 || posX >= Level.level[Math.floor(posY)].length || posX < 0) {
             return { x: null, y: null };
         }
     }
+    posX *= 10;
+    posY *= 10;
+
     return { x: posX, y: posY };
 }
 
@@ -55,6 +59,10 @@ class Player extends Thing.Visible {
         this.jumpTimer = 20;
         this.jumpBufferTime = BUFFER_TICKS;
         this.coyoteTime = COYOTE_TICKS;
+        this.facingX = 1;
+        this.facingY = 0;
+        this.lastFacedX = 1;
+        this.temp = raycast(x, y, this.facingX, this.facingY);
 
         this.spawnX = x;
         this.spawnY = y;
@@ -146,6 +154,29 @@ class Player extends Thing.Visible {
             console.log(this.touching)
             console.log(this.x, this.y);
         }
+        if (this.inputs.has("ArrowRight")) {
+            this.facingX = 1;
+            this.lastFacedX = 1;
+        }
+        else if (this.inputs.has("ArrowLeft")) {
+            this.facingX = -1;
+            this.lastFacedX = -1;
+        }
+        else {
+            this.facingX = 0;
+        }
+        if (this.inputs.has("ArrowDown")) {
+            this.facingY = 1;
+        }
+        else if (this.inputs.has("ArrowUp")) {
+            this.facingY = -1;
+        }
+        else {
+            this.facingY = 0;
+        }
+        if (this.facingX === 0 && this.facingY === 0) {
+            this.facingX = this.lastFacedX;
+        }
 
         this.prevX = this.x;
         this.prevY = this.y;
@@ -171,6 +202,8 @@ class Player extends Thing.Visible {
         // narrow phase
         for (const i of overlappingTiles) {
             if (i.id === 2) {
+
+                // add celeste machanic here where spikes don't kill if you're moving the same direction they face
                 if (overlappingTiles.length === 1) {
                     this.isDead = true;
                 }
@@ -242,11 +275,10 @@ class Player extends Thing.Visible {
             }
         }
 
-        if (this.y > 1000) {
+        if (this.y > 200) {
             this.y = 0;
         }
-        this.x = Math.round(this.x);
-        this.y = Math.round(this.y);
+        this.temp = raycast(this.x + SIZE / 2, this.y + SIZE / 2, this.facingX, this.facingY);
     }
 }
 

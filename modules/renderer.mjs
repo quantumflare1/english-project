@@ -30,13 +30,24 @@ class Renderer {
         this.ctx.fillStyle = "white";
         this.ctx.fillRect(0, 0, this.canvas.width / this.scale, this.canvas.height / this.scale);
         this.ctx.fillStyle = "black";
+
+        if (objs[0].temp.x) {
+            this.ctx.strokeStyle = "green";
+            this.ctx.beginPath();
+            this.ctx.moveTo(objs[0].x + 5, objs[0].y + 5);
+            this.ctx.lineTo(objs[0].temp.x, objs[0].temp.y);
+    
+            this.ctx.stroke();
+            this.ctx.closePath();
+        }
+
         for (const i of objs) {
             this.ctx.fillStyle = i.color;
             /*const diffX = i.x - i.prevX;
             const diffY = i.y - i.prevY;*/
             const diffX = 0;
             const diffY = 0;
-            this.ctx.fillRect(Math.floor(i.x + diffX * tickPercent), Math.floor(i.y + diffY * tickPercent), i.width, i.height);
+            this.ctx.fillRect(Math.round(i.x + diffX * tickPercent), Math.round(i.y + diffY * tickPercent), i.width, i.height);
         }
     }
     resize() {
