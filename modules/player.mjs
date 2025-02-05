@@ -235,15 +235,15 @@ class Player extends Thing.Visible {
                 overlappingTiles.push(i);
             }
         }
+        let overlappedHazards = 0;
         // narrow phase
         for (const i of overlappingTiles) {
             if (i.id === 2) {
-
-                // add celeste machanic here where spikes don't kill if you're moving the same direction they face
-                if (overlappingTiles.length === 1) {
+                overlappedHazards++;
+                if (overlappingTiles.length === overlappedHazards && this.velY >= 0) {
                     this.isDead = true;
                 }
-                overlappingTiles.splice(overlappingTiles.indexOf(i), 1);
+                continue;
             }
             let kickX, kickY;
 
@@ -291,7 +291,7 @@ class Player extends Thing.Visible {
 
         const touchingTiles = [];
         for (const i of Level.tiles) {
-            if (this.x + SIZE + TOUCH_THRESHOLD >= i.x && this.x <= i.x + i.width + TOUCH_THRESHOLD && this.y + SIZE + TOUCH_THRESHOLD >= i.y && this.y <= i.y + i.height + TOUCH_THRESHOLD) {
+            if (i.id === 1 && this.x + SIZE + TOUCH_THRESHOLD >= i.x && this.x <= i.x + i.width + TOUCH_THRESHOLD && this.y + SIZE + TOUCH_THRESHOLD >= i.y && this.y <= i.y + i.height + TOUCH_THRESHOLD) {
                 touchingTiles.push(i);
             }
         }
