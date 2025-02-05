@@ -17,7 +17,7 @@ const MIN_JUMP_SCALE = 0.3;
 const RESPAWN_TIME = 40;
 
 const COYOTE_TICKS = 6;
-const BUFFER_TICKS = 6;
+const BUFFER_TICKS = 8;
 
 /**
  * 
@@ -35,6 +35,9 @@ function raycast(sx, sy, dx, dy) {
     const deltaX = dx / step;
     const deltaY = dy / step;
 
+    if (posY >= Level.level.length || posY < 0 || posX >= Level.level[Math.floor(posY)].length || posX < 0) {
+        return { x: null, y: null };
+    }
     while (Level.level[Math.floor(posY)][Math.floor(posX)] !== 1) {
         posX += deltaX;
         posY += deltaY;
@@ -275,8 +278,8 @@ class Player extends Thing.Visible {
             }
         }
 
-        if (this.y > 200) {
-            this.y = 0;
+        if (this.y > 180) {
+            this.y = -20;
         }
         this.temp = raycast(this.x + SIZE / 2, this.y + SIZE / 2, this.facingX, this.facingY);
     }
