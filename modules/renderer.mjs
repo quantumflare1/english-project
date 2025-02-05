@@ -31,6 +31,7 @@ class Renderer {
         this.ctx.fillRect(0, 0, this.canvas.width / this.scale, this.canvas.height / this.scale);
         this.ctx.fillStyle = "black";
 
+        /*
         if (objs[0].temp.x) {
             this.ctx.strokeStyle = "green";
             this.ctx.beginPath();
@@ -39,7 +40,7 @@ class Renderer {
     
             this.ctx.stroke();
             this.ctx.closePath();
-        }
+        }*/
 
         for (const i of objs) {
             this.ctx.fillStyle = i.color;

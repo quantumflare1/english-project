@@ -6,6 +6,7 @@ const MAX_VEL_TIME = 8;
 const MAX_VEL = 2;
 const ACCEL_PER_TICK = MAX_VEL / MAX_VEL_TIME;
 const TOUCH_THRESHOLD = 0.01;   // magic floating point error fixer
+const MAX_GRAPPLE_TIME = 36;
 
 const JUMP_HEIGHT = 32;
 const JUMP_APEX_TIME = 24;
@@ -66,6 +67,11 @@ class Player extends Thing.Visible {
         this.facingY = 0;
         this.lastFacedX = 1;
         this.temp = raycast(x, y, this.facingX, this.facingY);
+        this.bufferingGrapple = false;
+        this.canGrapple = false;
+        this.grappleTime = 0;
+        this.grappleX = 0;
+        this.grappleY = 0;
 
         this.spawnX = x;
         this.spawnY = y;
@@ -99,15 +105,33 @@ class Player extends Thing.Visible {
         if (this.touching.get("up")) {
             this.velY = 0;
         }
+
+        if (this.inputs.has("z")) {
+            this.bufferingGrapple = true;
+        } else {
+            this.bufferingGrapple = false;
+            this.grappleTime = 0;
+        }
+
         if (!this.touching.get("down")) {
             this.velY += GRAVITY;
             if (this.velY > MAX_FALL_VEL) {
                 this.velY = MAX_FALL_VEL;
             }
-            this.coyoteTime--;
+            if (this.grappleTime === 0) this.coyoteTime--;
         } else {
             this.velY = 0;
             this.coyoteTime = COYOTE_TICKS;
+            this.canGrapple = true;
+        }
+        if (this.bufferingGrapple && this.canGrapple) { // start grapple
+            this.bufferingGrapple = false;
+            this.canGrapple = false;
+            this.grappleTime = MAX_GRAPPLE_TIME;
+            if (this.temp.x) this.grappleX = this.facingX * 3;
+            else this.grappleX = null;
+            if (this.temp.y) this.grappleY = this.facingY * 3;
+            else this.grappleY = null;
         }
         if (this.touching.get("right") || this.touching.get("left")) {
             this.velX = 0;
@@ -128,6 +152,7 @@ class Player extends Thing.Visible {
             this.velY = -BASE_JUMP_VEL;
             this.jumpTimer = 10;
             this.coyoteTime = 0;
+            this.grappleTime = 0;
         }
 
         if (this.inputs.has("ArrowRight") && !this.touching.get("right")) {
@@ -157,6 +182,7 @@ class Player extends Thing.Visible {
             console.log(this.touching)
             console.log(this.x, this.y);
         }
+
         if (this.inputs.has("ArrowRight")) {
             this.facingX = 1;
             this.lastFacedX = 1;
@@ -179,6 +205,13 @@ class Player extends Thing.Visible {
         }
         if (this.facingX === 0 && this.facingY === 0) {
             this.facingX = this.lastFacedX;
+        }
+
+        if (this.grappleTime > 0) {
+            if (this.grappleX !== null) this.velX = this.grappleX;
+            if (this.grappleY !== null) this.velY = this.grappleY;
+            this.grappleTime--;
+            this.coyoteTime = 2;
         }
 
         this.prevX = this.x;
