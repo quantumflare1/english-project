@@ -36,14 +36,14 @@ function raycast(sx, sy, dx, dy) {
     const deltaX = dx / step;
     const deltaY = dy / step;
 
-    if (posY >= Level.level.length || posY < 0 || posX >= Level.level[Math.floor(posY)].length || posX < 0) {
+    if (posY >= Level.level.rooms[Level.curRoomId].height || posY < 0 || posX >= Level.level.rooms[Level.curRoomId].width || posX < 0) {
         return { x: null, y: null };
     }
-    while (Level.level[Math.floor(posY)][Math.floor(posX)] !== 1) {
+    while (Level.level.rooms[Level.curRoomId].tiles[Math.floor(posY)][Math.floor(posX)] !== 1) {
         posX += deltaX;
         posY += deltaY;
 
-        if (posY >= Level.level.length || posY < 0 || posX >= Level.level[Math.floor(posY)].length || posX < 0) {
+        if (posY >= Level.level.rooms[Level.curRoomId].height || posY < 0 || posX >= Level.level.rooms[Level.curRoomId].width || posX < 0) {
             return { x: null, y: null };
         }
     }
@@ -73,6 +73,8 @@ class Player extends Thing.Visible {
         this.grappleX = 0;
         this.grappleY = 0;
 
+        this.inControl = true;
+
         this.spawnX = x;
         this.spawnY = y;
 
@@ -92,6 +94,8 @@ class Player extends Thing.Visible {
     tick() {
         if (this.isDead) {
             this.respawnTime--;
+            this.velX = 0;
+            this.velY = 0;
             if (this.respawnTime <= 0) {
                 this.isDead = false;
                 this.x = this.spawnX;
@@ -125,6 +129,7 @@ class Player extends Thing.Visible {
             this.canGrapple = true;
         }
         if (this.bufferingGrapple && this.canGrapple) { // start grapple
+            // note: add short waiting time like in celeste so you don't dash wrong
             this.bufferingGrapple = false;
             this.canGrapple = false;
             this.grappleTime = MAX_GRAPPLE_TIME;
@@ -135,6 +140,14 @@ class Player extends Thing.Visible {
         }
         if (this.touching.get("right") || this.touching.get("left")) {
             this.velX = 0;
+        }
+
+        if (this.x < 0) {
+            const ev = new CustomEvent("game_roomtransition", { detail: "left" });
+            const nextRoom = Level.level.rooms[Level.level.rooms[Level.curRoomId].left];
+            this.x = nextRoom.width * 10;
+            this.y += Level.level.rooms[Level.curRoomId].leftOffset;
+            dispatchEvent(ev);
         }
 
         if (this.inputs.has(" ")) { // press jump
@@ -211,7 +224,7 @@ class Player extends Thing.Visible {
             if (this.grappleX !== null) this.velX = this.grappleX;
             if (this.grappleY !== null) this.velY = this.grappleY;
             this.grappleTime--;
-            this.coyoteTime = 2;
+            this.coyoteTime = COYOTE_TICKS;
         }
 
         this.prevX = this.x;
@@ -230,6 +243,7 @@ class Player extends Thing.Visible {
 
         // broad phase
         const overlappingTiles = [];
+
         for (const i of Level.tiles) {
             if (this.x + SIZE > i.x && this.x < i.x + i.width && this.y + SIZE > i.y && this.y < i.y + i.height) {
                 overlappingTiles.push(i);
@@ -287,6 +301,7 @@ class Player extends Thing.Visible {
                     overlappingTiles.splice(overlappingTiles.indexOf(i), 1);
                 }
             }
+            this.grappleTime = 0;
         }
 
         const touchingTiles = [];

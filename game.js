@@ -10,7 +10,7 @@ let lastSecondTime = document.timeline.currentTime;
 
 const renderer = new Renderer.Renderer();
 
-let sdhjlf = 0; // very well named tps variable
+let sdhjlf = 0; // very well named debug variable (represents tps)
 
 function tick(ms) {
     let tickTime = ms - lastTickTime;
