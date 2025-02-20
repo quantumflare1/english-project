@@ -113,16 +113,6 @@ class Player extends Thing.Visible {
             }
             return;
         }
-        if (this.touching.get("up")) {
-            this.velY = 0;
-        }
-
-        if (this.inputs.has("z")) {
-            this.bufferingGrapple = true;
-        } else {
-            this.bufferingGrapple = false;
-            this.grappleTime = 0;
-        }
 
         if (!this.touching.get("down")) {
             this.velY += GRAVITY;
@@ -135,74 +125,57 @@ class Player extends Thing.Visible {
             this.coyoteTime = COYOTE_TICKS;
             this.canGrapple = true;
         }
-        if (this.bufferingGrapple && this.canGrapple) { // start grapple
-            // note: add short waiting time like in celeste so you don't dash wrong
-            this.bufferingGrapple = false;
-            this.canGrapple = false;
-            this.grappleTime = MAX_GRAPPLE_TIME;
-            if (this.temp.x) this.grappleX = this.facingX * 3;
-            else this.grappleX = null;
-            if (this.temp.y) this.grappleY = this.facingY * 3;
-            else this.grappleY = null;
-        }
+
+        this.processGrapple();
+
         if (this.touching.get("right") || this.touching.get("left")) {
             this.velX = 0;
         }
 
+        /*
         if (this.x < 0) {
             const ev = new CustomEvent("game_roomtransition", { detail: "left" });
             const nextRoom = Level.level.rooms[Level.level.rooms[Level.curRoomId].left];
             this.x = nextRoom.width * 10;
             this.y += Level.level.rooms[Level.curRoomId].leftOffset;
             dispatchEvent(ev);
-        }
+        }*/
 
-        if (this.inputs.has(" ")) { // press jump
-            this.jumpBufferTime--;
-        } else { // release jump
-            this.jumpBufferTime = BUFFER_TICKS;
-        }
-        if (!this.inputs.has(" ") && this.velY < 0) {
-            if (this.velY < -BASE_JUMP_VEL * MIN_JUMP_SCALE) {
-                this.velY = -BASE_JUMP_VEL * MIN_JUMP_SCALE;
-            }
-        }
+        this.processJump();
+        this.processRun();
 
-        if (this.jumpBufferTime >= 0 && this.coyoteTime >= 0 && this.inputs.has(" ")) { // start jump
-            this.velY = -BASE_JUMP_VEL;
-            this.jumpTimer = 10;
-            this.coyoteTime = 0;
-            this.grappleTime = 0;
-        }
-
-        if (this.inputs.has("ArrowRight") && !this.touching.get("right")) {
-            this.velX += ACCEL_PER_TICK;
-            if (this.velX > MAX_VEL) {
-                this.velX = MAX_VEL;
-            }
-        } else if (this.velX > 0) {
-            this.velX -= ACCEL_PER_TICK;
-            if (this.velX < 0.05) {
-                this.velX = 0;
-            }
-        }
-        if (this.inputs.has("ArrowLeft") && !this.touching.get("left")) {
-            this.velX -= ACCEL_PER_TICK;
-            if (this.velX < -MAX_VEL) {
-                this.velX = -MAX_VEL;
-            }
-        } else if (this.velX < 0) {
-            this.velX += ACCEL_PER_TICK;
-            if (this.velX > -0.05) {
-                this.velX = 0;
-            }
-        }
         // DEBUG
         if (this.inputs.has("t")) {
             console.log(this.touching)
             console.log(this.x, this.y);
         }
 
+        this.findFacingDirection();
+
+        if (this.grappleTime > 0) {
+            if (this.grappleX !== null) this.velX = this.grappleX;
+            if (this.grappleY !== null) this.velY = this.grappleY;
+            this.grappleTime--;
+            this.coyoteTime = COYOTE_TICKS;
+        }
+
+        this.prevX = this.x;
+        this.prevY = this.y;
+
+        this.x += this.velX;
+        this.y += this.velY;
+
+        this.collide();
+
+        if (this.y > 180) {
+            this.y = -20;
+        }
+        this.temp = raycast(this.x + WIDTH / 2, this.y + HEIGHT / 2, this.facingX, this.facingY);
+
+        this.x = Math.round(this.x);
+        this.y = Math.round(this.y);
+    }
+    findFacingDirection() {
         if (this.inputs.has("ArrowRight")) {
             this.facingX = 1;
             this.lastFacedX = 1;
@@ -226,20 +199,70 @@ class Player extends Thing.Visible {
         if (this.facingX === 0 && this.facingY === 0) {
             this.facingX = this.lastFacedX;
         }
-
-        if (this.grappleTime > 0) {
-            if (this.grappleX !== null) this.velX = this.grappleX;
-            if (this.grappleY !== null) this.velY = this.grappleY;
-            this.grappleTime--;
-            this.coyoteTime = COYOTE_TICKS;
+    }
+    processRun() {
+        if (this.inputs.has("ArrowRight") && !this.touching.get("right")) {
+            this.velX += ACCEL_PER_TICK;
+            if (this.velX > MAX_VEL) {
+                this.velX = MAX_VEL;
+            }
+        } else if (this.velX > 0) {
+            this.velX -= ACCEL_PER_TICK;
+            if (this.velX < 0.05) {
+                this.velX = 0;
+            }
+        }
+        if (this.inputs.has("ArrowLeft") && !this.touching.get("left")) {
+            this.velX -= ACCEL_PER_TICK;
+            if (this.velX < -MAX_VEL) {
+                this.velX = -MAX_VEL;
+            }
+        } else if (this.velX < 0) {
+            this.velX += ACCEL_PER_TICK;
+            if (this.velX > -0.05) {
+                this.velX = 0;
+            }
+        }
+    }
+    processGrapple() {
+        if (this.inputs.has("z")) {
+            this.bufferingGrapple = true;
+        } else {
+            this.bufferingGrapple = false;
+            this.grappleTime = 0;
         }
 
-        this.prevX = this.x;
-        this.prevY = this.y;
+        if (this.bufferingGrapple && this.canGrapple) { // start grapple
+            // note: add short waiting time like in celeste so you don't dash wrong
+            this.bufferingGrapple = false;
+            this.canGrapple = false;
+            this.grappleTime = MAX_GRAPPLE_TIME;
+            if (this.temp.x) this.grappleX = this.facingX * 3;
+            else this.grappleX = null;
+            if (this.temp.y) this.grappleY = this.facingY * 3;
+            else this.grappleY = null;
+        }
+    }
+    processJump() {
+        if (this.inputs.has(" ")) { // press jump
+            this.jumpBufferTime--;
+        } else { // release jump
+            this.jumpBufferTime = BUFFER_TICKS;
+        }
+        if (!this.inputs.has(" ") && this.velY < 0) {
+            if (this.velY < -BASE_JUMP_VEL * MIN_JUMP_SCALE) {
+                this.velY = -BASE_JUMP_VEL * MIN_JUMP_SCALE;
+            }
+        }
 
-        this.x += this.velX;
-        this.y += this.velY;
-
+        if (this.jumpBufferTime >= 0 && this.coyoteTime >= 0 && this.inputs.has(" ")) { // start jump
+            this.velY = -BASE_JUMP_VEL;
+            this.jumpTimer = 10;
+            this.coyoteTime = 0;
+            this.grappleTime = 0;
+        }
+    }
+    collide() {
         let moveX = this.x - this.prevX;
         let moveY = this.y - this.prevY;
 
@@ -333,13 +356,7 @@ class Player extends Thing.Visible {
             }
         }
 
-        if (this.y > 180) {
-            this.y = -20;
-        }
-        this.temp = raycast(this.x + WIDTH / 2, this.y + HEIGHT / 2, this.facingX, this.facingY);
-
-        this.x = Math.round(this.x);
-        this.y = Math.round(this.y);
+        if (this.touching.get("up")) this.velY = 0;
     }
 }
 

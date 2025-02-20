@@ -34,7 +34,6 @@ class Camera {
                 this.followTime = 0;
             }
             this.followTime++;
-            console.log(Player.player.x, this.x, this.x + CENTER_OFFSET_X);
         }
         else {
             if (this.followTime > TRANSITION_TIME) {

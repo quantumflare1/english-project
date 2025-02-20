@@ -8,6 +8,7 @@ const TPS = 60;
 const msPerTick = 1000 / TPS;
 let lastTickTime = document.timeline.currentTime;
 let lastSecondTime = document.timeline.currentTime;
+let freezeTicks = 0;
 
 let sdhjlf = 0; // very well named debug variable (represents tps)
 
@@ -17,6 +18,11 @@ function tick(ms) {
     while (tickTime > msPerTick) {
         performance.mark("tick");
         lastTickTime += msPerTick;
+
+        if (freezeTicks > 0) {
+            freezeTicks--;
+            continue;
+        }
         
         // avoid speedup if you tab out (or lag for more than 3 ticks)
         if (tickTime > 3 * msPerTick) lastTickTime = ms;
@@ -46,6 +52,10 @@ function load() {
     Level.init();
     Camera.init();
     Renderer.init();
+
+    addEventListener("game_freezetime", (e) => {
+        freezeTicks = e.detail;
+    });
 
     requestAnimationFrame(tick);
 }
