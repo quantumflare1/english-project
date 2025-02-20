@@ -1,5 +1,6 @@
 import * as Thing from "./thing.mjs";
 import * as Level from "./level.mjs";
+import * as Tile from "./tile.mjs";
 
 const WIDTH = 10;
 const HEIGHT = 14;
@@ -306,7 +307,7 @@ class Player extends Thing.Visible {
         let overlappedHazards = 0;
         // narrow phase
         for (const i of overlappingTiles) {
-            if (i.id === 2) {
+            if (i instanceof Tile.Hazard) {
                 overlappedHazards++;
                 if (overlappingTiles.length === overlappedHazards && this.velY >= 0) {
                     this.isDead = true;

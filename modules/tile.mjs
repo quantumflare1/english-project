@@ -1,9 +1,10 @@
 import * as Thing from "./thing.mjs";
 
 class Tile extends Thing.Visible {
-    constructor(x, y, w, h, c, id) {
+    constructor(x, y, w, h, c, id, z = 0) {
         super(x, y, w, h, c);
         this.id = id;
+        this.z = z;
     }
 }
 
@@ -19,4 +20,10 @@ class Hazard extends Tile {
     }
 }
 
-export { Block }
+class Decal extends Tile {
+    constructor(x, y, w, h, c, id, z) {
+        super(x, y, w, h, c, id, z);
+    }
+}
+
+export { Block, Hazard, Decal }

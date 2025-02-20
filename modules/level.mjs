@@ -37,6 +37,7 @@ class Room {
 }
 
 const tiles = [];
+const decals = [];
 const rooms = [];
 let curRoomId;
 
@@ -46,24 +47,46 @@ const tileTypes = {
         offY: 0,
         w: 10,
         h: 10,
-        c: "black"
+        c: "black",
+        type: "Block"
     },
     2: {
         offX: 0,
         offY: 7,
         w: 10,
         h: 3,
-        c: "blue"
+        c: "blue",
+        type: "Hazard"
     }
 };
 
+const decalTypes = {
+    1: {
+        offX: 2,
+        offY: 2,
+        w: 6,
+        h: 6,
+        c: "cyan",
+        z: 1
+    }
+}
+
 function loadRoom(id) {
     tiles.splice(0);
+    decals.splice(0);
     for (let i = 0; i < rooms[id].height; i++) {
         for (let j = 0; j < rooms[id].width; j++) {
             if (rooms[id].tiles[i][j] !== 0) {
                 const thisTile = tileTypes[rooms[id].tiles[i][j]];
-                tiles.push(new Tile.Block(j * 10 + thisTile.offX, i * 10 + thisTile.offY, thisTile.w, thisTile.h, thisTile.c, rooms[id].tiles[i][j]));
+                tiles.push(new Tile[thisTile.type](j * 10 + thisTile.offX, i * 10 + thisTile.offY, thisTile.w, thisTile.h, thisTile.c, rooms[id].tiles[i][j]));
+            }
+        }
+    }
+    for (let i = 0; i < rooms[id].height; i++) {
+        for (let j = 0; j < rooms[id].width; j++) {
+            if (rooms[id].decals[i][j] !== 0) {
+                const thisDecal = decalTypes[rooms[id].decals[i][j]];
+                decals.push(new Tile.Decal(j * 10 + thisDecal.offX, i * 10 + thisDecal.offY, thisDecal.w, thisDecal.h, thisDecal.c, rooms[id].decals[i][j], thisDecal.z));
             }
         }
     }
@@ -102,4 +125,4 @@ function init() {
     addEventListener("game_roomtransition", transitionListener);
 }
 
-export { level, curRoomId, rooms, tiles, init }
+export { level, curRoomId, rooms, decals, tiles, init }

@@ -41,7 +41,7 @@ function tick(ms) {
         sdhjlf = 0;
     }
     performance.mark("render");
-    Renderer.renderer.draw((ms - lastTickTime) / msPerTick, Player.player, ...Level.tiles);
+    Renderer.renderer.draw((ms - lastTickTime) / msPerTick, Player.player, ...Level.tiles, ...Level.decals);
     //console.log(performance.measure("render"));
 
     requestAnimationFrame(tick);
