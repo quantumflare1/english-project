@@ -1,7 +1,8 @@
 import * as Thing from "./thing.mjs";
 import * as Level from "./level.mjs";
 
-const SIZE = 10;
+const WIDTH = 10;
+const HEIGHT = 14;
 const MAX_VEL_TIME = 8;
 const MAX_VEL = 2;
 const ACCEL_PER_TICK = MAX_VEL / MAX_VEL_TIME;
@@ -19,6 +20,12 @@ const RESPAWN_TIME = 40;
 
 const COYOTE_TICKS = 6;
 const BUFFER_TICKS = 8;
+
+const STATES = {
+    DEFAULT: 0,
+    INTRO: 1,
+    GRAPPLED: 2
+};
 
 /**
  * 
@@ -245,7 +252,7 @@ class Player extends Thing.Visible {
         const overlappingTiles = [];
 
         for (const i of Level.tiles) {
-            if (this.x + SIZE > i.x && this.x < i.x + i.width && this.y + SIZE > i.y && this.y < i.y + i.height) {
+            if (this.x + WIDTH > i.x && this.x < i.x + i.width && this.y + HEIGHT > i.y && this.y < i.y + i.height) {
                 overlappingTiles.push(i);
             }
         }
@@ -261,9 +268,9 @@ class Player extends Thing.Visible {
             }
             let kickX, kickY;
 
-            if (moveX > 0) kickX = i.x - (this.x + SIZE);
+            if (moveX > 0) kickX = i.x - (this.x + WIDTH);
             else if (moveX < 0) kickX = (i.x + i.width) - this.x;
-            if (moveY > 0) kickY = i.y - (this.y + SIZE);
+            if (moveY > 0) kickY = i.y - (this.y + HEIGHT);
             else if (moveY < 0) kickY = (i.y + i.width) - this.y;
             //console.log(moveX, moveY, "m")
             //console.log(this.x, this.y, "t")
@@ -297,7 +304,7 @@ class Player extends Thing.Visible {
             }
 
             for (const i of overlappingTiles) {
-                if (!(this.x + SIZE > i.x && this.x < i.x + i.width && this.y + SIZE > i.y && this.y < i.y + i.height)) {
+                if (!(this.x + WIDTH > i.x && this.x < i.x + i.width && this.y + HEIGHT > i.y && this.y < i.y + i.height)) {
                     overlappingTiles.splice(overlappingTiles.indexOf(i), 1);
                 }
             }
@@ -306,22 +313,22 @@ class Player extends Thing.Visible {
 
         const touchingTiles = [];
         for (const i of Level.tiles) {
-            if (i.id === 1 && this.x + SIZE + TOUCH_THRESHOLD >= i.x && this.x <= i.x + i.width + TOUCH_THRESHOLD && this.y + SIZE + TOUCH_THRESHOLD >= i.y && this.y <= i.y + i.height + TOUCH_THRESHOLD) {
+            if (i.id === 1 && this.x + WIDTH + TOUCH_THRESHOLD >= i.x && this.x <= i.x + i.width + TOUCH_THRESHOLD && this.y + HEIGHT + TOUCH_THRESHOLD >= i.y && this.y <= i.y + i.height + TOUCH_THRESHOLD) {
                 touchingTiles.push(i);
             }
         }
 
         for (const i of touchingTiles) {
-            if (this.x + SIZE + TOUCH_THRESHOLD > i.x && this.x + TOUCH_THRESHOLD < i.x + i.width && this.y + SIZE > i.y && this.y < i.y + i.height) {
+            if (this.x + WIDTH + TOUCH_THRESHOLD > i.x && this.x + TOUCH_THRESHOLD < i.x + i.width && this.y + HEIGHT > i.y && this.y < i.y + i.height) {
                 this.touching.set("right", true);
             }
-            if (this.x + SIZE - TOUCH_THRESHOLD > i.x && this.x - TOUCH_THRESHOLD < i.x + i.width && this.y + SIZE > i.y && this.y < i.y + i.height) {
+            if (this.x + WIDTH - TOUCH_THRESHOLD > i.x && this.x - TOUCH_THRESHOLD < i.x + i.width && this.y + HEIGHT > i.y && this.y < i.y + i.height) {
                 this.touching.set("left", true);
             }
-            if (this.x + SIZE > i.x && this.x < i.x + i.width && this.y + SIZE + TOUCH_THRESHOLD > i.y && this.y + TOUCH_THRESHOLD < i.y + i.height) {
+            if (this.x + WIDTH > i.x && this.x < i.x + i.width && this.y + HEIGHT + TOUCH_THRESHOLD > i.y && this.y + TOUCH_THRESHOLD < i.y + i.height) {
                 this.touching.set("down", true);
             }
-            if (this.x + SIZE > i.x && this.x < i.x + i.width && this.y + SIZE - TOUCH_THRESHOLD > i.y && this.y - TOUCH_THRESHOLD < i.y + i.height) {
+            if (this.x + WIDTH > i.x && this.x < i.x + i.width && this.y + HEIGHT - TOUCH_THRESHOLD > i.y && this.y - TOUCH_THRESHOLD < i.y + i.height) {
                 this.touching.set("up", true);
             }
         }
@@ -329,14 +336,17 @@ class Player extends Thing.Visible {
         if (this.y > 180) {
             this.y = -20;
         }
-        this.temp = raycast(this.x + SIZE / 2, this.y + SIZE / 2, this.facingX, this.facingY);
+        this.temp = raycast(this.x + WIDTH / 2, this.y + HEIGHT / 2, this.facingX, this.facingY);
+
+        this.x = Math.round(this.x);
+        this.y = Math.round(this.y);
     }
 }
 
 let player;
 
 function init() {
-    player = new Player(230, 30, SIZE, SIZE, "red");
+    player = new Player(230, 30, WIDTH, HEIGHT, "red");
 }
 
-export { player, init }
+export { WIDTH, HEIGHT, player, init }

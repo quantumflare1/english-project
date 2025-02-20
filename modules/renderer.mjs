@@ -1,4 +1,5 @@
 import * as Thing from "./thing.mjs";
+import * as Camera from "./camera.mjs";
 
 const BASE_SCALE = 20;
 
@@ -18,7 +19,7 @@ class Renderer {
         const resize = this.resize.bind(this);
 
         this.ctx.imageSmoothingEnabled = false;
-        this.ctx.setTransform(this.scale, 0, 0, this.scale, 0, 0);
+        this.ctx.setTransform(this.scale, 0, 0, this.scale, -Camera.camera.x * this.scale, -Camera.camera.y * this.scale);
 
         addEventListener("resize", resize);
     }
@@ -27,9 +28,11 @@ class Renderer {
      * @param  {...Thing.Visible} objs 
      */
     draw(tickPercent, ...objs) {
+        this.ctx.setTransform(this.scale, 0, 0, this.scale, 0, 0);
         this.ctx.fillStyle = "white";
         this.ctx.fillRect(0, 0, this.canvas.width / this.scale, this.canvas.height / this.scale);
         this.ctx.fillStyle = "black";
+        this.ctx.setTransform(this.scale, 0, 0, this.scale, -Camera.camera.x * this.scale, -Camera.camera.y * this.scale);
 
         /*
         if (objs[0].temp.x) {
@@ -57,8 +60,15 @@ class Renderer {
         this.canvas.height = 9 * BASE_SCALE * this.scale;
         this.canvas.style.width = this.canvas.width;
         this.canvas.style.height = this.canvas.height;
-        this.ctx.setTransform(this.scale, 0, 0, this.scale, 0, 0);
+        this.ctx.setTransform(this.scale, 0, 0, this.scale, -Camera.camera.x * this.scale, -Camera.camera.y * this.scale);
         this.ctx.fillRect(0, 0, this.canvas.width / this.scale, this.canvas.height / this.scale);
     }
 }
-export { Renderer }
+
+let renderer;
+
+function init() {
+    renderer = new Renderer();
+}
+
+export { Renderer, init, renderer }
