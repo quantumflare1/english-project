@@ -48,8 +48,8 @@ function tick(ms) {
 }
 
 function load() {
-    Player.init();
     Level.init();
+    Player.init();
     Camera.init();
     Renderer.init();
 

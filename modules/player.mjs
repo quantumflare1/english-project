@@ -43,14 +43,14 @@ function raycast(sx, sy, dx, dy) {
     const deltaX = dx / step;
     const deltaY = dy / step;
 
-    if (posY >= Level.level.rooms[Level.curRoomId].height || posY < 0 || posX >= Level.level.rooms[Level.curRoomId].width || posX < 0) {
+    if (posY >= Level.rooms[Level.curRoomId].height || posY < 0 || posX >= Level.rooms[Level.curRoomId].width || posX < 0) {
         return { x: null, y: null };
     }
-    while (Level.level.rooms[Level.curRoomId].tiles[Math.floor(posY)][Math.floor(posX)] !== 1) {
+    while (Level.rooms[Level.curRoomId].tiles[Math.floor(posY)][Math.floor(posX)] !== 1) {
         posX += deltaX;
         posY += deltaY;
 
-        if (posY >= Level.level.rooms[Level.curRoomId].height || posY < 0 || posX >= Level.level.rooms[Level.curRoomId].width || posX < 0) {
+        if (posY >= Level.rooms[Level.curRoomId].height || posY < 0 || posX >= Level.rooms[Level.curRoomId].width || posX < 0) {
             return { x: null, y: null };
         }
     }
@@ -79,6 +79,7 @@ class Player extends Thing.Visible {
         this.grappleTime = 0;
         this.grappleX = 0;
         this.grappleY = 0;
+        this.consumedGrapplePress = false;
 
         this.inControl = true;
 
@@ -132,14 +133,7 @@ class Player extends Thing.Visible {
             this.velX = 0;
         }
 
-        /*
-        if (this.x < 0) {
-            const ev = new CustomEvent("game_roomtransition", { detail: "left" });
-            const nextRoom = Level.level.rooms[Level.level.rooms[Level.curRoomId].left];
-            this.x = nextRoom.width * 10;
-            this.y += Level.level.rooms[Level.curRoomId].leftOffset;
-            dispatchEvent(ev);
-        }*/
+        this.changeRoom();
 
         this.processJump();
         this.processRun();
@@ -167,9 +161,6 @@ class Player extends Thing.Visible {
 
         this.collide();
 
-        if (this.y > 180) {
-            this.y = -20;
-        }
         this.temp = raycast(this.x + WIDTH / 2, this.y + HEIGHT / 2, this.facingX, this.facingY);
 
         this.x = Math.round(this.x);
@@ -200,6 +191,36 @@ class Player extends Thing.Visible {
             this.facingX = this.lastFacedX;
         }
     }
+    changeRoom() {
+        if (Level.rooms[Level.curRoomId].right && this.x > Level.rooms[Level.curRoomId].width * 10 - WIDTH/2) {
+            const ev = new CustomEvent("game_roomtransition", { detail: "right" });
+            const nextRoom = Level.rooms[Level.curRoomId].right;
+            this.x = -WIDTH/2;
+            //this.y += Level.level.rooms[Level.curRoomId].leftOffset;
+            dispatchEvent(ev);
+        }
+        if (Level.rooms[Level.curRoomId].left && this.x < -WIDTH/2) {
+            const ev = new CustomEvent("game_roomtransition", { detail: "left" });
+            const nextRoom = Level.rooms[Level.curRoomId].left;
+            this.x = nextRoom.width * 10 - WIDTH/2;
+            //this.y += Level.level.rooms[Level.curRoomId].leftOffset;
+            dispatchEvent(ev);
+        }
+        if (Level.rooms[Level.curRoomId].down && this.x > Level.rooms[Level.curRoomId].height * 10 - HEIGHT/2) {
+            const ev = new CustomEvent("game_roomtransition", { detail: "down" });
+            const nextRoom = Level.rooms[Level.curRoomId].down;
+            this.y = -HEIGHT/2;
+            //this.y += Level.level.rooms[Level.curRoomId].leftOffset;
+            dispatchEvent(ev);
+        }
+        if (Level.rooms[Level.curRoomId].up && this.x < -HEIGHT/2) {
+            const ev = new CustomEvent("game_roomtransition", { detail: "up" });
+            const nextRoom = Level.rooms[Level.curRoomId].up;
+            this.y = nextRoom.width * 10 - HEIGHT/2;
+            //this.y += Level.level.rooms[Level.curRoomId].leftOffset;
+            dispatchEvent(ev);
+        }
+    }
     processRun() {
         if (this.inputs.has("ArrowRight") && !this.touching.get("right")) {
             this.velX += ACCEL_PER_TICK;
@@ -226,9 +247,11 @@ class Player extends Thing.Visible {
     }
     processGrapple() {
         if (this.inputs.has("z")) {
-            this.bufferingGrapple = true;
+            if (!this.consumedGrapplePress)
+                this.bufferingGrapple = true;
         } else {
             this.bufferingGrapple = false;
+            this.consumedGrapplePress = false;
             this.grappleTime = 0;
         }
 
@@ -236,6 +259,7 @@ class Player extends Thing.Visible {
             // note: add short waiting time like in celeste so you don't dash wrong
             this.bufferingGrapple = false;
             this.canGrapple = false;
+            this.consumedGrapplePress = true;
             this.grappleTime = MAX_GRAPPLE_TIME;
             if (this.temp.x) this.grappleX = this.facingX * 3;
             else this.grappleX = null;
