@@ -8,31 +8,24 @@ class Renderer {
         this.canvas = document.createElement("canvas");
         this.ctx = this.canvas.getContext("2d");
 
-        this.scale = Math.min(innerHeight / (9 * BASE_SCALE), innerWidth / (16 * BASE_SCALE)) / 2;
-        this.canvas.width = 16 * BASE_SCALE * this.scale;
-        this.canvas.height = 9 * BASE_SCALE * this.scale;
-        this.canvas.style = "display:block;position:absolute;top:0;left:0;bottom:0;right:0;margin:auto;";
-        this.canvas.style.width = this.canvas.width;
-        this.canvas.style.height = this.canvas.height;
+        this.canvas.width = 16 * BASE_SCALE;
+        this.canvas.height = 9 * BASE_SCALE;
 
         document.body.appendChild(this.canvas);
-        const resize = this.resize.bind(this);
 
         this.ctx.imageSmoothingEnabled = false;
-        this.ctx.setTransform(this.scale, 0, 0, this.scale, -Camera.camera.x * this.scale, -Camera.camera.y * this.scale);
-
-        addEventListener("resize", resize);
+        this.ctx.setTransform(1, 0, 0, 1, -Camera.camera.x, -Camera.camera.y);
     }
     /**
      * @param {number} tickPercent from 0 - 1
      * @param  {...Thing.Visible} objs 
      */
     draw(tickPercent, ...objs) {
-        this.ctx.setTransform(this.scale, 0, 0, this.scale, 0, 0);
+        this.ctx.setTransform(1, 0, 0, 1, 0, 0);
         this.ctx.fillStyle = "white";
-        this.ctx.fillRect(0, 0, this.canvas.width / this.scale, this.canvas.height / this.scale);
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         this.ctx.fillStyle = "black";
-        this.ctx.setTransform(this.scale, 0, 0, this.scale, -Camera.camera.x * this.scale, -Camera.camera.y * this.scale);
+        this.ctx.setTransform(1, 0, 0, 1, -Camera.camera.x, -Camera.camera.y);
 
         /*
         if (objs[0].temp.x) {
@@ -53,15 +46,6 @@ class Renderer {
             const diffY = 0;
             this.ctx.fillRect(Math.round(i.x + diffX * tickPercent), Math.round(i.y + diffY * tickPercent), i.width, i.height);
         }
-    }
-    resize() {
-        this.scale = Math.min(innerHeight / (9 * BASE_SCALE), innerWidth / (16 * BASE_SCALE)) / 2;
-        this.canvas.width = 16 * BASE_SCALE * this.scale;
-        this.canvas.height = 9 * BASE_SCALE * this.scale;
-        this.canvas.style.width = this.canvas.width;
-        this.canvas.style.height = this.canvas.height;
-        this.ctx.setTransform(this.scale, 0, 0, this.scale, -Camera.camera.x * this.scale, -Camera.camera.y * this.scale);
-        this.ctx.fillRect(0, 0, this.canvas.width / this.scale, this.canvas.height / this.scale);
     }
 }
 
