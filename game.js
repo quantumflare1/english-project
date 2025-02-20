@@ -2,6 +2,7 @@ import * as Player from "./modules/player.mjs";
 import * as Renderer from "./modules/renderer.mjs";
 import * as Level from "./modules/level.mjs";
 import * as Camera from "./modules/camera.mjs";
+import FlatQueue from "https://cdn.jsdelivr.net/npm/flatqueue/+esm";
 
 const $ = (l) => document.getElementById(l);
 const TPS = 60;
@@ -21,15 +22,15 @@ function tick(ms) {
 
         if (freezeTicks > 0) {
             freezeTicks--;
-            continue;
         }
-        
-        // avoid speedup if you tab out (or lag for more than 3 ticks)
-        if (tickTime > 3 * msPerTick) lastTickTime = ms;
+        else {
+            // avoid speedup if you tab out (or lag for more than 3 ticks)
+            if (tickTime > 3 * msPerTick) lastTickTime = ms;
 
-        // if refresh rate < tick rate, hurry it up
-        Player.player.tick();
-        Camera.camera.update();
+            // if refresh rate < tick rate, hurry it up
+            Player.player.tick();
+            Camera.camera.update();
+        }
         sdhjlf++;
         tickTime = ms - lastTickTime;
         
@@ -41,7 +42,19 @@ function tick(ms) {
         sdhjlf = 0;
     }
     performance.mark("render");
-    Renderer.renderer.draw((ms - lastTickTime) / msPerTick, Player.player, ...Level.tiles, ...Level.decals);
+
+    // pack stuff to be rendered together
+    // optimize this later too i don't think this is too good for performance
+    const renderedObjects = new FlatQueue();
+    renderedObjects.push(Player.player, Player.player.z);
+    for (const i of Level.tiles) {
+        renderedObjects.push(i, i.z);
+    }
+    for (const i of Level.decals) {
+        renderedObjects.push(i, i.z);
+    }
+
+    Renderer.renderer.draw((ms - lastTickTime) / msPerTick, renderedObjects);
     //console.log(performance.measure("render"));
 
     requestAnimationFrame(tick);

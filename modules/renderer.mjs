@@ -18,9 +18,9 @@ class Renderer {
     }
     /**
      * @param {number} tickPercent from 0 - 1
-     * @param  {...Thing.Visible} objs 
+     * @param  {...Thing.Visible} pq 
      */
-    draw(tickPercent, ...objs) {
+    draw(tickPercent, pq) {
         this.ctx.setTransform(1, 0, 0, 1, 0, 0);
         this.ctx.fillStyle = "white";
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
@@ -38,13 +38,14 @@ class Renderer {
             this.ctx.closePath();
         }*/
 
-        for (const i of objs) {
-            this.ctx.fillStyle = i.color;
+        while (pq.length > 0) {
+            const next = pq.pop();
+            this.ctx.fillStyle = next.color;
             /*const diffX = i.x - i.prevX;
             const diffY = i.y - i.prevY;*/
             const diffX = 0;
             const diffY = 0;
-            this.ctx.fillRect(Math.round(i.x + diffX * tickPercent), Math.round(i.y + diffY * tickPercent), i.width, i.height);
+            this.ctx.fillRect(Math.round(next.x + diffX * tickPercent), Math.round(next.y + diffY * tickPercent), next.width, next.height);
         }
     }
 }
