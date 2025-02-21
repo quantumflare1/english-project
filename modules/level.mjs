@@ -71,27 +71,38 @@ const decalTypes = {
 function loadRoom(id) {
     tiles.splice(0);
     decals.splice(0);
-    for (let i = 0; i < rooms[id].height; i++) {
-        for (let j = 0; j < rooms[id].width; j++) {
-            if (rooms[id].tiles[i][j] !== 0) {
-                const thisTile = tileTypes[rooms[id].tiles[i][j]];
-                tiles.push(new Tile[thisTile.type](j * 10 + thisTile.offX, i * 10 + thisTile.offY, thisTile.w, thisTile.h, rooms[id].tiles[i][j]));
-            }
-        }
+    for (const i of rooms[id].tiles) {
+        tiles.push(i);
     }
-    for (let i = 0; i < rooms[id].height; i++) {
-        for (let j = 0; j < rooms[id].width; j++) {
-            if (rooms[id].decals[i][j] !== 0) {
-                const thisDecal = decalTypes[rooms[id].decals[i][j]];
-                decals.push(new Tile.Decal(j * 10 + thisDecal.offX, i * 10 + thisDecal.offY, thisDecal.w, thisDecal.h, rooms[id].decals[i][j], thisDecal.z));
-            }
-        }
+    for (const i of rooms[id].decals) {
+        decals.push(i);
     }
 }
 
 function loadLevel() {
     for (const i of level.rooms) {
-        rooms.push(new Room(i.id, i.width, i.height, i.x, i.y, i.tiles, i.decals));
+
+        // preprocess room data
+        const curRoomTiles = [];
+        const curRoomDecals = [];
+        for (let r = 0; r < i.height; r++) {
+            for (let c = 0; c < i.width; c++) {
+                if (i.tiles[r][c] !== 0) {
+                    const thisTile = tileTypes[i.tiles[r][c]];
+                    curRoomTiles.push(new Tile[thisTile.type](c * 10 + thisTile.offX, r * 10 + thisTile.offY, thisTile.w, thisTile.h, i.tiles[r][c]));
+                }
+            }
+        }
+        for (let r = 0; r < i.height; r++) {
+            for (let c = 0; c < i.width; c++) {
+                if (i.decals[r][c] !== 0) {
+                    const thisDecal = decalTypes[i.decals[r][c]];
+                    curRoomDecals.push(new Tile.Decal(c * 10 + thisDecal.offX, r * 10 + thisDecal.offY, thisDecal.w, thisDecal.h, i.decals[r][c], thisDecal.z));
+                }
+            }
+        }
+
+        rooms.push(new Room(i.id, i.width, i.height, i.x, i.y, curRoomTiles, curRoomDecals));
 
         for (const j of rooms) {
             if (j.x + j.width === i.x)

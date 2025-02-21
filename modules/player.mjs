@@ -2,8 +2,8 @@ import * as Thing from "./thing.mjs";
 import * as Level from "./level.mjs";
 import * as Tile from "./tile.mjs";
 
-const WIDTH = 10;
-const HEIGHT = 14;
+const WIDTH = 8;
+const HEIGHT = 12;
 const MAX_VEL_TIME = 8;
 const MAX_VEL = 2;
 const ACCEL_PER_TICK = MAX_VEL / MAX_VEL_TIME;
@@ -28,9 +28,13 @@ const STATES = {
     GRAPPLED: 2
 };
 
-const spriteSettings = {
-    relativeX: -2,
-    relativeY: -2
+const spriteConfig = {
+    relativeX: -3,
+    relativeY: -4,
+    sheetX: 0,
+    sheetY: 0,
+    width: 13,
+    height: 16
 };
 
 /**
@@ -49,14 +53,14 @@ function raycast(sx, sy, dx, dy) {
     const deltaX = dx / step;
     const deltaY = dy / step;
 
-    if (posY >= Level.rooms[Level.curRoomId].height || posY < 0 || posX >= Level.rooms[Level.curRoomId].width || posX < 0) {
+    if (posY >= Level.level.rooms[Level.curRoomId].height || posY < 0 || posX >= Level.level.rooms[Level.curRoomId].width || posX < 0) {
         return { x: null, y: null };
     }
-    while (Level.rooms[Level.curRoomId].tiles[Math.floor(posY)][Math.floor(posX)] !== 1) {
+    while (Level.level.rooms[Level.curRoomId].tiles[Math.floor(posY)][Math.floor(posX)] !== 1) {
         posX += deltaX;
         posY += deltaY;
 
-        if (posY >= Level.rooms[Level.curRoomId].height || posY < 0 || posX >= Level.rooms[Level.curRoomId].width || posX < 0) {
+        if (posY >= Level.level.rooms[Level.curRoomId].height || posY < 0 || posX >= Level.level.rooms[Level.curRoomId].width || posX < 0) {
             return { x: null, y: null };
         }
     }
@@ -68,7 +72,7 @@ function raycast(sx, sy, dx, dy) {
 
 class Player extends Thing.Visible {
     constructor(x, y, w, h, s) {
-        super(x, y, w, h, s, 1, spriteSettings);
+        super(x, y, w, h, s, 1, spriteConfig);
         this.velX = 0;
         this.velY = 0;
         this.touching = new Map();

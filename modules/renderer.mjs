@@ -47,7 +47,7 @@ class Renderer {
             const diffY = 0;
 
             if (next.sprite) {
-                this.ctx.drawImage(next.sprite, Math.round(next.x + diffX * tickPercent) + next.spriteRelativeX, Math.round(next.y + diffY * tickPercent) + next.spriteRelativeY);
+                this.ctx.drawImage(next.sprite, next.spriteSheetX, next.spriteSheetY, next.spriteWidth, next.spriteHeight, Math.round(next.x + diffX * tickPercent) + next.spriteRelativeX, Math.round(next.y + diffY * tickPercent) + next.spriteRelativeY, next.spriteWidth, next.spriteHeight);
             }
             else {
                 this.ctx.fillStyle = "black";
