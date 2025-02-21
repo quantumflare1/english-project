@@ -40,12 +40,19 @@ class Renderer {
 
         while (pq.length > 0) {
             const next = pq.pop();
-            this.ctx.fillStyle = next.color;
-            /*const diffX = i.x - i.prevX;
-            const diffY = i.y - i.prevY;*/
+
+            /*const diffX = next.x - next.prevX;
+            const diffY = next.y - next.prevY;*/
             const diffX = 0;
             const diffY = 0;
-            this.ctx.fillRect(Math.round(next.x + diffX * tickPercent), Math.round(next.y + diffY * tickPercent), next.width, next.height);
+
+            if (next.sprite) {
+                this.ctx.drawImage(next.sprite, Math.round(next.x + diffX * tickPercent) + next.spriteRelativeX, Math.round(next.y + diffY * tickPercent) + next.spriteRelativeY);
+            }
+            else {
+                this.ctx.fillStyle = "black";
+                this.ctx.fillRect(Math.round(next.x + diffX * tickPercent), Math.round(next.y + diffY * tickPercent), next.width, next.height);
+            }
         }
     }
 }

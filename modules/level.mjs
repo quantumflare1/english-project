@@ -47,7 +47,6 @@ const tileTypes = {
         offY: 0,
         w: 10,
         h: 10,
-        c: "black",
         type: "Block"
     },
     2: {
@@ -55,7 +54,6 @@ const tileTypes = {
         offY: 7,
         w: 10,
         h: 3,
-        c: "blue",
         type: "Hazard"
     }
 };
@@ -66,8 +64,7 @@ const decalTypes = {
         offY: 2,
         w: 6,
         h: 6,
-        c: "cyan",
-        z: 1
+        z: 2
     }
 }
 
@@ -78,7 +75,7 @@ function loadRoom(id) {
         for (let j = 0; j < rooms[id].width; j++) {
             if (rooms[id].tiles[i][j] !== 0) {
                 const thisTile = tileTypes[rooms[id].tiles[i][j]];
-                tiles.push(new Tile[thisTile.type](j * 10 + thisTile.offX, i * 10 + thisTile.offY, thisTile.w, thisTile.h, thisTile.c, rooms[id].tiles[i][j]));
+                tiles.push(new Tile[thisTile.type](j * 10 + thisTile.offX, i * 10 + thisTile.offY, thisTile.w, thisTile.h, rooms[id].tiles[i][j]));
             }
         }
     }
@@ -86,7 +83,7 @@ function loadRoom(id) {
         for (let j = 0; j < rooms[id].width; j++) {
             if (rooms[id].decals[i][j] !== 0) {
                 const thisDecal = decalTypes[rooms[id].decals[i][j]];
-                decals.push(new Tile.Decal(j * 10 + thisDecal.offX, i * 10 + thisDecal.offY, thisDecal.w, thisDecal.h, thisDecal.c, rooms[id].decals[i][j], thisDecal.z));
+                decals.push(new Tile.Decal(j * 10 + thisDecal.offX, i * 10 + thisDecal.offY, thisDecal.w, thisDecal.h, rooms[id].decals[i][j], thisDecal.z));
             }
         }
     }

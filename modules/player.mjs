@@ -28,6 +28,11 @@ const STATES = {
     GRAPPLED: 2
 };
 
+const spriteSettings = {
+    relativeX: -2,
+    relativeY: -2
+};
+
 /**
  * 
  * @param {number} sx 
@@ -62,8 +67,8 @@ function raycast(sx, sy, dx, dy) {
 }
 
 class Player extends Thing.Visible {
-    constructor(x, y, w, h, c) {
-        super(x, y, w, h, c);
+    constructor(x, y, w, h, s) {
+        super(x, y, w, h, s, 1, spriteSettings);
         this.velX = 0;
         this.velY = 0;
         this.touching = new Map();
@@ -388,7 +393,7 @@ class Player extends Thing.Visible {
 let player;
 
 function init() {
-    player = new Player(230, 30, WIDTH, HEIGHT, "red");
+    player = new Player(230, 30, WIDTH, HEIGHT, "./data/assets/sprites/protagonist.png");
 }
 
 export { WIDTH, HEIGHT, player, init }
