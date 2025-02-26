@@ -47,7 +47,7 @@ function tick(ms) {
     // optimize this later too i don't think this is too good for performance
     const renderedObjects = new FlatQueue();
     renderedObjects.push(Player.player, Player.player.z);
-    for (const i of Level.tiles) {
+    for (const i of Level.rooms[Level.curRoomId].tiles) {
         renderedObjects.push(i, i.z);
     }
     for (const i of Level.decals) {

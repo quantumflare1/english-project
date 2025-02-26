@@ -72,7 +72,7 @@ function raycast(sx, sy, dx, dy) {
 
 class Player extends Thing.Visible {
     constructor(x, y, w, h, s) {
-        super(x, y, w, h, s, 1, spriteConfig);
+        super(x, y, w, h, s, -1, spriteConfig);
         this.velX = 0;
         this.velY = 0;
         this.touching = new Map();

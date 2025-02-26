@@ -1,5 +1,6 @@
 import * as Thing from "./thing.mjs";
 import * as Camera from "./camera.mjs";
+import FlatQueue from "https://cdn.jsdelivr.net/npm/flatqueue/+esm";
 
 const BASE_SCALE = 20;
 
@@ -18,7 +19,7 @@ class Renderer {
     }
     /**
      * @param {number} tickPercent from 0 - 1
-     * @param  {...Thing.Visible} pq 
+     * @param  {FlatQueue} pq 
      */
     draw(tickPercent, pq) {
         this.ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -47,7 +48,11 @@ class Renderer {
             const diffY = 0;
 
             if (next.sprite) {
-                this.ctx.drawImage(next.sprite, next.spriteSheetX, next.spriteSheetY, next.spriteWidth, next.spriteHeight, Math.round(next.x + diffX * tickPercent) + next.spriteRelativeX, Math.round(next.y + diffY * tickPercent) + next.spriteRelativeY, next.spriteWidth, next.spriteHeight);
+                this.ctx.drawImage(next.sprite,
+                    next.spriteSheetX, next.spriteSheetY,
+                    next.spriteWidth, next.spriteHeight,
+                    Math.round(next.x + diffX * tickPercent) + next.spriteRelativeX, Math.round(next.y + diffY * tickPercent) + next.spriteRelativeY,
+                    next.spriteWidth, next.spriteHeight);
             }
             else {
                 this.ctx.fillStyle = "black";

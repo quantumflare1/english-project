@@ -1,16 +1,16 @@
-function sanitizeConfig(obj) {
-    if (!obj.relativeX) obj.relativeX = 0;
-    if (!obj.relativeY) obj.relativeY = 0;
-    if (!obj.sheetX) obj.sheetX = 0;
-    if (!obj.sheetY) obj.sheetY = 0;
-    if (!obj.width) obj.width = 10;
-    if (!obj.height) obj.height = 10;
-
-    return obj;
+class VisibleConfig {
+    constructor(rx = 0, ry = 0, sx = 0, sy = 0, w = 10, h = 10) {
+        this.relativeX = rx;
+        this.relativeY = ry;
+        this.sheetX = sx;
+        this.sheetY = sy;
+        this.width = w;
+        this.height = h;
+    }
 }
 
 class Visible {
-    constructor(x, y, w, h, s, z = 0, config) {
+    constructor(x, y, w, h, s, z = 0, config = new VisibleConfig()) {
         this.x = x;
         this.y = y;
         this.width = w;
@@ -18,20 +18,24 @@ class Visible {
         this.prevX = x;
         this.prevY = y;
         if (s) {
-            this.sprite = new Image();
-            this.sprite.src = s;
+            if (typeof s === "string") {
+                this.sprite = new Image();
+                this.sprite.src = s;
+            }
+            else {
+                this.sprite = s;
+            }
 
-            const sc = sanitizeConfig(config);
+            this.spriteRelativeX = config.relativeX;
+            this.spriteRelativeY = config.relativeY;
+            this.spriteSheetX = config.sheetX;
+            this.spriteSheetY = config.sheetY;
+            this.spriteWidth = config.width;
+            this.spriteHeight = config.height;
 
-            this.spriteRelativeX = sc.relativeX;
-            this.spriteRelativeY = sc.relativeY;
-            this.spriteSheetX = sc.sheetX;
-            this.spriteSheetY = sc.sheetY;
-            this.spriteWidth = sc.width;
-            this.spriteHeight = sc.height;
         }
         this.z = z;
     }
 }
 
-export { Visible }
+export { Visible, VisibleConfig }
