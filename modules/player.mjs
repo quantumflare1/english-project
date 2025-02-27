@@ -9,6 +9,7 @@ const MAX_VEL = 2;
 const ACCEL_PER_TICK = MAX_VEL / MAX_VEL_TIME;
 const TOUCH_THRESHOLD = 0.01;   // magic floating point error fixer
 const MAX_GRAPPLE_TIME = 36;
+const GRAPPLE_FREEZE_TIME = 3;
 
 const JUMP_HEIGHT = 32;
 const JUMP_APEX_TIME = 24;
@@ -41,7 +42,6 @@ const spriteConfig = {
 
 function normalize(x, y) {
     let angle = Math.atan(y / x);
-    console.log(angle, " angle")
     if (angle > 0) return { x: x * Math.cos(angle), y: y * Math.sin(angle) };
     return { x: x * Math.cos(angle), y: -y * Math.sin(angle) };
 }
@@ -99,6 +99,7 @@ class Player extends Thing.Visible {
         this.grappleX = 0;
         this.grappleY = 0;
         this.state = STATE.DEFAULT;
+        this.grappleStarted = false;
 
         this.inControl = true;
 
@@ -146,6 +147,7 @@ class Player extends Thing.Visible {
             if (this.grappleTime === 0) this.canGrapple = true;
         }
 
+        this.findFacingDirection();
         this.processGrapple();
 
         if (this.touching.get("right") || this.touching.get("left")) {
@@ -162,8 +164,6 @@ class Player extends Thing.Visible {
             console.log(this.touching)
             console.log(this.x, this.y);
         }
-
-        this.findFacingDirection();
 
         if (this.grappleTime > 0) {
             if (this.grappleX !== null) this.velX = this.grappleX;
@@ -273,13 +273,18 @@ class Player extends Thing.Visible {
             this.grappleTime = 0;
         }
 
+        if (this.grappleStarted) {
+            const grappleVector = normalize(this.facingX, this.facingY);
+            this.grappleX = grappleVector.x * 3.5;
+            this.grappleY = grappleVector.y * 3.5;
+            this.grappleStarted = false;
+        }
+
         if (this.grappleBufferTime >= 0 && this.canGrapple && this.inputs.has("z")) { // start grapple
-            // note: add short waiting time like in celeste so you don't dash wrong
             if (this.temp.x && this.temp.y) {
-                const grappleVector = normalize(this.facingX, this.facingY);
-                this.grappleX = grappleVector.x * 3.5;
-                this.grappleY = grappleVector.y * 3.5;
-                console.log(grappleVector)
+                this.grappleStarted = true;
+                const ev = new CustomEvent("game_freezetime", { detail: GRAPPLE_FREEZE_TIME });
+                dispatchEvent(ev);
             }
             else {
                 this.grappleX = null;
