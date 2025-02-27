@@ -17,12 +17,14 @@ const BASE_JUMP_VEL = Math.sqrt(2 * GRAVITY * JUMP_HEIGHT);
 const MAX_FALL_VEL = 3;
 const MIN_JUMP_SCALE = 0.3;
 
+const AIR_ACCEL_FACTOR = 0.6;
+
 const RESPAWN_TIME = 40;
 
 const COYOTE_TICKS = 6;
 const BUFFER_TICKS = 8;
 
-const STATES = {
+const STATE = {
     DEFAULT: 0,
     INTRO: 1,
     GRAPPLED: 2
@@ -36,6 +38,13 @@ const spriteConfig = {
     width: 13,
     height: 16
 };
+
+function normalize(x, y) {
+    let angle = Math.atan(y / x);
+    console.log(angle, " angle")
+    if (angle > 0) return { x: x * Math.cos(angle), y: y * Math.sin(angle) };
+    return { x: x * Math.cos(angle), y: -y * Math.sin(angle) };
+}
 
 /**
  * 
@@ -84,12 +93,12 @@ class Player extends Thing.Visible {
         this.facingY = 0;
         this.lastFacedX = 1;
         this.temp = raycast(x, y, this.facingX, this.facingY);
-        this.bufferingGrapple = false;
+        this.grappleBufferTime = BUFFER_TICKS;
         this.canGrapple = false;
         this.grappleTime = 0;
         this.grappleX = 0;
         this.grappleY = 0;
-        this.consumedGrapplePress = false;
+        this.state = STATE.DEFAULT;
 
         this.inControl = true;
 
@@ -134,7 +143,7 @@ class Player extends Thing.Visible {
         } else {
             this.velY = 0;
             this.coyoteTime = COYOTE_TICKS;
-            this.canGrapple = true;
+            if (this.grappleTime === 0) this.canGrapple = true;
         }
 
         this.processGrapple();
@@ -232,24 +241,25 @@ class Player extends Thing.Visible {
         }
     }
     processRun() {
+        const acceleration = this.touching.get("down") ? ACCEL_PER_TICK : ACCEL_PER_TICK * AIR_ACCEL_FACTOR;
         if (this.inputs.has("ArrowRight") && !this.touching.get("right")) {
-            this.velX += ACCEL_PER_TICK;
+            this.velX += acceleration;
             if (this.velX > MAX_VEL) {
                 this.velX = MAX_VEL;
             }
         } else if (this.velX > 0) {
-            this.velX -= ACCEL_PER_TICK;
+            this.velX -= acceleration;
             if (this.velX < 0.05) {
                 this.velX = 0;
             }
         }
         if (this.inputs.has("ArrowLeft") && !this.touching.get("left")) {
-            this.velX -= ACCEL_PER_TICK;
+            this.velX -= acceleration;
             if (this.velX < -MAX_VEL) {
                 this.velX = -MAX_VEL;
             }
         } else if (this.velX < 0) {
-            this.velX += ACCEL_PER_TICK;
+            this.velX += acceleration;
             if (this.velX > -0.05) {
                 this.velX = 0;
             }
@@ -257,24 +267,30 @@ class Player extends Thing.Visible {
     }
     processGrapple() {
         if (this.inputs.has("z")) {
-            if (!this.consumedGrapplePress)
-                this.bufferingGrapple = true;
+            this.grappleBufferTime--;
         } else {
-            this.bufferingGrapple = false;
-            this.consumedGrapplePress = false;
+            this.grappleBufferTime = BUFFER_TICKS;
             this.grappleTime = 0;
         }
 
-        if (this.bufferingGrapple && this.canGrapple) { // start grapple
+        if (this.grappleBufferTime >= 0 && this.canGrapple && this.inputs.has("z")) { // start grapple
             // note: add short waiting time like in celeste so you don't dash wrong
-            this.bufferingGrapple = false;
-            this.canGrapple = false;
-            this.consumedGrapplePress = true;
-            this.grappleTime = MAX_GRAPPLE_TIME;
-            if (this.temp.x) this.grappleX = this.facingX * 3;
-            else this.grappleX = null;
-            if (this.temp.y) this.grappleY = this.facingY * 3;
-            else this.grappleY = null;
+            if (this.temp.x && this.temp.y) {
+                const grappleVector = normalize(this.facingX, this.facingY);
+                this.grappleX = grappleVector.x * 3.5;
+                this.grappleY = grappleVector.y * 3.5;
+                console.log(grappleVector)
+            }
+            else {
+                this.grappleX = null;
+                this.grappleY = null;
+            }
+            
+            if (this.temp.x !== null && this.temp.y !== null) {
+                this.canGrapple = false;
+                this.grappleBufferTime = 0;
+                this.grappleTime = MAX_GRAPPLE_TIME;
+            }
         }
     }
     processJump() {
