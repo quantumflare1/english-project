@@ -8,8 +8,12 @@ const MAX_VEL_TIME = 8;
 const MAX_VEL = 2;
 const ACCEL_PER_TICK = MAX_VEL / MAX_VEL_TIME;
 const TOUCH_THRESHOLD = 0.01;   // magic floating point error fixer
+
 const MAX_GRAPPLE_TIME = 36;
+const GRAPPLE_SPEED = 3.5;
 const GRAPPLE_FREEZE_TIME = 3;
+const GRAPPLE_START_OFFSET_X = 4;
+const GRAPPLE_START_OFFSET_Y = 3;
 
 const JUMP_HEIGHT = 32;
 const JUMP_APEX_TIME = 24;
@@ -70,6 +74,9 @@ function raycast(sx, sy, dx, dy) {
         posY += deltaY;
 
         if (posY >= Level.level.rooms[Level.curRoomId].height || posY < 0 || posX >= Level.level.rooms[Level.curRoomId].width || posX < 0) {
+            return { x: null, y: null };
+        }
+        if (Math.abs(posY - sy/10) > 9 || Math.abs(posX - sx/10) > 16) {
             return { x: null, y: null };
         }
     }
@@ -180,8 +187,6 @@ class Player extends Thing.Visible {
 
         this.collide();
 
-        this.temp = raycast(this.x + WIDTH / 2, this.y + HEIGHT / 2, this.facingX, this.facingY);
-
         this.x = Math.round(this.x);
         this.y = Math.round(this.y);
     }
@@ -274,27 +279,32 @@ class Player extends Thing.Visible {
         }
 
         if (this.grappleStarted) {
-            const grappleVector = normalize(this.facingX, this.facingY);
-            this.grappleX = grappleVector.x * 3.5;
-            this.grappleY = grappleVector.y * 3.5;
+            this.temp = raycast(this.x + GRAPPLE_START_OFFSET_X, this.y + GRAPPLE_START_OFFSET_Y, this.facingX, this.facingY);
             this.grappleStarted = false;
-        }
-
-        if (this.grappleBufferTime >= 0 && this.canGrapple && this.inputs.has("z")) { // start grapple
+            
             if (this.temp.x && this.temp.y) {
-                this.grappleStarted = true;
-                const ev = new CustomEvent("game_freezetime", { detail: GRAPPLE_FREEZE_TIME });
-                dispatchEvent(ev);
+                const grappleVector = normalize(this.facingX, this.facingY);
+                this.grappleX = grappleVector.x * GRAPPLE_SPEED;
+                this.grappleY = grappleVector.y * GRAPPLE_SPEED;
             }
             else {
                 this.grappleX = null;
                 this.grappleY = null;
             }
-            
+
             if (this.temp.x !== null && this.temp.y !== null) {
                 this.canGrapple = false;
                 this.grappleBufferTime = 0;
                 this.grappleTime = MAX_GRAPPLE_TIME;
+            }
+        }
+
+        if (this.grappleBufferTime > 0 && this.canGrapple && this.inputs.has("z")) { // start grapple
+            this.temp = raycast(this.x + GRAPPLE_START_OFFSET_X, this.y + GRAPPLE_START_OFFSET_Y, this.facingX, this.facingY);
+            if (this.temp.x && this.temp.y) {
+                this.grappleStarted = true;
+                const ev = new CustomEvent("game_freezetime", { detail: GRAPPLE_FREEZE_TIME });
+                dispatchEvent(ev);
             }
         }
     }
@@ -363,20 +373,27 @@ class Player extends Thing.Visible {
                 this.x += kickX;
                 moveX -= kickX;
             }
+
+            const kickXPercent = kickX / moveX;
+            const kickYPercent = kickY / moveY;
             
             if (kickX && kickY) {
-                const kickXPercent = kickX / moveX;
-                const kickYPercent = kickY / moveY;
-                if (Math.abs(kickXPercent) < Math.abs(kickYPercent)) {
+                if (Math.abs(kickXPercent) < Math.abs(kickYPercent) && Math.abs(kickYPercent) !== 1) { // kick x axis mostly
                     this.x += kickX;
                     this.y += moveY * (kickXPercent);
                     moveX -= kickX;
                     moveY -= moveY * (kickXPercent);
                 }
-                else {
+                else if (Math.abs(kickXPercent) > Math.abs(kickYPercent) || (Math.abs(kickYPercent) === 1 && Math.abs(kickXPercent) !== 1)) { // kick y axis mostly
                     this.x += moveX * (kickYPercent);
                     this.y += kickY;
                     moveX -= moveX * (kickYPercent);
+                    moveY -= kickY;
+                }
+                else { // kick equal on both axes
+                    this.x += moveX * 0.5;
+                    this.y += kickY;
+                    moveX -= moveX * 0.5;
                     moveY -= kickY;
                 }
             }
@@ -397,16 +414,16 @@ class Player extends Thing.Visible {
         }
 
         for (const i of touchingTiles) {
-            if (this.x + WIDTH + TOUCH_THRESHOLD > i.x && this.x + TOUCH_THRESHOLD < i.x + i.width && this.y + HEIGHT > i.y && this.y < i.y + i.height) {
+            if (this.x + WIDTH + TOUCH_THRESHOLD > i.x && this.x + TOUCH_THRESHOLD < i.x + i.width && this.y + HEIGHT > i.y && this.y < i.y + i.height && this.velX >= 0) {
                 this.touching.set("right", true);
             }
-            if (this.x + WIDTH - TOUCH_THRESHOLD > i.x && this.x - TOUCH_THRESHOLD < i.x + i.width && this.y + HEIGHT > i.y && this.y < i.y + i.height) {
+            if (this.x + WIDTH - TOUCH_THRESHOLD > i.x && this.x - TOUCH_THRESHOLD < i.x + i.width && this.y + HEIGHT > i.y && this.y < i.y + i.height && this.velX <= 0) {
                 this.touching.set("left", true);
             }
-            if (this.x + WIDTH > i.x && this.x < i.x + i.width && this.y + HEIGHT + TOUCH_THRESHOLD > i.y && this.y + TOUCH_THRESHOLD < i.y + i.height) {
+            if (this.x + WIDTH > i.x && this.x < i.x + i.width && this.y + HEIGHT + TOUCH_THRESHOLD > i.y && this.y + TOUCH_THRESHOLD < i.y + i.height && this.velY >= 0) {
                 this.touching.set("down", true);
             }
-            if (this.x + WIDTH > i.x && this.x < i.x + i.width && this.y + HEIGHT - TOUCH_THRESHOLD > i.y && this.y - TOUCH_THRESHOLD < i.y + i.height) {
+            if (this.x + WIDTH > i.x && this.x < i.x + i.width && this.y + HEIGHT - TOUCH_THRESHOLD > i.y && this.y - TOUCH_THRESHOLD < i.y + i.height && this.velY <= 0) {
                 this.touching.set("up", true);
             }
         }
