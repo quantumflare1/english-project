@@ -4,12 +4,14 @@ import level from "../data/level/level.json" with { type: "json" };
 import tileSprites from "../data/tile/tiles.json" with { type: "json" };
 
 class Room {
-    constructor(id, w, h, x, y, tiles, decals) {
+    constructor(id, w, h, x, y, tiles, decals, special, triggers) {
         this.id = id;
         this.width = w;
         this.height = h;
         this.tiles = tiles;
         this.decals = decals;
+        this.special = special;
+        this.triggers = triggers;
 
         this.x = x;
         this.y = y;
@@ -111,6 +113,8 @@ function loadLevel() {
         // preprocess room data
         const curRoomTiles = [];
         const curRoomDecals = [];
+        const curRoomSpecials = [];
+        const curRoomTriggers = [];
         for (let r = 0; r < i.height; r++) {
             for (let c = 0; c < i.width; c++) {
                 if (i.tiles[r][c] !== 0) {
@@ -159,18 +163,25 @@ function loadLevel() {
                         sprMap.get(thisTileSprite.name), i.tiles[r][c], 0, config)
                     );
                 }
-            }
-        }
-        for (let r = 0; r < i.height; r++) {
-            for (let c = 0; c < i.width; c++) {
+
                 if (i.decals[r][c] !== 0) {
                     const thisDecal = decalTypes[i.decals[r][c]];
                     curRoomDecals.push(new Tile.Decal(c * 10 + thisDecal.offX, r * 10 + thisDecal.offY, thisDecal.w, thisDecal.h, false, i.decals[r][c], thisDecal.z));
                 }
+
+                if (i.specials[r][c] !== 0) {
+                    const thisSpecial = decalTypes[i.specials[r][c]];
+                    curRoomSpecials.push(new Tile.Special(c * 10 + thisSpecial.offX, r * 10 + thisSpecial.offY, thisSpecial.w, thisSpecial.h, false, i.specials[r][c], thisSpecial.z));
+                }
+
+                if (i.triggers[r][c] !== 0) {
+                    const thisTrigger = decalTypes[i.triggers[r][c]];
+                    curRoomTriggers.push(new Thing.Trigger(c * 10 + thisTrigger.offX, r * 10 + thisTrigger.offY, thisTrigger.w, thisTrigger.h, () => {}));
+                }
             }
         }
 
-        rooms.push(new Room(i.id, i.width, i.height, i.x, i.y, curRoomTiles, curRoomDecals));
+        rooms.push(new Room(i.id, i.width, i.height, i.x, i.y, curRoomTiles, curRoomDecals, curRoomSpecials, curRoomTriggers));
 
         for (const j of rooms) {
             if (j.x + j.width === i.x)

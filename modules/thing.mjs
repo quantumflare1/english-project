@@ -38,4 +38,14 @@ class Visible {
     }
 }
 
-export { Visible, VisibleConfig }
+class Trigger {
+    constructor(x, y, w, h, effect) {
+        this.x = x;
+        this.y = y;
+        this.width = w;
+        this.height = h;
+        this.effect = effect;
+    }
+}
+
+export { Visible, VisibleConfig, Trigger }
