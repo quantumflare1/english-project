@@ -2,6 +2,7 @@ import * as Player from "./modules/player.mjs";
 import * as Renderer from "./modules/renderer.mjs";
 import * as Level from "./modules/level.mjs";
 import * as Camera from "./modules/camera.mjs";
+import * as Audio from "./modules/audio.mjs";
 import FlatQueue from "https://cdn.jsdelivr.net/npm/flatqueue/+esm";
 
 const $ = (l) => document.getElementById(l);
@@ -65,12 +66,19 @@ function load() {
     Player.init();
     Camera.init();
     Renderer.init();
+    Audio.load("./data/assets/bgm/bgm_temple.ogg");
 
+    addEventListener("click", audioStarter);
     addEventListener("game_freezetime", (e) => {
         freezeTicks = e.detail;
     });
 
     requestAnimationFrame(tick);
+}
+
+function audioStarter(e) {
+    Audio.play();
+    removeEventListener("click", audioStarter);
 }
 
 addEventListener("load", load);
