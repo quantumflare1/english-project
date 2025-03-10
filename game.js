@@ -3,7 +3,10 @@ import * as Renderer from "./modules/renderer.mjs";
 import * as Level from "./modules/level.mjs";
 import * as Camera from "./modules/camera.mjs";
 import * as Audio from "./modules/audio.mjs";
-import FlatQueue from "https://cdn.jsdelivr.net/npm/flatqueue/+esm";
+
+// for offline development
+import FlatQueue from "./modules/flat_queue_mirror.mjs";
+//import FlatQueue from "https://cdn.jsdelivr.net/npm/flatqueue/+esm";
 
 const $ = (l) => document.getElementById(l);
 const TPS = 60;
@@ -72,6 +75,7 @@ function load() {
     addEventListener("game_freezetime", (e) => {
         freezeTicks = e.detail;
     });
+    //  addEventListener("keydown", (e) => {e.preventDefault()});
 
     requestAnimationFrame(tick);
 }

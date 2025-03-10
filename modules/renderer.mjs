@@ -28,18 +28,11 @@ class Renderer {
         this.ctx.fillStyle = "black";
         this.ctx.setTransform(1, 0, 0, 1, -Camera.camera.x, -Camera.camera.y);
 
+        let tempX = 0;
+        let tempY = 0;
+
         while (pq.length > 0) {
             const next = pq.pop();
-
-            /*if (next.temp) {
-                this.ctx.strokeStyle = "green";
-                this.ctx.beginPath();
-                this.ctx.moveTo(next.x + 5, next.y + 5);
-                this.ctx.lineTo(next.temp.x, next.temp.y);
-        
-                this.ctx.stroke();
-                this.ctx.closePath();
-            }*/
 
             /*const diffX = next.x - next.prevX;
             const diffY = next.y - next.prevY;*/
@@ -60,7 +53,21 @@ class Renderer {
                 this.ctx.fillStyle = "black";
                 this.ctx.fillRect(Math.round(next.x + diffX * tickPercent), Math.round(next.y + diffY * tickPercent), next.width, next.height);
             }
+
+            /*
+            if (next.temp) {
+                this.ctx.strokeStyle = "red";
+                this.ctx.lineWidth = 2;
+                this.ctx.beginPath();
+                this.ctx.moveTo(next.x + 4, next.y + 3);
+                tempX = next.temp.x;
+                tempY = next.temp.y;
+            }*/
         }
+        this.ctx.lineTo(tempX, tempY);
+
+        this.ctx.stroke();
+        this.ctx.closePath();
     }
 }
 

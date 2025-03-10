@@ -5,8 +5,10 @@ import * as Tile from "./tile.mjs";
 const WIDTH = 8;
 const HEIGHT = 12;
 const MAX_VEL_TIME = 8;
-const MAX_VEL = 2;
+const MAX_VEL = 1.5;
+const DECEL_TIME = 4;
 const ACCEL_PER_TICK = MAX_VEL / MAX_VEL_TIME;
+const DECEL_PER_TICK = MAX_VEL / DECEL_TIME;
 const TOUCH_THRESHOLD = 0.01;   // magic floating point error fixer
 
 const MAX_GRAPPLE_TIME = 36;
@@ -14,15 +16,18 @@ const GRAPPLE_SPEED = 3.5;
 const GRAPPLE_FREEZE_TIME = 3;
 const GRAPPLE_START_OFFSET_X = 4;
 const GRAPPLE_START_OFFSET_Y = 3;
+const GRAPPLE_RANGE = 14;
+const GRAPPLE_DEADZONE = 5;
 
-const JUMP_HEIGHT = 32;
-const JUMP_APEX_TIME = 24;
+const JUMP_HEIGHT = 24;
+const JUMP_APEX_TIME = 18;
 const GRAVITY = (JUMP_HEIGHT * 2) / (JUMP_APEX_TIME * JUMP_APEX_TIME);
 const BASE_JUMP_VEL = Math.sqrt(2 * GRAVITY * JUMP_HEIGHT);
 const MAX_FALL_VEL = 3;
 const MIN_JUMP_SCALE = 0.3;
 
 const AIR_ACCEL_FACTOR = 0.6;
+const AIR_DECEL_FACTOR = 0.2;
 
 const RESPAWN_TIME = 40;
 
@@ -56,7 +61,7 @@ function normalize(x, y) {
  * @param {number} sy 
  * @param {number} dx 
  * @param {number} dy 
- * @returns 
+ * @returns x/y object
  */
 function raycast(sx, sy, dx, dy) {
     // dda implementation basically taken straight from wikipedia
@@ -65,6 +70,27 @@ function raycast(sx, sy, dx, dy) {
     const step = Math.abs(dx) > Math.abs(dy) ? Math.abs(dx) : Math.abs(dy);
     const deltaX = dx / step;
     const deltaY = dy / step;
+
+    if (dx < 0) {
+        const diff = Math.ceil(posX) - posX;
+        posX -= diff;
+        posY -= deltaY * diff;
+    }
+    if (dx > 0) {
+        const diff = Math.floor(posX) - posX;
+        posX -= diff;
+        posY -= deltaY * diff;
+    }
+    if (dy < 0) {
+        const diff = Math.ceil(posY) - posY;
+        posX -= deltaX * diff;
+        posY -= diff;
+    }
+    if (dy > 0) {
+        const diff = Math.floor(posY) - posY;
+        posX -= deltaX * diff;
+        posY -= diff;
+    }
 
     if (posY >= Level.level.rooms[Level.curRoomId].height || posY < 0 || posX >= Level.level.rooms[Level.curRoomId].width || posX < 0) {
         return { x: null, y: null };
@@ -76,13 +102,26 @@ function raycast(sx, sy, dx, dy) {
         if (posY >= Level.level.rooms[Level.curRoomId].height || posY < 0 || posX >= Level.level.rooms[Level.curRoomId].width || posX < 0) {
             return { x: null, y: null };
         }
-        if (Math.abs(posY - sy/10) > 9 || Math.abs(posX - sx/10) > 16) {
+        if (Math.abs(posY - sy/10) > GRAPPLE_RANGE || Math.abs(posX - sx/10) > GRAPPLE_RANGE) {
             return { x: null, y: null };
         }
     }
+    console.log(dx, dy)
+
+    if (dx > 0) posX = Math.floor(posX);
+    if (dx < 0) posX = Math.ceil(posX);
+    if (dy > 0) posY = Math.floor(posY);
+    if (dy < 0) posY = Math.ceil(posY);
+
     posX *= 10;
     posY *= 10;
 
+    const rayLength = Math.sqrt((posY-sy) ** 2 + (posX-sx) ** 2);
+
+    if (rayLength < GRAPPLE_DEADZONE) {
+        console.log(Math.abs(posY - sy), Math.abs(posX - sx));
+        return { x: null, y: null };
+    }
     return { x: posX, y: posY };
 }
 
@@ -124,8 +163,8 @@ class Player extends Thing.Visible {
         addEventListener("keydown", this.keydown);
         addEventListener("keyup", this.keyup);
     }
-    keydown = (e) => this.inputs.add(e.key);
-    keyup = (e) => this.inputs.delete(e.key);
+    keydown = (e) => this.inputs.add(e.key.toLowerCase());
+    keyup = (e) => this.inputs.delete(e.key.toLowerCase());
     tick() {
         if (this.isDead) {
             this.respawnTime--;
@@ -187,25 +226,25 @@ class Player extends Thing.Visible {
 
         this.collide();
 
-        this.x = Math.round(this.x);
-        this.y = Math.round(this.y);
+        //this.x = Math.round(this.x);
+        //this.y = Math.round(this.y);
     }
     findFacingDirection() {
-        if (this.inputs.has("ArrowRight")) {
+        if (this.inputs.has("arrowright")) {
             this.facingX = 1;
             this.lastFacedX = 1;
         }
-        else if (this.inputs.has("ArrowLeft")) {
+        else if (this.inputs.has("arrowleft")) {
             this.facingX = -1;
             this.lastFacedX = -1;
         }
         else {
             this.facingX = 0;
         }
-        if (this.inputs.has("ArrowDown")) {
+        if (this.inputs.has("arrowdown")) {
             this.facingY = 1;
         }
-        else if (this.inputs.has("ArrowUp")) {
+        else if (this.inputs.has("arrowup")) {
             this.facingY = -1;
         }
         else {
@@ -247,27 +286,32 @@ class Player extends Thing.Visible {
     }
     processRun() {
         const acceleration = this.touching.get("down") ? ACCEL_PER_TICK : ACCEL_PER_TICK * AIR_ACCEL_FACTOR;
-        if (this.inputs.has("ArrowRight") && !this.touching.get("right")) {
-            this.velX += acceleration;
-            if (this.velX > MAX_VEL) {
-                this.velX = MAX_VEL;
+        const deceleration = this.touching.get("down") ? DECEL_PER_TICK : DECEL_PER_TICK * AIR_DECEL_FACTOR;
+        if (this.inputs.has("arrowright") && !this.touching.get("right")) {
+            if (this.velX < MAX_VEL)
+                this.velX += acceleration;
+            else if (this.velX > MAX_VEL) {
+                this.velX -= deceleration;
+                if (this.velX < 0.05)
+                    this.velX = 0;
             }
         } else if (this.velX > 0) {
-            this.velX -= acceleration;
-            if (this.velX < 0.05) {
+            this.velX -= deceleration;
+            if (this.velX < 0.05)
                 this.velX = 0;
-            }
         }
-        if (this.inputs.has("ArrowLeft") && !this.touching.get("left")) {
-            this.velX -= acceleration;
-            if (this.velX < -MAX_VEL) {
-                this.velX = -MAX_VEL;
+        if (this.inputs.has("arrowleft") && !this.touching.get("left")) {
+            if (this.velX > -MAX_VEL)
+                this.velX -= acceleration;
+            else if (this.velX < -MAX_VEL) {
+                this.velX += deceleration;
+                if (this.velX > -0.05)
+                    this.velX = 0;
             }
         } else if (this.velX < 0) {
-            this.velX += acceleration;
-            if (this.velX > -0.05) {
+            this.velX += deceleration;
+            if (this.velX > -0.05)
                 this.velX = 0;
-            }
         }
     }
     processGrapple() {
@@ -325,6 +369,7 @@ class Player extends Thing.Visible {
             this.jumpTimer = 10;
             this.coyoteTime = 0;
             this.grappleTime = 0;
+            this.jumpBufferTime = 0;
         }
     }
     collide() {
@@ -378,22 +423,16 @@ class Player extends Thing.Visible {
             const kickYPercent = kickY / moveY;
             
             if (kickX && kickY) {
-                if (Math.abs(kickXPercent) < Math.abs(kickYPercent) && Math.abs(kickYPercent) !== 1) { // kick x axis mostly
+                if (Math.abs(kickXPercent) < Math.abs(kickYPercent)) { // kick x axis mostly
                     this.x += kickX;
-                    this.y += moveY * (kickXPercent);
+                    //this.y += moveY * (kickXPercent);
                     moveX -= kickX;
                     moveY -= moveY * (kickXPercent);
                 }
-                else if (Math.abs(kickXPercent) > Math.abs(kickYPercent) || (Math.abs(kickYPercent) === 1 && Math.abs(kickXPercent) !== 1)) { // kick y axis mostly
-                    this.x += moveX * (kickYPercent);
+                else { // kick y axis mostly
+                    //this.x += moveX * (kickYPercent);
                     this.y += kickY;
                     moveX -= moveX * (kickYPercent);
-                    moveY -= kickY;
-                }
-                else { // kick equal on both axes
-                    this.x += moveX * 0.5;
-                    this.y += kickY;
-                    moveX -= moveX * 0.5;
                     moveY -= kickY;
                 }
             }
