@@ -1,70 +1,61 @@
 import * as Level from "./level.mjs";
-import * as Renderer from "./renderer.mjs";
-import * as Player from "./player.mjs";
 
-const TRANSITION_TIME = 30;
-const CAMERA_WIDTH = 32;
-const CAMERA_HEIGHT = 18;
-
-const CENTER_OFFSET_X = CAMERA_WIDTH * 5 + Player.WIDTH / 2;
-const CENTER_OFFSET_Y = CAMERA_HEIGHT * 5 + Player.HEIGHT / 2;
-
-function smoothstep(n) {
+function clamp(n) {
     if (n > 1) return 1;
     if (n < 0) return 0;
-    
-    return (3 * n ** 2) - (2 * n ** 3);
+    return n;
 }
 
-class Camera {
-    constructor() {
-        this.x = Player.player.x - CENTER_OFFSET_X;
-        this.y = Player.player.y - CENTER_OFFSET_Y;
+function lerp(a, b, n) {
+    return a + (b - a) * clamp(n);
+}
 
-        this.followFactor = 0;
+export default class Camera {
+    static #followTicks = 30;
+    static #width = 320;
+    static #height = 180;
+
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+
+        this.targetX = x;
+        this.targetY = y;
+        this.prevX = x;
+        this.prevY = y;
+        this.followTime = 0;
+
+        addEventListener("game_cameramove", (e) => {
+            if (e.detail.instant) this.instantlyMoveTo(e.detail.x, e.detail.y);
+            else this.moveTo(e.detail.x, e.detail.y);
+        });
+    }
+    moveTo(x, y) {
+        this.prevX = this.x;
+        this.prevY = this.y;
+        this.targetX = x;
+        this.targetY = y;
         this.followTime = 0;
     }
+    instantlyMoveTo(x, y) {
+        this.prevX = x;
+        this.prevY = y;
+        this.x = x;
+        this.y = y;
+        this.targetX = x;
+        this.targetY = y;
+    }
     update() {
-        // note: this is like. kinda broken (should be smooth)
-        if (Player.player.isDead) {
-            this.followFactor = 1;
-        }
-        else if (Player.player.x !== this.x + CENTER_OFFSET_X || Player.player.y !== this.y + CENTER_OFFSET_Y) {
-            if (this.followTime < 0) {
-                this.followTime = 0;
-            }
-            this.followTime++;
-        }
-        else {
-            if (this.followTime > TRANSITION_TIME) {
-                this.followTime = TRANSITION_TIME;
-            }
-            else {
-                this.followTime--;
-            }
-        }
-        this.followFactor = smoothstep(this.followTime / TRANSITION_TIME);
-
-        const diffX = this.x + CENTER_OFFSET_X - Player.player.x;
-        const diffY = this.y + CENTER_OFFSET_Y - Player.player.y;
-
-        this.x -= diffX * this.followFactor;
-        this.y -= diffY * this.followFactor;
+        this.followTime++;
+        this.x = lerp(this.prevX, this.targetX, this.followTime / Camera.#followTicks);
+        this.y = lerp(this.prevY, this.targetY, this.followTime / Camera.#followTicks);
 
         if (this.x < 0) this.x = 0;
-        if (this.x + CAMERA_WIDTH * 10 > Level.level.rooms[Level.curRoomId].width * 10) this.x = Level.level.rooms[Level.curRoomId].width * 10 - CAMERA_WIDTH * 10;
+        if (this.x + Camera.#width > Level.level.rooms[Level.curRoomId].width * 10) this.x = Level.level.rooms[Level.curRoomId].width * 10 - Camera.#width;
         if (this.y < 0) this.y = 0;
-        if (this.y + CAMERA_HEIGHT * 10 > Level.level.rooms[Level.curRoomId].height * 10) this.y = Level.level.rooms[Level.curRoomId].height * 10 - CAMERA_HEIGHT * 10;
+        if (this.y + Camera.#height > Level.level.rooms[Level.curRoomId].height * 10) this.y = Level.level.rooms[Level.curRoomId].height * 10 - Camera.#height;
         
         this.x = Math.round(this.x);
         this.y = Math.round(this.y);
     }
 }
-
-let camera;
-
-function init() {
-    camera = new Camera(0, 0);
-}
-
-export { Camera, init, camera };

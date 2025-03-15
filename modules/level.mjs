@@ -4,11 +4,12 @@ import level from "../data/level/level.json" with { type: "json" };
 import tileSprites from "../data/tile/tiles.json" with { type: "json" };
 
 class Room {
-    constructor(id, w, h, x, y, tiles, decals, special, triggers) {
+    constructor(id, w, h, x, y, tiles, hazards, decals, special, triggers) {
         this.id = id;
         this.width = w;
         this.height = h;
         this.tiles = tiles;
+        this.hazards = hazards;
         this.decals = decals;
         this.special = special;
         this.triggers = triggers;
@@ -64,16 +65,18 @@ const tileTypes = {
         offX: 0,
         offY: 0,
         w: 10,
-        h: 10,
-        type: "Block"
-    },
-    2: {
+        h: 10
+    }
+};
+
+const hazardTypes = {
+    1: {
         offX: 0,
         offY: 7,
         w: 10,
         h: 3,
-        type: "Hazard"
-    }
+        facing: "up"
+    },
 };
 
 const decalTypes = {
@@ -99,7 +102,7 @@ function loadRoom(id) {
 
 const testImage = new Image(); testImage.src = "../data/assets/tiles/tile_grass.png";
 
-function loadLevel() {
+function loadLevel() {                          // TODO: rewrite hazards to use their own thing
     for (let i = 0; i < 100; i++) {
         console.log(rand.next().value);
     }
@@ -112,6 +115,7 @@ function loadLevel() {
     for (const i of level.rooms) {
         // preprocess room data
         const curRoomTiles = [];
+        const curRoomHazards = [];
         const curRoomDecals = [];
         const curRoomSpecials = [];
         const curRoomTriggers = [];
@@ -157,11 +161,16 @@ function loadLevel() {
                     else if (n && !w && !e && !s) textureId = texVariant.pipe_bottom;
                     else textureId = texVariant.outer_all;
 
-                    const config = new Thing.VisibleConfig(thisTileSprite.sprite.relX, thisTileSprite.sprite.relY, ...thisTileSprite.sprite.indices[textureId], thisTileSprite.sprite.width, thisTileSprite.sprite.height);
+                    const config = new Thing.SpriteConfig(thisTileSprite.sprite.relX, thisTileSprite.sprite.relY, ...thisTileSprite.sprite.indices[textureId], thisTileSprite.sprite.width, thisTileSprite.sprite.height);
 
-                    curRoomTiles.push(new Tile[thisTile.type](c * 10 + thisTile.offX, r * 10 + thisTile.offY, thisTile.w, thisTile.h,
+                    curRoomTiles.push(new Tile.Block(c * 10 + thisTile.offX, r * 10 + thisTile.offY, thisTile.w, thisTile.h,
                         sprMap.get(thisTileSprite.name), i.tiles[r][c], 0, config)
                     );
+                }
+
+                if (i.hazards[r][c] !== 0) {
+                    const thisHazard = hazardTypes[i.hazards[r][c]];
+                    curRoomHazards.push(new Tile.Hazard(c * 10 + thisHazard.offX, r * 10 + thisHazard.offY, thisHazard.w, thisHazard.h, false, i.hazards[r][c], thisHazard.facing));
                 }
 
                 if (i.decals[r][c] !== 0) {
@@ -181,7 +190,7 @@ function loadLevel() {
             }
         }
 
-        rooms.push(new Room(i.id, i.width, i.height, i.x, i.y, curRoomTiles, curRoomDecals, curRoomSpecials, curRoomTriggers));
+        rooms.push(new Room(i.id, i.width, i.height, i.x, i.y, curRoomTiles, curRoomHazards, curRoomDecals, curRoomSpecials, curRoomTriggers));
 
         for (const j of rooms) {
             if (j.x + j.width === i.x)

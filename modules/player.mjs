@@ -1,164 +1,137 @@
 import * as Thing from "./thing.mjs";
 import * as Level from "./level.mjs";
 import * as Tile from "./tile.mjs";
+import Vector from "./vector.mjs"
+import * as Event from "./event.mjs";
+import config from "../data/config/player.json" with { type: "json" };
 
-const WIDTH = 8;
-const HEIGHT = 12;
-const MAX_VEL_TIME = 8;
-const MAX_VEL = 1.5;
-const DECEL_TIME = 4;
-const ACCEL_PER_TICK = MAX_VEL / MAX_VEL_TIME;
-const DECEL_PER_TICK = MAX_VEL / DECEL_TIME;
-const TOUCH_THRESHOLD = 0.01;   // magic floating point error fixer
+export default class Player extends Thing.Entity {
+    static #width = config.width;
+    static #height = config.height;
+    static #accelTicks = config.accelTime;
+    static #maxVel = config.maxVel;
+    static #decelTicks = config.decelTime;
+    static #maxGrappleTicks = config.maxGrappleTime;
+    static #grappleVel = config.grappleVel;
+    static #grappleFreezeTicks = config.grappleFreezeTime;
+    static #grappleOffset = new Vector(config.grappleOffsetX, config.grappleOffsetY);
+    static #grappleRange = config.grappleRange;
+    static #grappleDeadZone = config.grappleDeadZone;
+    static #jumpHeight = config.jumpHeight;
+    static #jumpTime = config.jumpTime;
+    static #terminalVel = config.terminalVel;
+    static #minJumpFactor = config.minJumpFactor;
+    static #airAccelFactor = config.airAccelFactor;
+    static #airDecelFactor = config.airDecelFactor;
+    static #respawnTicks = config.respawnTime;
+    static #coyoteTicks = config.coyoteTime;
+    static #bufferTicks = config.bufferTime;
+    static #touchThreshold = 0.01;
+    static #cameraOffsetX = -160 + config.width / 2;
+    static #cameraOffsetY = -90 + config.height / 2;
+    static state = {
+        DEFAULT: 0,
+        INTRO: 1,
+        GRAPPLED: 2
+    };
 
-const MAX_GRAPPLE_TIME = 36;
-const GRAPPLE_SPEED = 3.5;
-const GRAPPLE_FREEZE_TIME = 3;
-const GRAPPLE_START_OFFSET_X = 4;
-const GRAPPLE_START_OFFSET_Y = 3;
-const GRAPPLE_RANGE = 14;
-const GRAPPLE_DEADZONE = 5;
+    static #accelPerTick = this.#maxVel / this.#accelTicks;
+    static #decelPerTick = this.#maxVel / this.#decelTicks;
+    static #gravity = (this.#jumpHeight * 2) / (this.#jumpTime ** 2);
+    static #baseJumpVel = Math.sqrt(2 * this.#gravity * this.#jumpHeight);
 
-const JUMP_HEIGHT = 24;
-const JUMP_APEX_TIME = 18;
-const GRAVITY = (JUMP_HEIGHT * 2) / (JUMP_APEX_TIME * JUMP_APEX_TIME);
-const BASE_JUMP_VEL = Math.sqrt(2 * GRAVITY * JUMP_HEIGHT);
-const MAX_FALL_VEL = 3;
-const MIN_JUMP_SCALE = 0.3;
+    vel = new Vector();
+    touching = new Map();
+    inputs = new Set();
+    jumpTimer = 20;
+    jumpBufferTime = Player.#bufferTicks;
+    grappleBufferTime = Player.#bufferTicks;
+    coyoteTime = Player.#coyoteTicks;
+    facing = new Vector(1, 0);
+    lastFacedX = 1;
+    canGrapple = false;
+    grappleTime = 0;
+    grapple = new Vector();
+    state = Player.state.DEFAULT;
+    grappleStarted = false;
+    inControl = true;
+    isDead = false;
+    respawnTime = Player.#respawnTicks;
+    temp; spawnX; spawnY;
 
-const AIR_ACCEL_FACTOR = 0.6;
-const AIR_DECEL_FACTOR = 0.2;
-
-const RESPAWN_TIME = 40;
-
-const COYOTE_TICKS = 6;
-const BUFFER_TICKS = 8;
-
-const STATE = {
-    DEFAULT: 0,
-    INTRO: 1,
-    GRAPPLED: 2
-};
-
-const spriteConfig = {
-    relativeX: -3,
-    relativeY: -4,
-    sheetX: 0,
-    sheetY: 0,
-    width: 13,
-    height: 16
-};
-
-function normalize(x, y) {
-    let angle = Math.atan(y / x);
-    if (angle > 0) return { x: x * Math.cos(angle), y: y * Math.sin(angle) };
-    return { x: x * Math.cos(angle), y: -y * Math.sin(angle) };
-}
-
-/**
- * 
- * @param {number} sx 
- * @param {number} sy 
- * @param {number} dx 
- * @param {number} dy 
- * @returns x/y object
- */
-function raycast(sx, sy, dx, dy) {
-    // dda implementation basically taken straight from wikipedia
-    let posX = sx / 10;
-    let posY = sy / 10;
-    const step = Math.abs(dx) > Math.abs(dy) ? Math.abs(dx) : Math.abs(dy);
-    const deltaX = dx / step;
-    const deltaY = dy / step;
-
-    if (dx < 0) {
-        const diff = Math.ceil(posX) - posX;
-        posX -= diff;
-        posY -= deltaY * diff;
-    }
-    if (dx > 0) {
-        const diff = Math.floor(posX) - posX;
-        posX -= diff;
-        posY -= deltaY * diff;
-    }
-    if (dy < 0) {
-        const diff = Math.ceil(posY) - posY;
-        posX -= deltaX * diff;
-        posY -= diff;
-    }
-    if (dy > 0) {
-        const diff = Math.floor(posY) - posY;
-        posX -= deltaX * diff;
-        posY -= diff;
-    }
-
-    if (posY >= Level.level.rooms[Level.curRoomId].height || posY < 0 || posX >= Level.level.rooms[Level.curRoomId].width || posX < 0) {
-        return { x: null, y: null };
-    }
-    while (Level.level.rooms[Level.curRoomId].tiles[Math.floor(posY)][Math.floor(posX)] !== 1) {
-        posX += deltaX;
-        posY += deltaY;
-
-        if (posY >= Level.level.rooms[Level.curRoomId].height || posY < 0 || posX >= Level.level.rooms[Level.curRoomId].width || posX < 0) {
-            return { x: null, y: null };
+    /**
+     * 
+     * @param {Vector} s 
+     * @param {Vector} d 
+     * @returns Vector
+     */
+    static #raycast(s, d) {
+        // dda implementation basically taken straight from wikipedia
+        let pos = new Vector(s.x / 10, s.y / 10);
+        const step = Math.abs(d.x) > Math.abs(d.y) ? Math.abs(d.x) : Math.abs(d.y);
+        const delta = new Vector(d.x / step, d.y / step);
+    
+        if (d.x < 0) {
+            const diff = Math.ceil(pos.x) - pos.x;
+            pos.x -= diff;
+            pos.y -= delta.y * diff;
         }
-        if (Math.abs(posY - sy/10) > GRAPPLE_RANGE || Math.abs(posX - sx/10) > GRAPPLE_RANGE) {
-            return { x: null, y: null };
+        if (d.x > 0) {
+            const diff = Math.floor(pos.x) - pos.x;
+            pos.x -= diff;
+            pos.y -= delta.y * diff;
         }
+        if (d.y < 0) {
+            const diff = Math.ceil(pos.y) - pos.y;
+            pos.x -= delta.x * diff;
+            pos.y -= diff;
+        }
+        if (d.y > 0) {
+            const diff = Math.floor(pos.y) - pos.y;
+            pos.x -= delta.x * diff;
+            pos.y -= diff;
+        }
+    
+        if (pos.y >= Level.level.rooms[Level.curRoomId].height || pos.y < 0 || pos.x >= Level.level.rooms[Level.curRoomId].width || pos.x < 0) {
+            return null;
+        }
+        while (Level.level.rooms[Level.curRoomId].tiles[Math.floor(pos.y)][Math.floor(pos.x)] !== 1) {
+            pos.x += delta.x;
+            pos.y += delta.y;
+    
+            if (pos.y >= Level.level.rooms[Level.curRoomId].height || pos.y < 0 || pos.x >= Level.level.rooms[Level.curRoomId].width || pos.x < 0) {
+                return null;
+            }
+        }
+    
+        if (d.x > 0) pos.x = Math.floor(pos.x);
+        if (d.x < 0) pos.x = Math.ceil(pos.x);
+        if (d.y > 0) pos.y = Math.floor(pos.y);
+        if (d.y < 0) pos.y = Math.ceil(pos.y);
+    
+        pos.x *= 10;
+        pos.y *= 10;
+    
+        const rayLength = Math.sqrt((pos.y-s.y) ** 2 + (pos.x-s.x) ** 2);
+    
+        if (rayLength < Player.#grappleDeadZone || rayLength > Player.#grappleRange) {
+            return null;
+        }
+        return pos;
     }
-    console.log(dx, dy)
 
-    if (dx > 0) posX = Math.floor(posX);
-    if (dx < 0) posX = Math.ceil(posX);
-    if (dy > 0) posY = Math.floor(posY);
-    if (dy < 0) posY = Math.ceil(posY);
-
-    posX *= 10;
-    posY *= 10;
-
-    const rayLength = Math.sqrt((posY-sy) ** 2 + (posX-sx) ** 2);
-
-    if (rayLength < GRAPPLE_DEADZONE) {
-        console.log(Math.abs(posY - sy), Math.abs(posX - sx));
-        return { x: null, y: null };
-    }
-    return { x: posX, y: posY };
-}
-
-class Player extends Thing.Visible {
-    constructor(x, y, w, h, s) {
-        super(x, y, w, h, s, -1, spriteConfig);
-        this.velX = 0;
-        this.velY = 0;
-        this.touching = new Map();
-        this.inputs = new Set();
-        this.jumpTimer = 20;
-        this.jumpBufferTime = BUFFER_TICKS;
-        this.coyoteTime = COYOTE_TICKS;
-        this.facingX = 1;
-        this.facingY = 0;
-        this.lastFacedX = 1;
-        this.temp = raycast(x, y, this.facingX, this.facingY);
-        this.grappleBufferTime = BUFFER_TICKS;
-        this.canGrapple = false;
-        this.grappleTime = 0;
-        this.grappleX = 0;
-        this.grappleY = 0;
-        this.state = STATE.DEFAULT;
-        this.grappleStarted = false;
-
-        this.inControl = true;
-
+    constructor(x, y) {
+        super(x, y, Player.#width, Player.#height, config.spriteSrc, -1, new Thing.SpriteConfig(...config.sprite));
+        this.temp = Player.#raycast(new Vector(x, y), this.facing);
         this.spawnX = x;
         this.spawnY = y;
-
-        this.isDead = false;
-        this.respawnTime = RESPAWN_TIME;
 
         this.touching.set("down", false);
         this.touching.set("up", false);
         this.touching.set("left", false);
         this.touching.set("right", false);
+
+        dispatchEvent(new Event.CameraMoveEvent(this.x + Player.#cameraOffsetX, this.y + Player.#cameraOffsetY, true));
 
         addEventListener("keydown", this.keydown);
         addEventListener("keyup", this.keyup);
@@ -168,37 +141,35 @@ class Player extends Thing.Visible {
     tick() {
         if (this.isDead) {
             this.respawnTime--;
-            this.velX = 0;
-            this.velY = 0;
+            this.vel.zero();
             if (this.respawnTime <= 0) {
                 this.isDead = false;
                 this.x = this.spawnX;
                 this.y = this.spawnY;
                 this.jumpBufferTime = 0;
                 this.coyoteTime = 0;
-                this.respawnTime = RESPAWN_TIME;
+                this.respawnTime = Player.#respawnTicks;
+                dispatchEvent(new Event.CameraMoveEvent(this.x + Player.#cameraOffsetX, this.y + Player.#cameraOffsetY, true));
             }
             return;
         }
 
         if (!this.touching.get("down")) {
-            this.velY += GRAVITY;
-            if (this.velY > MAX_FALL_VEL) {
-                this.velY = MAX_FALL_VEL;
-            }
+            if (this.vel.y < Player.#terminalVel)
+                this.vel.y += Player.#gravity;
+
             if (this.grappleTime === 0) this.coyoteTime--;
         } else {
-            this.velY = 0;
-            this.coyoteTime = COYOTE_TICKS;
+            this.vel.y = 0;
+            this.coyoteTime = Player.#coyoteTicks;
             if (this.grappleTime === 0) this.canGrapple = true;
         }
 
         this.findFacingDirection();
         this.processGrapple();
 
-        if (this.touching.get("right") || this.touching.get("left")) {
-            this.velX = 0;
-        }
+        if (this.touching.get("right") || this.touching.get("left"))
+            this.vel.x = 0;
 
         this.changeRoom();
 
@@ -212,17 +183,21 @@ class Player extends Thing.Visible {
         }
 
         if (this.grappleTime > 0) {
-            if (this.grappleX !== null) this.velX = this.grappleX;
-            if (this.grappleY !== null) this.velY = this.grappleY;
+            if (this.grapple !== null) {
+                this.vel.x = this.grapple.x;
+                this.vel.y = this.grapple.y;
+            }
             this.grappleTime--;
-            this.coyoteTime = COYOTE_TICKS;
+            this.coyoteTime = Player.#coyoteTicks;
         }
 
         this.prevX = this.x;
         this.prevY = this.y;
 
-        this.x += this.velX;
-        this.y += this.velY;
+        this.x += this.vel.x;
+        this.y += this.vel.y;
+
+        dispatchEvent(new Event.CameraMoveEvent(this.x + Player.#cameraOffsetX, this.y + Player.#cameraOffsetY));
 
         this.collide();
 
@@ -231,141 +206,135 @@ class Player extends Thing.Visible {
     }
     findFacingDirection() {
         if (this.inputs.has("arrowright")) {
-            this.facingX = 1;
+            this.facing.x = 1;
             this.lastFacedX = 1;
         }
         else if (this.inputs.has("arrowleft")) {
-            this.facingX = -1;
+            this.facing.x = -1;
             this.lastFacedX = -1;
         }
         else {
-            this.facingX = 0;
+            this.facing.x = 0;
         }
-        if (this.inputs.has("arrowdown")) {
-            this.facingY = 1;
-        }
-        else if (this.inputs.has("arrowup")) {
-            this.facingY = -1;
-        }
-        else {
-            this.facingY = 0;
-        }
-        if (this.facingX === 0 && this.facingY === 0) {
-            this.facingX = this.lastFacedX;
-        }
+
+        if (this.inputs.has("arrowdown"))
+            this.facing.y = 1;
+        else if (this.inputs.has("arrowup"))
+            this.facing.y = -1;
+        else
+            this.facing.y = 0;
+
+        if (this.facing.x === 0 && this.facing.y === 0)
+            this.facing.x = this.lastFacedX;
     }
     changeRoom() {
-        if (Level.rooms[Level.curRoomId].right && this.x > Level.rooms[Level.curRoomId].width * 10 - WIDTH/2) {
-            const ev = new CustomEvent("game_roomtransition", { detail: "right" });
+        if (Level.rooms[Level.curRoomId].right && this.x > Level.rooms[Level.curRoomId].width * 10 - Player.#width/2) {
             const nextRoom = Level.rooms[Level.curRoomId].right;
-            this.x = -WIDTH/2;
+            this.x = -Player.#width/2;
             //this.y += Level.level.rooms[Level.curRoomId].leftOffset;
-            dispatchEvent(ev);
+            dispatchEvent(new Event.RoomChangeEvent("right"));
+            dispatchEvent(new Event.CameraMoveEvent(this.x, this.y, true));
         }
-        if (Level.rooms[Level.curRoomId].left && this.x < -WIDTH/2) {
-            const ev = new CustomEvent("game_roomtransition", { detail: "left" });
+        if (Level.rooms[Level.curRoomId].left && this.x < -Player.#width/2) {
             const nextRoom = Level.rooms[Level.curRoomId].left;
-            this.x = nextRoom.width * 10 - WIDTH/2;
+            this.x = nextRoom.width * 10 - Player.#width/2;
             //this.y += Level.level.rooms[Level.curRoomId].leftOffset;
-            dispatchEvent(ev);
+            dispatchEvent(new Event.RoomChangeEvent("left"));
+            dispatchEvent(new Event.CameraMoveEvent(this.x, this.y, true));
         }
-        if (Level.rooms[Level.curRoomId].down && this.x > Level.rooms[Level.curRoomId].height * 10 - HEIGHT/2) {
-            const ev = new CustomEvent("game_roomtransition", { detail: "down" });
+        if (Level.rooms[Level.curRoomId].down && this.x > Level.rooms[Level.curRoomId].height * 10 - Player.#height/2) {
             const nextRoom = Level.rooms[Level.curRoomId].down;
-            this.y = -HEIGHT/2;
+            this.y = -Player.#height/2;
             //this.y += Level.level.rooms[Level.curRoomId].leftOffset;
-            dispatchEvent(ev);
+            dispatchEvent(new Event.RoomChangeEvent("down"));
+            dispatchEvent(new Event.CameraMoveEvent(this.x, this.y, true));
         }
-        if (Level.rooms[Level.curRoomId].up && this.x < -HEIGHT/2) {
-            const ev = new CustomEvent("game_roomtransition", { detail: "up" });
+        if (Level.rooms[Level.curRoomId].up && this.x < -Player.#height/2) {
             const nextRoom = Level.rooms[Level.curRoomId].up;
-            this.y = nextRoom.width * 10 - HEIGHT/2;
+            this.y = nextRoom.width * 10 - Player.#height/2;
             //this.y += Level.level.rooms[Level.curRoomId].leftOffset;
-            dispatchEvent(ev);
+            dispatchEvent(new Event.RoomChangeEvent("up"));
+            dispatchEvent(new Event.CameraMoveEvent(this.x, this.y, true));
         }
     }
     processRun() {
-        const acceleration = this.touching.get("down") ? ACCEL_PER_TICK : ACCEL_PER_TICK * AIR_ACCEL_FACTOR;
-        const deceleration = this.touching.get("down") ? DECEL_PER_TICK : DECEL_PER_TICK * AIR_DECEL_FACTOR;
+        const acceleration = this.touching.get("down") ? Player.#accelPerTick : Player.#accelPerTick * Player.#airAccelFactor;
+        const deceleration = this.touching.get("down") ? Player.#decelPerTick : Player.#decelPerTick * Player.#airDecelFactor;
         if (this.inputs.has("arrowright") && !this.touching.get("right")) {
-            if (this.velX < MAX_VEL)
-                this.velX += acceleration;
-            else if (this.velX > MAX_VEL) {
-                this.velX -= deceleration;
-                if (this.velX < 0.05)
-                    this.velX = 0;
+            if (this.vel.x < Player.#maxVel)
+                this.vel.x += acceleration;
+            else if (this.vel.x > Player.#maxVel) {
+                this.vel.x -= deceleration;
+                if (this.vel.x < 0.05)
+                    this.vel.x = 0;
             }
-        } else if (this.velX > 0) {
-            this.velX -= deceleration;
-            if (this.velX < 0.05)
-                this.velX = 0;
+        } else if (this.vel.x > 0) {
+            this.vel.x -= deceleration;
+            if (this.vel.x < 0.05)
+                this.vel.x = 0;
         }
         if (this.inputs.has("arrowleft") && !this.touching.get("left")) {
-            if (this.velX > -MAX_VEL)
-                this.velX -= acceleration;
-            else if (this.velX < -MAX_VEL) {
-                this.velX += deceleration;
-                if (this.velX > -0.05)
-                    this.velX = 0;
+            if (this.vel.x > -Player.#maxVel)
+                this.vel.x -= acceleration;
+            else if (this.vel.x < -Player.#maxVel) {
+                this.vel.x += deceleration;
+                if (this.vel.x > -0.05)
+                    this.vel.x = 0;
             }
-        } else if (this.velX < 0) {
-            this.velX += deceleration;
-            if (this.velX > -0.05)
-                this.velX = 0;
+        } else if (this.vel.x < 0) {
+            this.vel.x += deceleration;
+            if (this.vel.x > -0.05)
+                this.vel.x = 0;
         }
     }
     processGrapple() {
         if (this.inputs.has("z")) {
             this.grappleBufferTime--;
         } else {
-            this.grappleBufferTime = BUFFER_TICKS;
+            this.grappleBufferTime = Player.#bufferTicks;
             this.grappleTime = 0;
         }
 
         if (this.grappleStarted) {
-            this.temp = raycast(this.x + GRAPPLE_START_OFFSET_X, this.y + GRAPPLE_START_OFFSET_Y, this.facingX, this.facingY);
+            this.temp = Player.#raycast(new Vector(this.x + Player.#grappleOffset.x, this.y + Player.#grappleOffset.y), this.facing);
             this.grappleStarted = false;
             
-            if (this.temp.x && this.temp.y) {
-                const grappleVector = normalize(this.facingX, this.facingY);
-                this.grappleX = grappleVector.x * GRAPPLE_SPEED;
-                this.grappleY = grappleVector.y * GRAPPLE_SPEED;
+            if (this.temp) {
+                this.grapple = this.facing.normalize();
+                this.grapple.multiply(Player.#grappleVel);
             }
             else {
-                this.grappleX = null;
-                this.grappleY = null;
+                this.grapple = null;
             }
 
-            if (this.temp.x !== null && this.temp.y !== null) {
+            if (this.temp) {
                 this.canGrapple = false;
                 this.grappleBufferTime = 0;
-                this.grappleTime = MAX_GRAPPLE_TIME;
+                this.grappleTime = Player.#maxGrappleTicks;
             }
         }
 
         if (this.grappleBufferTime > 0 && this.canGrapple && this.inputs.has("z")) { // start grapple
-            this.temp = raycast(this.x + GRAPPLE_START_OFFSET_X, this.y + GRAPPLE_START_OFFSET_Y, this.facingX, this.facingY);
-            if (this.temp.x && this.temp.y) {
+            this.temp = Player.#raycast(new Vector(this.x + Player.#grappleOffset.x, this.y + Player.#grappleOffset.y), this.facing);
+            if (this.temp) {
                 this.grappleStarted = true;
-                const ev = new CustomEvent("game_freezetime", { detail: GRAPPLE_FREEZE_TIME });
+                const ev = new CustomEvent("game_freezetime", { detail: Player.#grappleFreezeTicks });
                 dispatchEvent(ev);
             }
         }
     }
     processJump() {
-        if (this.inputs.has(" ")) { // press jump
+        if (this.inputs.has(" ")) // press jump
             this.jumpBufferTime--;
-        } else { // release jump
-            this.jumpBufferTime = BUFFER_TICKS;
-        }
-        if (!this.inputs.has(" ") && this.velY < 0) {
-            if (this.velY < -BASE_JUMP_VEL * MIN_JUMP_SCALE) {
-                this.velY = -BASE_JUMP_VEL * MIN_JUMP_SCALE;
-            }
-        }
+        else // release jump
+            this.jumpBufferTime = Player.#bufferTicks;
+        
+        if (!this.inputs.has(" ") && this.vel.y < 0)
+            if (this.vel.y < -Player.#baseJumpVel * Player.#minJumpFactor)
+                this.vel.y = -Player.#baseJumpVel * Player.#minJumpFactor;
 
         if (this.jumpBufferTime >= 0 && this.coyoteTime >= 0 && this.inputs.has(" ")) { // start jump
-            this.velY = -BASE_JUMP_VEL;
+            this.vel.y = -Player.#baseJumpVel;
             this.jumpTimer = 10;
             this.coyoteTime = 0;
             this.grappleTime = 0;
@@ -384,26 +353,17 @@ class Player extends Thing.Visible {
         // broad phase
         const overlappingTiles = [];
 
-        for (const i of Level.tiles) {
-            if (this.x + WIDTH > i.x && this.x < i.x + i.width && this.y + HEIGHT > i.y && this.y < i.y + i.height) {
+        for (const i of Level.rooms[Level.curRoomId].tiles)
+            if (this.x + Player.#width > i.x && this.x < i.x + i.width && this.y + Player.#height > i.y && this.y < i.y + i.height)
                 overlappingTiles.push(i);
-            }
-        }
-        let overlappedHazards = 0;
+
         // narrow phase
         for (const i of overlappingTiles) {
-            if (i instanceof Tile.Hazard) {
-                overlappedHazards++;
-                if (overlappingTiles.length === overlappedHazards && this.velY >= 0) {
-                    this.isDead = true;
-                }
-                continue;
-            }
             let kickX, kickY;
 
-            if (moveX > 0) kickX = i.x - (this.x + WIDTH);
+            if (moveX > 0) kickX = i.x - (this.x + Player.#width);
             else if (moveX < 0) kickX = (i.x + i.width) - this.x;
-            if (moveY > 0) kickY = i.y - (this.y + HEIGHT);
+            if (moveY > 0) kickY = i.y - (this.y + Player.#height);
             else if (moveY < 0) kickY = (i.y + i.width) - this.y;
             //console.log(moveX, moveY, "m")
             //console.log(this.x, this.y, "t")
@@ -438,43 +398,61 @@ class Player extends Thing.Visible {
             }
 
             for (const i of overlappingTiles) {
-                if (!(this.x + WIDTH > i.x && this.x < i.x + i.width && this.y + HEIGHT > i.y && this.y < i.y + i.height)) {
-                    overlappingTiles.splice(overlappingTiles.indexOf(i), 1);
-                }
+                if (!(this.x + Player.#width > i.x &&
+                    this.x < i.x + i.width &&
+                    this.y + Player.#height > i.y &&
+                    this.y < i.y + i.height))
+                        overlappingTiles.splice(overlappingTiles.indexOf(i), 1);
             }
             this.grappleTime = 0;
+        }
+        for (const i of Level.rooms[Level.curRoomId].hazards) {
+            if (this.x + Player.#width > i.x &&
+                this.x < i.x + i.width &&
+                this.y + Player.#height > i.y &&
+                this.y < i.y + i.height) {
+                    if (i.facing === "up" && this.vel.y < 0) continue;
+                    if (i.facing === "down" && this.vel.y > 0) continue;
+                    if (i.facing === "right" && this.vel.x < 0) continue;
+                    if (i.facing === "left" && this.vel.x > 0) continue;
+
+                    this.isDead = true;
+            }
         }
 
         const touchingTiles = [];
         for (const i of Level.tiles) {
-            if (i.id === 1 && this.x + WIDTH + TOUCH_THRESHOLD >= i.x && this.x <= i.x + i.width + TOUCH_THRESHOLD && this.y + HEIGHT + TOUCH_THRESHOLD >= i.y && this.y <= i.y + i.height + TOUCH_THRESHOLD) {
-                touchingTiles.push(i);
-            }
+            if (i.id !== 0 &&
+                this.x + Player.#width + Player.#touchThreshold >= i.x &&
+                this.x <= i.x + i.width + Player.#touchThreshold &&
+                this.y + Player.#height + Player.#touchThreshold >= i.y &&
+                this.y <= i.y + i.height + Player.#touchThreshold)
+                    touchingTiles.push(i);
         }
 
         for (const i of touchingTiles) {
-            if (this.x + WIDTH + TOUCH_THRESHOLD > i.x && this.x + TOUCH_THRESHOLD < i.x + i.width && this.y + HEIGHT > i.y && this.y < i.y + i.height && this.velX >= 0) {
-                this.touching.set("right", true);
-            }
-            if (this.x + WIDTH - TOUCH_THRESHOLD > i.x && this.x - TOUCH_THRESHOLD < i.x + i.width && this.y + HEIGHT > i.y && this.y < i.y + i.height && this.velX <= 0) {
-                this.touching.set("left", true);
-            }
-            if (this.x + WIDTH > i.x && this.x < i.x + i.width && this.y + HEIGHT + TOUCH_THRESHOLD > i.y && this.y + TOUCH_THRESHOLD < i.y + i.height && this.velY >= 0) {
-                this.touching.set("down", true);
-            }
-            if (this.x + WIDTH > i.x && this.x < i.x + i.width && this.y + HEIGHT - TOUCH_THRESHOLD > i.y && this.y - TOUCH_THRESHOLD < i.y + i.height && this.velY <= 0) {
-                this.touching.set("up", true);
-            }
+            if (this.x + Player.#width + Player.#touchThreshold > i.x &&
+                this.x + Player.#touchThreshold < i.x + i.width &&
+                this.y + Player.#height > i.y &&
+                this.y < i.y + i.height && this.vel.x >= 0)
+                    this.touching.set("right", true);
+            if (this.x + Player.#width - Player.#touchThreshold > i.x &&
+                this.x - Player.#touchThreshold < i.x + i.width &&
+                this.y + Player.#height > i.y &&
+                this.y < i.y + i.height && this.vel.x <= 0)
+                    this.touching.set("left", true);
+            if (this.x + Player.#width > i.x &&
+                this.x < i.x + i.width &&
+                this.y + Player.#height + Player.#touchThreshold > i.y &&
+                this.y + Player.#touchThreshold < i.y + i.height && this.vel.y >= 0)
+                    this.touching.set("down", true);
+            if (this.x + Player.#width > i.x &&
+                this.x < i.x + i.width &&
+                this.y + Player.#height - Player.#touchThreshold > i.y &&
+                this.y - Player.#touchThreshold < i.y + i.height && this.vel.y <= 0)
+                    this.touching.set("up", true);
         }
 
-        if (this.touching.get("up")) this.velY = 0;
+        if (this.touching.get("up")) this.vel.y = 0;
     }
 }
-
-let player;
-
-function init() {
-    player = new Player(230, 30, WIDTH, HEIGHT, "./data/assets/sprites/protagonist.png");
-}
-
-export { WIDTH, HEIGHT, player, init }

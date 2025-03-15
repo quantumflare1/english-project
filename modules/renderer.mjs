@@ -1,13 +1,14 @@
 import * as Thing from "./thing.mjs";
-import * as Camera from "./camera.mjs";
+import Camera from "./camera.mjs";
 import FlatQueue from "https://cdn.jsdelivr.net/npm/flatqueue/+esm";
 
 const BASE_SCALE = 20;
 
-class Renderer {
-    constructor() {
+export default class Renderer {
+    constructor(camera) {
         this.canvas = document.createElement("canvas");
         this.ctx = this.canvas.getContext("2d");
+        this.camera = camera;
 
         this.canvas.width = 16 * BASE_SCALE;
         this.canvas.height = 9 * BASE_SCALE;
@@ -15,7 +16,7 @@ class Renderer {
         document.body.appendChild(this.canvas);
 
         this.ctx.imageSmoothingEnabled = false;
-        this.ctx.setTransform(1, 0, 0, 1, -Camera.camera.x, -Camera.camera.y);
+        this.ctx.setTransform(1, 0, 0, 1, -this.camera.x, -this.camera.y);
     }
     /**
      * @param {number} tickPercent from 0 - 1
@@ -26,7 +27,7 @@ class Renderer {
         this.ctx.fillStyle = "white";
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         this.ctx.fillStyle = "black";
-        this.ctx.setTransform(1, 0, 0, 1, -Camera.camera.x, -Camera.camera.y);
+        this.ctx.setTransform(1, 0, 0, 1, -this.camera.x, -this.camera.y);
 
         let tempX = 0;
         let tempY = 0;
@@ -70,11 +71,3 @@ class Renderer {
         this.ctx.closePath();
     }
 }
-
-let renderer;
-
-function init() {
-    renderer = new Renderer();
-}
-
-export { Renderer, init, renderer }
