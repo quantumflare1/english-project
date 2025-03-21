@@ -16,7 +16,7 @@ let lastTickTime = document.timeline.currentTime;
 let lastSecondTime = document.timeline.currentTime;
 let freezeTicks = 0;
 
-let player, camera, renderer, level;
+let player, camera, renderer, level, bg;
 const scenes = {
     menu: new Scene(),
     game: new Scene()
@@ -63,6 +63,7 @@ function tick(ms) {
         renderedObjects.push(i, i.z);
 
     scenes[activeScene].camera.update();
+    level.bg.tick();
     renderer.draw((ms - lastTickTime) / MS_PER_TICK, renderedObjects);
     //console.log(performance.measure("render"));
 
@@ -80,9 +81,9 @@ function load() {
     //  addEventListener("keydown", (e) => {e.preventDefault()});
 
     addEventListener("game_levelload", () => {
+        camera = new Camera(0, 0, level);
         player = new Player(230, 30, level);
         player.addToScene(scenes.game);
-        camera = new Camera(0, 0, level);
         renderer = new Renderer(camera);
         camera.addToScene(scenes.game);
 

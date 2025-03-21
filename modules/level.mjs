@@ -1,6 +1,5 @@
 import * as Thing from "./thing.mjs";
 import * as Tile from "./tile.mjs";
-import level from "../data/level/level.json" with { type: "json" };
 import tileSprites from "../data/tile/tiles.json" with { type: "json" };
 
 class Room {
@@ -91,7 +90,7 @@ class Room {
 class Level {
     rooms = [];
     curRoom = 0;
-    scene;
+    scene; bg;
 
     /**
      * Creates a new level
@@ -105,12 +104,20 @@ class Level {
     async init(path) {
         const json = await (await fetch(path)).json();
 
-        const sprMap = new Map();
-        for (const i of tileSprites) {
-            const img = new Image();
-            img.src = i.sprite.src;
-            sprMap.set(i.name, img);
+        this.bg = new Thing.Entity(0, 0, 320, 180, json.background, -100, new Thing.SpriteConfig(0, 0, 0, 0, 320, 180));
+        this.bg.tick = () => {
+            this.bg.x = this.scene.camera.x;
+            this.bg.y = this.scene.camera.y;
         }
+
+        const sprMap = new Map();
+        Object.keys(tileSprites).forEach((v) => {
+            Object.keys(tileSprites[v]).forEach((val) => {
+                const img = new Image();
+                img.src = tileSprites[v][val].sprite.src;
+                sprMap.set(val, img);
+            })
+        });
         for (const i of json.rooms) {
             // preprocess room data
             const curRoomTiles = [];
@@ -122,7 +129,7 @@ class Level {
                 for (let c = 0; c < i.width; c++) {
                     if (i.tiles[r][c] !== 0) {
                         const thisTile = tileTypes[i.tiles[r][c]];
-                        const thisTileSprite = tileSprites[i.tiles[r][c]-1];
+                        const thisTileSprite = tileSprites.block[thisTile.sprite];
                         let textureId = 0;
     
                         if (!thisTileSprite) {
@@ -160,16 +167,20 @@ class Level {
                         else if (n && !w && !e && !s) textureId = texVariant.pipe_bottom;
                         else textureId = texVariant.outer_all;
     
-                        const config = new Thing.SpriteConfig(thisTileSprite.sprite.relX, thisTileSprite.sprite.relY, ...thisTileSprite.sprite.indices[textureId], thisTileSprite.sprite.width, thisTileSprite.sprite.height);
+                        const config = new Thing.SpriteConfig(...thisTileSprite.sprite.details[textureId]);
     
                         curRoomTiles.push(new Tile.Block(c * 10 + thisTile.offX, r * 10 + thisTile.offY, thisTile.w, thisTile.h,
-                            sprMap.get(thisTileSprite.name), i.tiles[r][c], 0, config)
+                            sprMap.get(thisTile.sprite), i.tiles[r][c], 0, config)
                         );
                     }
     
                     if (i.hazards[r][c] !== 0) {
                         const thisHazard = hazardTypes[i.hazards[r][c]];
-                        curRoomHazards.push(new Tile.Hazard(c * 10 + thisHazard.offX, r * 10 + thisHazard.offY, thisHazard.w, thisHazard.h, false, i.hazards[r][c], thisHazard.facing));
+                        const thisHazardSprite = tileSprites.hazard[thisHazard.sprite];
+                        const textureId = thisHazardSprite.sprite.texture[`facing_${thisHazard.facing}`];
+                        const config = new Thing.SpriteConfig(...thisHazardSprite.sprite.details[textureId]);
+                        curRoomHazards.push(new Tile.Hazard(c * 10 + thisHazard.offX, r * 10 + thisHazard.offY, thisHazard.w, thisHazard.h,
+                            sprMap.get(thisHazard.sprite), i.hazards[r][c], thisHazard.facing, 1, config));
                     }
     
                     if (i.decals[r][c] !== 0) {
@@ -184,7 +195,7 @@ class Level {
     
                     if (i.triggers[r][c] !== 0) {
                         const thisTrigger = decalTypes[i.triggers[r][c]];
-                        curRoomTriggers.push(new Thing.Trigger(c * 10 + thisTrigger.offX, r * 10 + thisTrigger.offY, thisTrigger.w, thisTrigger.h, () => {}));
+                        curRoomTriggers.push(new Tile.Trigger(c * 10 + thisTrigger.offX, r * 10 + thisTrigger.offY, thisTrigger.w, thisTrigger.h, () => {}));
                     }
                 }
             }
@@ -204,6 +215,8 @@ class Level {
         }
 
         this.loadRoom(this.curRoom);
+        this.bg.addToScene(this.scene);
+        console.log(this.scene);
 
         dispatchEvent(new Event("game_levelload"));
     }
@@ -243,7 +256,15 @@ const tileTypes = {
         offX: 0,
         offY: 0,
         w: 10,
-        h: 10
+        h: 10,
+        sprite: "grass"
+    },
+    2: {
+        offX: 0,
+        offY: 0,
+        w: 10,
+        h: 10,
+        sprite: "temple"
     }
 };
 
@@ -253,7 +274,32 @@ const hazardTypes = {
         offY: 7,
         w: 10,
         h: 3,
-        facing: "up"
+        facing: "up",
+        sprite: "spike"
+    },
+    2: {
+        offX: 0,
+        offY: 0,
+        w: 10,
+        h: 3,
+        facing: "down",
+        sprite: "spike"
+    },
+    3: {
+        offX: 0,
+        offY: 0,
+        w: 3,
+        h: 10,
+        facing: "left",
+        sprite: "spike"
+    },
+    4: {
+        offX: 7,
+        offY: 0,
+        w: 3,
+        h: 10,
+        facing: "right",
+        sprite: "spike"
     },
 };
 

@@ -69,32 +69,11 @@ export default class Player extends Thing.Entity {
         let pos = new Vector(s.x / 10, s.y / 10);
         const step = Math.abs(d.x) > Math.abs(d.y) ? Math.abs(d.x) : Math.abs(d.y);
         const delta = new Vector(d.x / step, d.y / step);
-    
-        if (d.x < 0) {
-            const diff = Math.ceil(pos.x) - pos.x;
-            pos.x -= diff;
-            pos.y -= delta.y * diff;
-        }
-        else {
-            const diff = Math.floor(pos.x) - pos.x;
-            pos.x -= diff;
-            pos.y -= delta.y * diff;
-        }
-        if (d.y < 0) {
-            const diff = Math.ceil(pos.y) - pos.y;
-            pos.x -= delta.x * diff;
-            pos.y -= diff;
-        }
-        else {
-            const diff = Math.floor(pos.y) - pos.y;
-            pos.x -= delta.x * diff;
-            pos.y -= diff;
-        }
-    
+
         if (pos.y >= this.level.rooms[this.level.curRoom].height || pos.y < 0 || pos.x >= this.level.rooms[this.level.curRoom].width || pos.x < 0) {
             return null;
         }
-        while (this.level.rooms[this.level.curRoom].rawTiles[Math.floor(pos.y)][Math.floor(pos.x)] !== 1) {
+        while (this.level.rooms[this.level.curRoom].rawTiles[Math.floor(pos.y)][Math.floor(pos.x)] === 0) {
             pos.x += delta.x;
             pos.y += delta.y;
     
@@ -240,6 +219,7 @@ export default class Player extends Thing.Entity {
             dispatchEvent(new Event.RoomChangeEvent("right"));
             dispatchEvent(new Event.CameraMoveEvent(this.x, this.y, true));
         }
+        // stop player from going offscreen
         if (this.level.rooms[this.level.curRoom].left && this.x < -WIDTH/2) {
             const nextRoom = this.level.rooms[this.level.curRoom].left;
             this.x = nextRoom.width * 10 - WIDTH/2;
@@ -319,13 +299,11 @@ export default class Player extends Thing.Entity {
             }
         }
 
-        if (this.grappleBufferTime > 0 && this.canGrapple && this.inputs.has("z")) { // start grapple
-            this.temp = this.#raycast(new Vector(this.x + GRAPPLE_OFFSET.x, this.y + GRAPPLE_OFFSET.y), this.facing);
-            if (this.temp) {
-                this.grappleStarted = true;
-                const ev = new CustomEvent("game_freezetime", { detail: GRAPPLE_FREEZE_TICKS });
-                dispatchEvent(ev);
-            }
+        if (this.grappleBufferTime > 0 && this.canGrapple && this.inputs.has("z") && !this.grappleStarted) { // start grapple
+            this.grappleStarted = true;
+            this.grappleBufferTime = 0;
+            const ev = new CustomEvent("game_freezetime", { detail: GRAPPLE_FREEZE_TICKS });
+            dispatchEvent(ev);
         }
     }
     processJump() {
@@ -364,16 +342,18 @@ export default class Player extends Thing.Entity {
 
         // narrow phase
         for (const i of overlappingTiles) {
+            if (!(this.x + WIDTH > i.x &&
+                this.x < i.x + i.width &&
+                this.y + HEIGHT > i.y &&
+                this.y < i.y + i.height))
+                    continue;
+
             let kickX, kickY;
 
             if (moveX > 0) kickX = i.x - (this.x + WIDTH);
             else if (moveX < 0) kickX = (i.x + i.width) - this.x;
             if (moveY > 0) kickY = i.y - (this.y + HEIGHT);
             else if (moveY < 0) kickY = (i.y + i.width) - this.y;
-            //console.log(moveX, moveY, "m")
-            //console.log(this.x, this.y, "t")
-            //console.log(i.x, i.y, "i")
-            //console.log(kickX, kickY, "k")
 
             if (!kickX && kickY) {
                 this.y += kickY;
@@ -390,24 +370,12 @@ export default class Player extends Thing.Entity {
             if (kickX && kickY) {
                 if (Math.abs(kickXPercent) < Math.abs(kickYPercent)) { // kick x axis mostly
                     this.x += kickX;
-                    //this.y += moveY * (kickXPercent);
                     moveX -= kickX;
-                    moveY -= moveY * (kickXPercent);
                 }
                 else { // kick y axis mostly
-                    //this.x += moveX * (kickYPercent);
                     this.y += kickY;
-                    moveX -= moveX * (kickYPercent);
                     moveY -= kickY;
                 }
-            }
-
-            for (const i of overlappingTiles) {
-                if (!(this.x + WIDTH > i.x &&
-                    this.x < i.x + i.width &&
-                    this.y + HEIGHT > i.y &&
-                    this.y < i.y + i.height))
-                        overlappingTiles.splice(overlappingTiles.indexOf(i), 1);
             }
             this.grappleTime = 0;
         }

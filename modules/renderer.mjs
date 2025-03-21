@@ -66,7 +66,7 @@ export default class Renderer {
 
             if (next.temp) {
                 this.ctx.strokeStyle = "red";
-                this.ctx.lineWidth = 2;
+                this.ctx.lineWidth = 1;
                 this.ctx.beginPath();
                 this.ctx.moveTo(next.x + 4, next.y + 4);
                 tempX = next.temp.x;

@@ -19,6 +19,7 @@ class Thing {
     execute(name) {
         this.scripts.get(name).run();
     }
+    tick() {}
 }
 
 class Entity extends Thing { // who up extending they thing
@@ -46,7 +47,7 @@ class Entity extends Thing { // who up extending they thing
      * @param {number} z Z layer of this entity
      * @param {VisibleConfig} config Sprite settings for this entity
      */
-    constructor(x, y, w, h, src, z = 0, config = new VisibleConfig()) {
+    constructor(x, y, w, h, src, z = 0, config = new SpriteConfig()) {
         super();
         this.x = x;
         this.y = y;

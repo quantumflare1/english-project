@@ -1,49 +1,113 @@
-[
-    {
-        "name": "grass",
-        "sprite": {
-            "indices": [
-                [20, 20],
-                [30, 10],
-                [0, 20],
-                [10, 10],
-                [10, 30],
-                [20, 30],
-                [0, 30],
-                [0, 30],
-                [20, 10],
-                [10, 20],
-                [0, 10],
-                [30, 0],
-                [20, 0],
-                [10, 0],
-                [0, 0],
-                [30, 30]
-            ],
-            "texture": {
-                "outer_topleft": 0,
-                "outer_topright": 1,
-                "outer_bottomleft": 2,
-                "outer_bottomright": 3,
-                "edge_top": 4,
-                "edge_left": 5,
-                "edge_bottom": 6,
-                "edge_right": 7,
-                "pipe_horizontal": 8,
-                "pipe_vertical": 9,
-                "pipe_top": 10,
-                "pipe_left": 11,
-                "pipe_bottom": 12,
-                "pipe_right": 13,
-                "outer_all": 14,
-                "inner": 15
+{
+    "block": {
+        "grass": {
+            "sprite": {
+                "details": [
+                    [0, 0, 20, 20, 10, 10],
+                    [0, 0, 30, 10, 10, 10],
+                    [0, 0, 0, 20, 10, 10],
+                    [0, 0, 10, 10, 10, 10],
+                    [0, 0, 10, 30, 10, 10],
+                    [0, 0, 20, 30, 10, 10],
+                    [0, 0, 0, 30, 10, 10],
+                    [0, 0, 0, 30, 10, 10],
+                    [0, 0, 20, 10, 10, 10],
+                    [0, 0, 10, 20, 10, 10],
+                    [0, 0, 0, 10, 10, 10],
+                    [0, 0, 30, 0, 10, 10],
+                    [0, 0, 20, 0, 10, 10],
+                    [0, 0, 10, 0, 10, 10],
+                    [0, 0, 0, 0, 10, 10],
+                    [0, 0, 30, 30, 10, 10]
+                ],
+                "texture": {
+                    "outer_topleft": 0,
+                    "outer_topright": 1,
+                    "outer_bottomleft": 2,
+                    "outer_bottomright": 3,
+                    "edge_top": 4,
+                    "edge_left": 5,
+                    "edge_bottom": 6,
+                    "edge_right": 7,
+                    "pipe_horizontal": 8,
+                    "pipe_vertical": 9,
+                    "pipe_top": 10,
+                    "pipe_left": 11,
+                    "pipe_bottom": 12,
+                    "pipe_right": 13,
+                    "outer_all": 14,
+                    "inner": 15
+                },
+                "src": "../data/assets/tiles/tile_grass.png"
             },
-            "relX": 0,
-            "relY": 0,
-            "width": 10,
-            "height": 10,
-            "src": "../data/assets/tiles/tile_grass.png"
+            "type": "Block"
         },
-        "type": "Block"
+        "temple": {
+            "name": "temple",
+            "sprite": {
+                "details": [
+                    [0, 0, 20, 20, 10, 10],
+                    [0, 0, 30, 10, 10, 10],
+                    [0, 0, 0, 20, 10, 10],
+                    [0, 0, 10, 10, 10, 10],
+                    [0, 0, 10, 30, 10, 10],
+                    [0, 0, 20, 30, 10, 10],
+                    [0, 0, 30, 20, 10, 10],
+                    [0, 0, 0, 30, 10, 10],
+                    [0, 0, 20, 10, 10, 10],
+                    [0, 0, 10, 20, 10, 10],
+                    [0, 0, 0, 10, 10, 10],
+                    [0, 0, 30, 0, 10, 10],
+                    [0, 0, 20, 0, 10, 10],
+                    [0, 0, 10, 0, 10, 10],
+                    [0, 0, 0, 0, 10, 10],
+                    [0, 0, 30, 30, 10, 10]
+                ],
+                "texture": {
+                    "outer_topleft": 0,
+                    "outer_topright": 1,
+                    "outer_bottomleft": 2,
+                    "outer_bottomright": 3,
+                    "edge_top": 4,
+                    "edge_left": 5,
+                    "edge_bottom": 6,
+                    "edge_right": 7,
+                    "pipe_horizontal": 8,
+                    "pipe_vertical": 9,
+                    "pipe_top": 10,
+                    "pipe_left": 11,
+                    "pipe_bottom": 12,
+                    "pipe_right": 13,
+                    "outer_all": 14,
+                    "inner": 15
+                },
+                "src": "../data/assets/tiles/tile_temple.png"
+            },
+            "type": "Block"
+        }
+    },
+    "hazard": {
+        "spike": {
+            "sprite": {
+                "details": [
+                    [0, -2, 0, 0, 10, 5],
+                    [0, 0, 0, 5, 10, 5],
+                    [0, 0, 10, 0, 5, 10],
+                    [-2, 0, 15, 0, 5, 10]
+                ],
+                "texture": {
+                    "facing_up": 0,
+                    "facing_down": 1,
+                    "facing_left": 2,
+                    "facing_right": 3
+                },
+                "relX": 0,
+                "relY": 0,
+                "width": 10,
+                "height": 10,
+                "src": "../data/assets/tiles/tile_spike.png"
+            },
+            "type": "Hazard"
+        }
     }
-]
+}
