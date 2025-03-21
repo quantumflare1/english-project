@@ -5,6 +5,14 @@ import FlatQueue from "https://cdn.jsdelivr.net/npm/flatqueue/+esm";
 const BASE_SCALE = 20;
 
 export default class Renderer {
+    canvas;
+    ctx;
+    camera;
+
+    /**
+     * Creates a new renderer
+     * @param {Camera} camera 
+     */
     constructor(camera) {
         this.canvas = document.createElement("canvas");
         this.ctx = this.canvas.getContext("2d");
@@ -55,15 +63,15 @@ export default class Renderer {
                 this.ctx.fillRect(Math.round(next.x + diffX * tickPercent), Math.round(next.y + diffY * tickPercent), next.width, next.height);
             }
 
-            /*
+
             if (next.temp) {
                 this.ctx.strokeStyle = "red";
                 this.ctx.lineWidth = 2;
                 this.ctx.beginPath();
-                this.ctx.moveTo(next.x + 4, next.y + 3);
+                this.ctx.moveTo(next.x + 4, next.y + 4);
                 tempX = next.temp.x;
                 tempY = next.temp.y;
-            }*/
+            }
         }
         this.ctx.lineTo(tempX, tempY);
 

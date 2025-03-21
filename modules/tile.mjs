@@ -32,4 +32,10 @@ class Special extends Tile {
     }
 }
 
-export { Block, Hazard, Decal, Special }
+class Trigger extends Tile {
+    constructor(x, y, w, h, s, id, z, c) {
+        super(x, y, w, h, s, id, z, c);
+    }
+}
+
+export { Block, Hazard, Decal, Special, Trigger }

@@ -10,7 +10,7 @@
     "grappleOffsetX": 4,
     "grappleOffsetY": 4,
     "grappleRange": 140,
-    "grappleDeadZone": 3,
+    "grappleDeadZone": 6,
     "jumpHeight": 24,
     "jumpTime": 18,
     "terminalVel": 3,

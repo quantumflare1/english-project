@@ -4,50 +4,228 @@ import level from "../data/level/level.json" with { type: "json" };
 import tileSprites from "../data/tile/tiles.json" with { type: "json" };
 
 class Room {
-    constructor(id, w, h, x, y, tiles, hazards, decals, special, triggers) {
+    id;
+    width;
+    height;
+    tiles;
+    hazards;
+    decals;
+    specials;
+    triggers;
+    rawTiles;
+    x;
+    y;
+    up = null;
+    down = null;
+    left = null;
+    right = null;
+
+    /**
+     * Creates a new room
+     * @param {number} id The ID of this room
+     * @param {number} w The width of this room in tiles
+     * @param {number} h The height of this room in tiles
+     * @param {number} x The X coordinate of this room in tiles
+     * @param {number} y The Y coordinate of this room in tiles
+     * @param {Tile.Block[]} tiles The tiles this room contains
+     * @param {Tile.Hazard[]} hazards The hazards this room contains
+     * @param {Tile.Decal[]} decals The decals this room contains
+     * @param {Tile.Special[]} special The specials this room contains
+     * @param {Tile.Trigger[]} triggers The triggers this room contains
+     * @param {number[][]} rawTiles A 2D array of the tiles this room contains
+     */
+    constructor(id, w, h, x, y, tiles, hazards, decals, special, triggers, rawTiles) {
         this.id = id;
         this.width = w;
         this.height = h;
         this.tiles = tiles;
         this.hazards = hazards;
         this.decals = decals;
-        this.special = special;
+        this.specials = special;
         this.triggers = triggers;
+        this.rawTiles = rawTiles;
 
         this.x = x;
         this.y = y;
-
-        this.up = null;
-        this.left = null;
-        this.down = null;
-        this.right = null;
     }
+    /**
+     * @param {Room} room The room above this one
+     */
     connectUp(room) {
         this.up = room;
         room.down = this;
     }
+    /**
+     * @param {Room} room The room left of this one
+     */
     connectLeft(room) {
         this.left = room;
         room.right = this;
     }
+    /**
+     * @param {Room} room The room below this one
+     */
     connectDown(room) {
         this.down = room;
         room.up = this;
     }
+    /**
+     * @param {Room} room The room right of this one
+     */
     connectRight(room) {
         this.right = room;
         room.left = this;
     }
+    addToScene(scene) {
+        for (const tile of this.tiles) tile.addToScene(scene);
+        for (const decal of this.decals) decal.addToScene(scene);
+        for (const hazard of this.hazards) hazard.addToScene(scene);
+    }
+    removeFromScene() {
+        for (const tile of this.tiles) tile.removeFromScene();
+        for (const decal of this.decals) decal.removeFromScene();
+        for (const hazard of this.hazards) hazard.removeFromScene();
+    }
 }
 
-const tiles = [];
-const decals = [];
-const rooms = [];
-let curRoomId;
+class Level {
+    rooms = [];
+    curRoom = 0;
+    scene;
+
+    /**
+     * Creates a new level
+     * @param {string} path A path to the level JSON 
+     */
+    constructor(path, scene) {
+        this.scene = scene;
+        this.init(path);
+        addEventListener("game_roomtransition", (e) => { this.transition(e.detail); });
+    }
+    async init(path) {
+        const json = await (await fetch(path)).json();
+
+        const sprMap = new Map();
+        for (const i of tileSprites) {
+            const img = new Image();
+            img.src = i.sprite.src;
+            sprMap.set(i.name, img);
+        }
+        for (const i of json.rooms) {
+            // preprocess room data
+            const curRoomTiles = [];
+            const curRoomHazards = [];
+            const curRoomDecals = [];
+            const curRoomSpecials = [];
+            const curRoomTriggers = [];
+            for (let r = 0; r < i.height; r++) {
+                for (let c = 0; c < i.width; c++) {
+                    if (i.tiles[r][c] !== 0) {
+                        const thisTile = tileTypes[i.tiles[r][c]];
+                        const thisTileSprite = tileSprites[i.tiles[r][c]-1];
+                        let textureId = 0;
+    
+                        if (!thisTileSprite) {
+                            curRoomTiles.push(new Tile[thisTile.type](c * 10 + thisTile.offX, r * 10 + thisTile.offY, thisTile.w, thisTile.h,
+                                false, i.tiles[r][c])
+                            );
+                            continue;
+                        }
+    
+                        const nw = (c - 1 >= 0 && r - 1 >= 0) ?             i.tiles[r-1][c-1] > 0 : true;
+                        const n =  (r - 1 >= 0) ?                           i.tiles[r-1][c] > 0 : true;
+                        const ne = (c + 1 < i.width && r - 1 >= 0) ?        i.tiles[r-1][c+1] > 0 : true;
+                        const w =  (c - 1 >= 0) ?                           i.tiles[r][c-1] > 0 : true;
+                        const e =  (c + 1 < i.width) ?                      i.tiles[r][c+1] > 0 : true;
+                        const sw = (c - 1 >= 0 && r + 1 < i.height) ?       i.tiles[r+1][c-1] > 0 : true;
+                        const s =  (r + 1 < i.height) ?                     i.tiles[r+1][c] > 0 : true;
+                        const se = (c + 1 < i.width && r + 1 < i.height) ?  i.tiles[r+1][c+1] > 0 : true;
+    
+                        const texVariant = thisTileSprite.sprite.texture;
+    
+                        if (n && w && e && s) textureId = texVariant.inner;
+                        else if (!n && w && e && s) textureId = texVariant.edge_top;
+                        else if (n && !w && e && s) textureId = texVariant.edge_left;
+                        else if (n && w && !e && s) textureId = texVariant.edge_right;
+                        else if (n && w && e && !s) textureId = texVariant.edge_bottom;
+                        else if (!n && !w && e && s) textureId = texVariant.outer_topleft;
+                        else if (!n && w && !e && s) textureId = texVariant.outer_topright;
+                        else if (!n && w && e && !s) textureId = texVariant.pipe_horizontal;
+                        else if (n && !w && !e && s) textureId = texVariant.pipe_vertical;
+                        else if (n && !w && e && !s) textureId = texVariant.outer_bottomleft;
+                        else if (n && w && !e && !s) textureId = texVariant.outer_bottomright;
+                        else if (!n && !w && !e && s) textureId = texVariant.pipe_top;
+                        else if (!n && !w && e && !s) textureId = texVariant.pipe_left;
+                        else if (!n && w && !e && !s) textureId = texVariant.pipe_right;
+                        else if (n && !w && !e && !s) textureId = texVariant.pipe_bottom;
+                        else textureId = texVariant.outer_all;
+    
+                        const config = new Thing.SpriteConfig(thisTileSprite.sprite.relX, thisTileSprite.sprite.relY, ...thisTileSprite.sprite.indices[textureId], thisTileSprite.sprite.width, thisTileSprite.sprite.height);
+    
+                        curRoomTiles.push(new Tile.Block(c * 10 + thisTile.offX, r * 10 + thisTile.offY, thisTile.w, thisTile.h,
+                            sprMap.get(thisTileSprite.name), i.tiles[r][c], 0, config)
+                        );
+                    }
+    
+                    if (i.hazards[r][c] !== 0) {
+                        const thisHazard = hazardTypes[i.hazards[r][c]];
+                        curRoomHazards.push(new Tile.Hazard(c * 10 + thisHazard.offX, r * 10 + thisHazard.offY, thisHazard.w, thisHazard.h, false, i.hazards[r][c], thisHazard.facing));
+                    }
+    
+                    if (i.decals[r][c] !== 0) {
+                        const thisDecal = decalTypes[i.decals[r][c]];
+                        curRoomDecals.push(new Tile.Decal(c * 10 + thisDecal.offX, r * 10 + thisDecal.offY, thisDecal.w, thisDecal.h, false, i.decals[r][c], thisDecal.z));
+                    }
+    
+                    if (i.specials[r][c] !== 0) {
+                        const thisSpecial = decalTypes[i.specials[r][c]];
+                        curRoomSpecials.push(new Tile.Special(c * 10 + thisSpecial.offX, r * 10 + thisSpecial.offY, thisSpecial.w, thisSpecial.h, false, i.specials[r][c], thisSpecial.z));
+                    }
+    
+                    if (i.triggers[r][c] !== 0) {
+                        const thisTrigger = decalTypes[i.triggers[r][c]];
+                        curRoomTriggers.push(new Thing.Trigger(c * 10 + thisTrigger.offX, r * 10 + thisTrigger.offY, thisTrigger.w, thisTrigger.h, () => {}));
+                    }
+                }
+            }
+
+            this.rooms.push(new Room(i.id, i.width, i.height, i.x, i.y, curRoomTiles, curRoomHazards, curRoomDecals, curRoomSpecials, curRoomTriggers, i.tiles));
+
+            for (const j of this.rooms) {
+                if (j.x + j.width === i.x)
+                    this.rooms[i.id].connectLeft(j);
+                if (j.x === i.x + i.width)
+                    this.rooms[i.id].connectRight(j);
+                if (j.y + j.height === i.y)
+                    this.rooms[i.id].connectUp(j);
+                if (j.y === i.y + i.height)
+                    this.rooms[i.id].connectDown(j);
+            }
+        }
+
+        this.loadRoom(this.curRoom);
+
+        dispatchEvent(new Event("game_levelload"));
+    }
+    loadRoom(id) {
+        this.curRoom = id;
+        this.rooms[this.curRoom].addToScene(this.scene);
+    }
+    unloadRoom(id) {
+        this.rooms[id].removeFromScene();
+    }
+    transition(direction) {
+        this.unloadRoom(this.curRoom);
+        this.loadRoom(this.rooms[this.curRoom][direction].id);
+    }
+}
 
 // linear congruential generator implementation
 // taken from Mathematics of Computation Vol 68 #225 Jan 1999 pgs 249-260
 // shoutout my guy Pierre L'Ecuyer
+/**
+ * @param {number} seed The seed for the RNG
+ */
 function* prng(seed) {
     const a = 5122456;
     const c = 99;
@@ -89,137 +267,4 @@ const decalTypes = {
     }
 }
 
-function loadRoom(id) {
-    tiles.splice(0);
-    decals.splice(0);
-    for (const i of rooms[id].tiles) {
-        tiles.push(i);
-    }
-    for (const i of rooms[id].decals) {
-        decals.push(i);
-    }
-}
-
-const testImage = new Image(); testImage.src = "../data/assets/tiles/tile_grass.png";
-
-function loadLevel() {                          // TODO: rewrite hazards to use their own thing
-    for (let i = 0; i < 100; i++) {
-        console.log(rand.next().value);
-    }
-    const sprMap = new Map();
-    for (const i of tileSprites) {
-        const img = new Image();
-        img.src = i.sprite.src;
-        sprMap.set(i.name, img);
-    }
-    for (const i of level.rooms) {
-        // preprocess room data
-        const curRoomTiles = [];
-        const curRoomHazards = [];
-        const curRoomDecals = [];
-        const curRoomSpecials = [];
-        const curRoomTriggers = [];
-        for (let r = 0; r < i.height; r++) {
-            for (let c = 0; c < i.width; c++) {
-                if (i.tiles[r][c] !== 0) {
-                    const thisTile = tileTypes[i.tiles[r][c]];
-                    const thisTileSprite = tileSprites[i.tiles[r][c]-1];
-                    let textureId = 0;
-
-                    if (!thisTileSprite) {
-                        curRoomTiles.push(new Tile[thisTile.type](c * 10 + thisTile.offX, r * 10 + thisTile.offY, thisTile.w, thisTile.h,
-                            false, i.tiles[r][c])
-                        );
-                        continue;
-                    }
-
-                    const nw = (c - 1 >= 0 && r - 1 >= 0) ?             i.tiles[r-1][c-1] > 0 : true;
-                    const n =  (r - 1 >= 0) ?                           i.tiles[r-1][c] > 0 : true;
-                    const ne = (c + 1 < i.width && r - 1 >= 0) ?        i.tiles[r-1][c+1] > 0 : true;
-                    const w =  (c - 1 >= 0) ?                           i.tiles[r][c-1] > 0 : true;
-                    const e =  (c + 1 < i.width) ?                           i.tiles[r][c+1] > 0 : true;
-                    const sw = (c - 1 >= 0 && r + 1 < i.height) ?       i.tiles[r+1][c-1] > 0 : true;
-                    const s =  (r + 1 < i.height) ?                     i.tiles[r+1][c] > 0 : true;
-                    const se = (c + 1 < i.width && r + 1 < i.height) ?  i.tiles[r+1][c+1] > 0 : true;
-
-                    const texVariant = thisTileSprite.sprite.texture;
-
-                    if (n && w && e && s) textureId = texVariant.inner;
-                    else if (!n && w && e && s) textureId = texVariant.edge_top;
-                    else if (n && !w && e && s) textureId = texVariant.edge_left;
-                    else if (n && w && !e && s) textureId = texVariant.edge_right;
-                    else if (n && w && e && !s) textureId = texVariant.edge_bottom;
-                    else if (!n && !w && e && s) textureId = texVariant.outer_topleft;
-                    else if (!n && w && !e && s) textureId = texVariant.outer_topright;
-                    else if (!n && w && e && !s) textureId = texVariant.pipe_horizontal;
-                    else if (n && !w && !e && s) textureId = texVariant.pipe_vertical;
-                    else if (n && !w && e && !s) textureId = texVariant.outer_bottomleft;
-                    else if (n && w && !e && !s) textureId = texVariant.outer_bottomright;
-                    else if (!n && !w && !e && s) textureId = texVariant.pipe_top;
-                    else if (!n && !w && e && !s) textureId = texVariant.pipe_left;
-                    else if (!n && w && !e && !s) textureId = texVariant.pipe_right;
-                    else if (n && !w && !e && !s) textureId = texVariant.pipe_bottom;
-                    else textureId = texVariant.outer_all;
-
-                    const config = new Thing.SpriteConfig(thisTileSprite.sprite.relX, thisTileSprite.sprite.relY, ...thisTileSprite.sprite.indices[textureId], thisTileSprite.sprite.width, thisTileSprite.sprite.height);
-
-                    curRoomTiles.push(new Tile.Block(c * 10 + thisTile.offX, r * 10 + thisTile.offY, thisTile.w, thisTile.h,
-                        sprMap.get(thisTileSprite.name), i.tiles[r][c], 0, config)
-                    );
-                }
-
-                if (i.hazards[r][c] !== 0) {
-                    const thisHazard = hazardTypes[i.hazards[r][c]];
-                    curRoomHazards.push(new Tile.Hazard(c * 10 + thisHazard.offX, r * 10 + thisHazard.offY, thisHazard.w, thisHazard.h, false, i.hazards[r][c], thisHazard.facing));
-                }
-
-                if (i.decals[r][c] !== 0) {
-                    const thisDecal = decalTypes[i.decals[r][c]];
-                    curRoomDecals.push(new Tile.Decal(c * 10 + thisDecal.offX, r * 10 + thisDecal.offY, thisDecal.w, thisDecal.h, false, i.decals[r][c], thisDecal.z));
-                }
-
-                if (i.specials[r][c] !== 0) {
-                    const thisSpecial = decalTypes[i.specials[r][c]];
-                    curRoomSpecials.push(new Tile.Special(c * 10 + thisSpecial.offX, r * 10 + thisSpecial.offY, thisSpecial.w, thisSpecial.h, false, i.specials[r][c], thisSpecial.z));
-                }
-
-                if (i.triggers[r][c] !== 0) {
-                    const thisTrigger = decalTypes[i.triggers[r][c]];
-                    curRoomTriggers.push(new Thing.Trigger(c * 10 + thisTrigger.offX, r * 10 + thisTrigger.offY, thisTrigger.w, thisTrigger.h, () => {}));
-                }
-            }
-        }
-
-        rooms.push(new Room(i.id, i.width, i.height, i.x, i.y, curRoomTiles, curRoomHazards, curRoomDecals, curRoomSpecials, curRoomTriggers));
-
-        for (const j of rooms) {
-            if (j.x + j.width === i.x)
-                rooms[i.id].connectLeft(j);
-            if (j.x === i.x + i.width)
-                rooms[i.id].connectRight(j);
-            if (j.y + j.height === i.y)
-                rooms[i.id].connectUp(j);
-            if (j.y === i.y + i.height)
-                rooms[i.id].connectDown(j);
-        }
-    }
-}
-
-function transition(direction) {
-    loadRoom(rooms[curRoomId][direction].id);
-    curRoomId = rooms[curRoomId][direction].id;
-}
-
-function transitionListener(e) {
-    transition(e.detail);
-}
-
-function init() {
-    loadLevel();
-    curRoomId = 0;
-
-    loadRoom(curRoomId);
-    addEventListener("game_roomtransition", transitionListener);
-}
-
-export { level, curRoomId, rooms, decals, tiles, init }
+export { Room, Level }
