@@ -1,4 +1,5 @@
 import * as Thing from "./thing.mjs";
+import Scene from "./scene.mjs";
 import Camera from "./camera.mjs";
 import FlatQueue from "https://cdn.jsdelivr.net/npm/flatqueue/+esm";
 
@@ -28,20 +29,23 @@ export default class Renderer {
     }
     /**
      * @param {number} tickPercent from 0 - 1
-     * @param  {FlatQueue} pq 
+     * @param  {Scene} scene
      */
-    draw(tickPercent, pq) {
+    draw(tickPercent, scene) {
+        /*
         this.ctx.setTransform(1, 0, 0, 1, 0, 0);
         this.ctx.fillStyle = "white";
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         this.ctx.fillStyle = "black";
-        this.ctx.setTransform(1, 0, 0, 1, -this.camera.x, -this.camera.y);
+        this.ctx.setTransform(1, 0, 0, 1, -this.camera.x, -this.camera.y);*/
 
         let tempX = 0;
         let tempY = 0;
 
-        while (pq.length > 0) {
-            const next = pq.pop();
+        while (scene.renderedObjects.length > 0) {
+            const next = scene.renderedObjects.pop();
+
+            this.ctx.setTransform(1, 0, 0, 1, -this.camera.x + this.camera.x * next.follow, -this.camera.y + this.camera.y * next.follow);
 
             /*const diffX = next.x - next.prevX;
             const diffY = next.y - next.prevY;*/
@@ -50,10 +54,10 @@ export default class Renderer {
 
             if (next.sprite) {
                 this.ctx.drawImage(next.sprite,
-                    next.spriteSheetX, next.spriteSheetY,
-                    next.spriteWidth, next.spriteHeight,
-                    Math.round(next.x + diffX * tickPercent) + next.spriteRelativeX, Math.round(next.y + diffY * tickPercent) + next.spriteRelativeY,
-                    next.spriteWidth, next.spriteHeight);
+                    next.config.sheetX, next.config.sheetY,
+                    next.config.width, next.config.height,
+                    Math.round(next.x + diffX * tickPercent) + next.config.relativeX, Math.round(next.y + diffY * tickPercent) + next.config.relativeY,
+                    next.config.width, next.config.height);
 
                     /*this.ctx.strokeStyle = "red";
                     this.ctx.strokeRect(Math.round(next.x + diffX * tickPercent)+0.5, Math.round(next.y + diffY * tickPercent)+0.5, next.width-1, next.height-1);*/
@@ -61,6 +65,11 @@ export default class Renderer {
             else {
                 this.ctx.fillStyle = "black";
                 this.ctx.fillRect(Math.round(next.x + diffX * tickPercent), Math.round(next.y + diffY * tickPercent), next.width, next.height);
+            }
+            if (next.string) {
+                this.ctx.font = "10px Pixellari";
+                this.ctx.textAlign = next.align;
+                this.ctx.fillText(next.string, Math.round(next.x + diffX * tickPercent), Math.round(next.y + diffY * tickPercent));
             }
 
 

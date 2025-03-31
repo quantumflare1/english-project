@@ -23,20 +23,13 @@ class Thing {
 }
 
 class Entity extends Thing { // who up extending they thing
-    x;
-    y;
-    width;
-    height;
-    prevX;
-    prevY;
+    x; y;
+    width; height;
+    prevX; prevY;
     sprite;
-    spriteRelativeX;
-    spriteRelativeY;
-    spriteSheetX;
-    spriteSheetY;
-    spriteWidth;
-    spriteHeight;
+    config;
     z;
+    follow;
     /**
      * Creates a new entity
      * @param {number} x X coordinate of this entity in pixels
@@ -45,9 +38,9 @@ class Entity extends Thing { // who up extending they thing
      * @param {number} h Height of this entity in pixels
      * @param {string | Image} src Sprite source for this entity
      * @param {number} z Z layer of this entity
-     * @param {VisibleConfig} config Sprite settings for this entity
+     * @param {SpriteConfig} config Sprite settings for this entity
      */
-    constructor(x, y, w, h, src, z = 0, config = new SpriteConfig()) {
+    constructor(x, y, w, h, src, z = 0, config = new SpriteConfig(), follow = 0) {
         super();
         this.x = x;
         this.y = y;
@@ -55,6 +48,7 @@ class Entity extends Thing { // who up extending they thing
         this.height = h;
         this.prevX = x;
         this.prevY = y;
+        this.follow = follow;
         if (src) {
             if (typeof src === "string") {
                 this.sprite = new Image();
@@ -64,12 +58,7 @@ class Entity extends Thing { // who up extending they thing
                 this.sprite = src;
             }
 
-            this.spriteRelativeX = config.relativeX;
-            this.spriteRelativeY = config.relativeY;
-            this.spriteSheetX = config.sheetX;
-            this.spriteSheetY = config.sheetY;
-            this.spriteWidth = config.width;
-            this.spriteHeight = config.height;
+            this.config = config;
         }
         this.z = z;
     }
@@ -78,7 +67,32 @@ class Entity extends Thing { // who up extending they thing
      * @param {Scene} scene 
      */
     addToScene(scene) {
-        scene.entities.add(this);
+        scene.addEntity(this);
+        this.parentScene = scene;
+    }
+    removeFromScene() {
+        this.parentScene.entities.delete(this);
+        this.parentScene = null;
+    }
+}
+
+class Text extends Thing {
+    x; y; z;
+    prevX; prevY;
+    string;
+    align;
+    follow;
+    constructor(x, y, z, text, align, follow = 0) {
+        super();
+        this.x = x;
+        this.y = y;
+        this.z = z;
+        this.string = text;
+        this.align = align;
+        this.follow = follow;
+    }
+    addToScene(scene) {
+        scene.addEntity(this);
         this.parentScene = scene;
     }
     removeFromScene() {
@@ -88,8 +102,7 @@ class Entity extends Thing { // who up extending they thing
 }
 
 class Sound extends Thing {
-    x;
-    y;
+    x; y;
     follow;
     loop;
     sound;
@@ -127,4 +140,4 @@ class Sound extends Thing {
 }
 
 
-export { Entity, Sound, SpriteConfig }
+export { Entity, Text, Sound, SpriteConfig }

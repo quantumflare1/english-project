@@ -104,12 +104,6 @@ class Level {
     async init(path) {
         const json = await (await fetch(path)).json();
 
-        this.bg = new Thing.Entity(0, 0, 320, 180, json.background, -100, new Thing.SpriteConfig(0, 0, 0, 0, 320, 180));
-        this.bg.tick = () => {
-            this.bg.x = this.scene.camera.x;
-            this.bg.y = this.scene.camera.y;
-        }
-
         const sprMap = new Map();
         Object.keys(tileSprites).forEach((v) => {
             Object.keys(tileSprites[v]).forEach((val) => {
@@ -215,8 +209,6 @@ class Level {
         }
 
         this.loadRoom(this.curRoom);
-        this.bg.addToScene(this.scene);
-        console.log(this.scene);
 
         dispatchEvent(new Event("game_levelload"));
     }

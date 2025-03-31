@@ -1,3 +1,4 @@
+import * as Thing from "./modules/thing.mjs";
 import Player from "./modules/player.mjs";
 import Renderer from "./modules/renderer.mjs";
 import * as Level from "./modules/level.mjs";
@@ -57,14 +58,9 @@ function tick(ms) {
     }
     performance.mark("render");
 
-    // pack stuff to be rendered together
-    const renderedObjects = new FlatQueue();
-    for (const i of scenes[activeScene].entities)
-        renderedObjects.push(i, i.z);
-
     scenes[activeScene].camera.update();
-    level.bg.tick();
-    renderer.draw((ms - lastTickTime) / MS_PER_TICK, renderedObjects);
+    scenes[activeScene].refreshRenderList();
+    renderer.draw((ms - lastTickTime) / MS_PER_TICK, scenes[activeScene]);
     //console.log(performance.measure("render"));
 
     requestAnimationFrame(tick);
@@ -79,13 +75,17 @@ function load() {
         freezeTicks = e.detail;
     });
     //  addEventListener("keydown", (e) => {e.preventDefault()});
+    const bg = new Thing.Entity(0, 0, 320, 180, "./data/assets/background/bg_temple.png", -100, new Thing.SpriteConfig(0, 0, 0, 0, 320, 180), 1);
 
     addEventListener("game_levelload", () => {
         camera = new Camera(0, 0, level);
         player = new Player(230, 30, level);
-        player.addToScene(scenes.game);
         renderer = new Renderer(camera);
-        camera.addToScene(scenes.game);
+
+        scenes.game.addEntity(player);
+        scenes.game.setCamera(camera);
+
+        scenes.game.setBG(bg);
 
         requestAnimationFrame(tick);
     });
