@@ -1,4 +1,5 @@
 import Vector from "../misc/vector.mjs";
+import Node from "./node.mjs";
 
 export default class Rect extends Node {
     pos = new Vector();
