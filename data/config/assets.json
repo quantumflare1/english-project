@@ -1,0 +1,32 @@
+{
+    "image": {
+        "directories": [
+            "./data/assets/background",
+            "./data/assets/sprite",
+            "./data/assets/tile"
+        ],
+        "files": [
+            ["bg_menu.png", "bg_temple.png"],
+            ["protagonist.png"],
+            ["tile_grass.png", "tile_spike.png", "tile_temple.png"]
+        ]
+    },
+    "audio": {
+        "directories": [
+            "./data/assets/bgm",
+            "./data/assets/sfx"
+        ],
+        "files": [
+            ["bgm_temple.ogg"],
+            []
+        ]
+    },
+    "font": {
+        "directories": [
+            "./data/assets/font"
+        ],
+        "files": [
+            ["Pixellari.ttf"]
+        ]
+    }
+}
