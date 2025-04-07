@@ -22,4 +22,16 @@ class RoomChangeEvent extends CustomEvent {
     }
 }
 
-export { RoomChangeEvent, CameraSnapEvent, CameraMoveEvent, CameraZoomEvent };
+class AssetLoadEvent extends CustomEvent {
+    constructor() {
+        super("game_assetloaded");
+    }
+}
+
+class FreezeTimeEvent extends CustomEvent {
+    constructor(ticks) {
+        super("game_freezetime", { detail: ticks });
+    }
+}
+
+export { RoomChangeEvent, CameraSnapEvent, CameraMoveEvent, CameraZoomEvent, AssetLoadEvent, FreezeTimeEvent };

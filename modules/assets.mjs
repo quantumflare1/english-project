@@ -1,12 +1,13 @@
 import assets from "../data/config/assets.json" with { type: "json" };
+import { AssetLoadEvent } from "./event.mjs";
 
 export default class Assets {
-    static spritesheet = new OffscreenCanvas(100, 100);
+    static spritesheet = new OffscreenCanvas(800, 200);
     static sprites = {};
     static spriteCtx = this.spritesheet.getContext("2d");
     static audio = [];
     static font = [];
-    static load() {
+    static async load() {
         let sprWidth = 0;
         let sprMaxHeight = 0;
 
@@ -17,25 +18,27 @@ export default class Assets {
                 const json = this.#getJSON(`./data/tile/${assets.image.files[i][j]}.json`);
 
                 json.then((res) => {
-                    for (const i of res.sprites)
-                        i[0] += sprWidth;
-                    
-                    this.sprites[assets.image.files[i][j]] = res;
+                    if (res !== null) {
+                        for (const i of res.sprite)
+                            i[0] += sprWidth;
+                        
+                        this.sprites[assets.image.files[i][j]] = res;
+                    }
                 });
 
-                file.then((res) => {
-                    return createImageBitmap(res);
+                // putting await here is an extremely quick and dirty fix maybe improve this later
+                await file.then((res) => {
+                    if (res !== null)
+                        return createImageBitmap(res);
                 }).then((res) => {
-                    if (res.height > sprMaxHeight)
-                        sprMaxHeight = res.height;
-
-                    this.spriteCtx.drawImage(res, sprWidth, 0);
-                    sprWidth += res.width;
+                    if (res) {
+                        this.spriteCtx.drawImage(res, sprWidth, 0);
+                        console.log(sprWidth);
+                        sprWidth += res.width;
+                    }
                 });
             }
         }
-        this.spritesheet.height = sprMaxHeight;
-        this.spritesheet.width = sprWidth;
 
         // load audio
         for (let i = 0; i < assets.audio.files.length; i++) {
@@ -43,7 +46,6 @@ export default class Assets {
                 const file = this.#getFile(`./data/assets/${assets.audio.directories[i]}/${assets.audio.files[i][j]}.ogg`);
 
                 file.then((res) => {
-                    if (!res.ok) throw new Error(`Couldn't get blob ${assets.audio.files[i][j]} (Error code: ${res.status})`);
                     const src = URL.createObjectURL(res);
                     this.audio.push(new Audio(src));
                 });
@@ -55,24 +57,27 @@ export default class Assets {
             for (let j = 0; j < assets.font.files[i].length; j++) {
                 const file = this.#getFile(`./data/assets/${assets.font.directories[i]}/${assets.font.files[i][j]}.ttf`);
 
-                file.then((res) => {
-                    if (!res.ok) throw new Error(`Couldn't get blob ${assets.font.files[i][j]} (Error code: ${res.status})`);
+                // here too
+                await file.then((res) => {
                     const src = URL.createObjectURL(res);
                     document.fonts.add(new FontFace(`font${i}-${j}`, `url(${src})`));
                     this.font.push(`font${i}-${j}`);
                 });
             }
         }
+
+        dispatchEvent(new Event("game_assetloaded"));
+        console.log("done")
     }
     static async #getFile(path) {
         return await fetch(path).then(async (res) => {
-            if (!res.ok) throw new Error(`Couldn't load ${path} (Error code: ${res.status})`);
+            if (!res.ok) return null;
             return await res.blob();
         });
     }
     static async #getJSON(path) {
         return await fetch(path).then(async (res) => {
-            if (!res.ok) throw new Error(`Couldn't load ${path} (Error code: ${res.status})`);
+            if (!res.ok) return null;
             return await res.json();
         });
     }

@@ -1,8 +1,8 @@
-import * as Thing from "./thing.mjs";
-import * as Level from "./level.mjs";
-import Vector from "./misc/vector.mjs"
-import * as Event from "./event.mjs";
-import config from "../data/config/player.json" with { type: "json" };
+import * as Thing from "../thing.mjs";
+import * as Level from "../level.mjs";
+import Vector from "../misc/vector.mjs"
+import * as Event from "../event.mjs";
+import config from "../../data/config/player.json" with { type: "json" };
 
 const WIDTH = config.width;
 const HEIGHT = config.height;

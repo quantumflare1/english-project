@@ -1,10 +1,12 @@
 import * as Thing from "./modules/thing.mjs";
-import Player from "./modules/player.mjs";
+import Player from "./modules/node/player.mjs";
 import Renderer from "./modules/renderer.mjs";
 import * as Level from "./modules/level.mjs";
 import Camera from "./modules/camera.mjs";
 import * as Audio from "./modules/audio.mjs";
 import Scene from "./modules/scene.mjs";
+import { testScene } from "./modules/scenes.mjs";
+import Assets from "./modules/assets.mjs";
 
 // for offline development
 //import FlatQueue from "./modules/flat_queue_mirror.mjs";
@@ -17,14 +19,19 @@ let lastTickTime = document.timeline.currentTime;
 let lastSecondTime = document.timeline.currentTime;
 let freezeTicks = 0;
 
-let player, camera, renderer, level, bg;
-const scenes = {
-    menu: new Scene(),
-    game: new Scene()
-}; // sure just load everything in the game at once why not
-let activeScene = "game";
+let renderer;
 
 let tps = 0;
+
+const debugCanvas = document.createElement("canvas");
+const debugCtx = debugCanvas.getContext("2d");
+debugCanvas.width = 752;
+debugCanvas.height = 180;
+document.body.appendChild(debugCanvas);
+
+function debugDraw() {
+    debugCtx.drawImage(Assets.spritesheet, 0, 0);
+}
 
 /**
  * Runs game logic
@@ -44,7 +51,7 @@ function tick(ms) {
             if (tickTime > 3 * MS_PER_TICK) lastTickTime = ms;
 
             // if refresh rate < tick rate, hurry it up
-            player.tick();
+            //player.tick();
         }
         tps++;
         tickTime = ms - lastTickTime;
@@ -58,37 +65,33 @@ function tick(ms) {
     }
     performance.mark("render");
 
-    scenes[activeScene].camera.update();
-    scenes[activeScene].refreshRenderList();
-    renderer.draw((ms - lastTickTime) / MS_PER_TICK, scenes[activeScene]);
+    testScene.update();
+    testScene.refreshRenderList();
+    renderer.draw((ms - lastTickTime) / MS_PER_TICK, testScene);
     //console.log(performance.measure("render"));
 
     requestAnimationFrame(tick);
 }
 
 function load() {
-    level = new Level.Level("./data/level/level.json", scenes.game);
-    Audio.load("./data/assets/bgm/bgm_temple.ogg");
+    //Audio.load("./data/assets/bgm/bgm_temple.ogg");
 
-    addEventListener("click", audioStarter);
+    //addEventListener("click", audioStarter);
     addEventListener("game_freezetime", (e) => {
         freezeTicks = e.detail;
     });
     //  addEventListener("keydown", (e) => {e.preventDefault()});
-    const bg = new Thing.Entity(0, 0, 320, 180, "./data/assets/background/bg_temple.png", -100, new Thing.SpriteConfig(0, 0, 0, 0, 320, 180), 1);
+    //const bg = new Thing.Entity(0, 0, 320, 180, "./data/assets/background/bg_temple.png", -100, new Thing.SpriteConfig(0, 0, 0, 0, 320, 180), 1);
 
-    addEventListener("game_levelload", () => {
-        camera = new Camera(0, 0, level);
-        player = new Player(230, 30, level);
-        renderer = new Renderer(camera);
-
-        scenes.game.addEntity(player);
-        scenes.game.setCamera(camera);
-
-        scenes.game.setBG(bg);
+    addEventListener("game_assetloaded", () => {
+        /*camera = new Camera(0, 0, level);
+        player = new Player(230, 30, level);*/
+        renderer = new Renderer();
 
         requestAnimationFrame(tick);
+        debugDraw();
     });
+    Assets.load();
 }
 
 function audioStarter(e) {

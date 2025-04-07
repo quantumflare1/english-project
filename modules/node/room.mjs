@@ -1,16 +1,14 @@
+import Rect from "./rect.mjs";
 import Node from "./node.mjs";
 import Vector from "../misc/vector.mjs";
 
 export default class Room extends Node {
-    pos = new Vector();
-    dimensions = new Vector();
+    bounds;
     up; down; left; right;
 
     constructor(x, y, w, h) {
-        this.pos.x = x;
-        this.pos.y = y;
-        this.dimensions.x = w;
-        this.dimensions.y = h;
+        super();
+        this.bounds = new Rect(x, y, w, h);
     }
     /**
      * 

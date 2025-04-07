@@ -16,6 +16,7 @@ export default class Sound extends Node {
      * @param {boolean} follow 
      */
     constructor(x = 0, y = 0, source = new Audio(), volume = 0, loop = false, follow = false) {
+        super();
         this.pos.x = x;
         this.pos.y = y;
         this.source = source;

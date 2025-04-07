@@ -1,6 +1,7 @@
 import Node from "./node.mjs";
 import Vector from "../misc/vector.mjs";
-import Util from "../misc/util.mjs";
+import { lerp } from "../misc/util.mjs";
+import Room from "./room.mjs";
 
 export default class Camera extends Node {
     static BASE_DIMENSIONS = new Vector(320, 180);
@@ -17,6 +18,7 @@ export default class Camera extends Node {
     zoomTime = 0;
 
     constructor(x, y, zoom) {
+        super();
         this.pos.x = x;
         this.pos.y = y;
         this.prevPos.x = x;
@@ -64,18 +66,22 @@ export default class Camera extends Node {
         this.targetZoom = zoom;
         this.zoomTime = 0;
     }
-    update() {
+    /**
+     * 
+     * @param {Room} room 
+     */
+    update(room) {
         this.followTime++;
-        this.pos.x = Util.lerp(this.prevPos.x, this.targetPos.x, this.followTime / Camera.FOLLOW_TICKS);
-        this.pos.y = Util.lerp(this.prevPos.y, this.targetPos.y, this.followTime / Camera.FOLLOW_TICKS);
+        this.pos.x = lerp(this.prevPos.x, this.targetPos.x, this.followTime / Camera.FOLLOW_TICKS);
+        this.pos.y = lerp(this.prevPos.y, this.targetPos.y, this.followTime / Camera.FOLLOW_TICKS);
 
         this.zoomTime++;
-        this.zoom = Util.lerp(this.prevZoom, this.targetZoom, this.zoomTime / Camera.FOLLOW_TICKS);
+        this.zoom = lerp(this.prevZoom, this.targetZoom, this.zoomTime / Camera.FOLLOW_TICKS);
 
         if (this.pos.x < 0) this.pos.x = 0;
-        if (this.pos.x + Camera.BASE_DIMENSIONS.x > this.level.rooms[this.level.curRoom].width * 10) this.pos.x = this.level.rooms[this.level.curRoom].width * 10 - Camera.BASE_DIMENSIONS.x;
+        if (this.pos.x + Camera.BASE_DIMENSIONS.x > room.bounds.dimensions.x * 10) this.pos.x = room.bounds.dimensions.x * 10 - Camera.BASE_DIMENSIONS.x;
         if (this.pos.y < 0) this.pos.y = 0;
-        if (this.pos.y + Camera.BASE_DIMENSIONS.y > this.level.rooms[this.level.curRoom].height * 10) this.pos.y = this.level.rooms[this.level.curRoom].height * 10 - Camera.BASE_DIMENSIONS.y;
+        if (this.pos.y + Camera.BASE_DIMENSIONS.y > room.bounds.dimensions.y * 10) this.pos.y = room.bounds.dimensions.y * 10 - Camera.BASE_DIMENSIONS.y;
         
         this.x = Math.round(this.x);
         this.y = Math.round(this.y);

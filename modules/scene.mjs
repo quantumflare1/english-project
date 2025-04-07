@@ -1,32 +1,51 @@
+import Node from "./node/node.mjs";
+import Camera from "./node/camera.mjs";
 import FlatQueue from "https://cdn.jsdelivr.net/npm/flatqueue/+esm";
 
 export default class Scene {
-    entities = new Set();
+    nodes = new Set();
     renderedObjects = new FlatQueue();
     camera;
-    bg;
     name;
-    constructor(name) {
+    rooms = [];
+    curRoom = 0;
+    /**
+     * 
+     * @param {string} name 
+     * @param {Camera} camera 
+     */
+    constructor(name, camera, ...rooms) {
         this.name = name;
+        this.camera = camera;
+
+        // who the hell cares anymore
+        this.rooms.push(...rooms);
     }
-    setBG(bg) {
-        this.bg = bg;
+    /**
+     * 
+     * @param {Node} node 
+     */
+    addNode(node) {
+        this.nodes.add(node);
     }
-    addEntity(entity) {
-        this.entities.add(entity);
-    }
-    removeEntity(entity) {
-        this.entities.delete(entity);
+    /**
+     * 
+     * @param {Node} node 
+     */
+    removeNode(node) {
+        this.nodes.delete(node);
     }
     refreshRenderList() {
         this.renderedObjects.clear();
         this.renderedObjects.shrink();
-        for (const i of this.entities) {
-            this.renderedObjects.push(i, i.z);
+        for (const i of this.nodes) {
+            if (i.draw)
+                this.renderedObjects.push(i, i.z);
         }
-        this.renderedObjects.push(this.bg, -999);
     }
-    setCamera(cam) {
-        this.camera = cam;
+    update() {
+        for (const i of this.nodes)
+            i.update();
+        this.camera.update(this.rooms[this.curRoom]);
     }
 }

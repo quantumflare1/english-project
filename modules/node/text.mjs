@@ -4,6 +4,7 @@ import Vector from "../misc/vector.mjs";
 export default class Text extends Node {
     pos = new Vector();
     text;
+    z;
     align;
     display;
 
@@ -13,9 +14,11 @@ export default class Text extends Node {
      * @param {string} align 
      * @param {string} display 
      */
-    constructor(x, y, text = "", align = "start", display = "follow") {
+    constructor(x, y, z = 10, text = "", align = "start", display = "follow") {
+        super();
         this.pos.x = x;
         this.pos.y = y;
+        this.z = z;
         this.text = text;
         this.align = align;
         this.display = display;

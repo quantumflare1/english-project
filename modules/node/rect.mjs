@@ -13,6 +13,7 @@ export default class Rect extends Node {
      * @param {number} h 
      */
     constructor(x = 0, y = 0, w = 0, h = 0) {
+        super();
         this.pos.x = x;
         this.pos.y = y;
         this.dimensions.x = w;

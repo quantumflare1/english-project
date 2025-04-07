@@ -8,23 +8,21 @@ export default class Sprite extends Node {
     pos = new Vector();
     z;
     source = new Rect();
-    display;
+    follow;
     /**
      * 
      * @param {number} x 
      * @param {number} y 
-     * @param {number} sourceX 
-     * @param {number} sourceY 
-     * @param {number} sourceWidth 
-     * @param {number} sourceHeight 
-     * @param {string} display 
+     * @param {Rect} source
+     * @param {number} follow 
      */
-    constructor(x = 0, y = 0, z = 0, source = new Rect(), display = "follow") {
+    constructor(x = 0, y = 0, z = 0, source = new Rect(), follow = 0) {
+        super();
         this.pos.x = x;
         this.pos.y = y;
         this.z = z;
         this.source = source;
-        this.display = display;
+        this.follow = follow;
     }
     /**
      * 
@@ -41,7 +39,7 @@ export default class Sprite extends Node {
      * 
      * @param {Vector} newPos 
      */
-    update(newPos) {
+    update(newPos = new Vector(this.pos.x, this.pos.y)) {
         this.pos.x = newPos.x;
         this.pos.y = newPos.y;
     }

@@ -7,7 +7,7 @@
         ],
         "files": [
             ["bg_menu", "bg_temple"],
-            ["protagonist"],
+            ["player"],
             ["tile_grass", "tile_spike", "tile_temple"]
         ]
     },

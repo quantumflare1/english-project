@@ -15,6 +15,7 @@ export default class Entity extends Node {
      * @param {Sprite} sprite 
      */
     constructor(x = 0, y = 0, hitbox = new Rect(), sprite = new Sprite()) {
+        super();
         this.pos.x = x;
         this.pos.y = y;
         this.hitbox = hitbox;

@@ -1,23 +1,18 @@
-import * as Thing from "./thing.mjs";
 import Scene from "./scene.mjs";
-import Camera from "./camera.mjs";
-import FlatQueue from "https://cdn.jsdelivr.net/npm/flatqueue/+esm";
+import Camera from "./node/camera.mjs";
 
 const BASE_SCALE = 20;
 
 export default class Renderer {
     canvas;
     ctx;
-    camera;
 
     /**
-     * Creates a new renderer
-     * @param {Camera} camera 
+     * Creates a new renderer.
      */
-    constructor(camera) {
+    constructor() {
         this.canvas = document.createElement("canvas");
         this.ctx = this.canvas.getContext("2d");
-        this.camera = camera;
 
         this.canvas.width = 16 * BASE_SCALE;
         this.canvas.height = 9 * BASE_SCALE;
@@ -25,11 +20,11 @@ export default class Renderer {
         document.body.appendChild(this.canvas);
 
         this.ctx.imageSmoothingEnabled = false;
-        this.ctx.setTransform(1, 0, 0, 1, -this.camera.x, -this.camera.y);
+        //this.ctx.setTransform(1, 0, 0, 1, -this.camera.x, -this.camera.y);
     }
     /**
      * @param {number} tickPercent from 0 - 1
-     * @param  {Scene} scene
+     * @param {Scene} scene
      */
     draw(tickPercent, scene) {
         /*
@@ -45,27 +40,14 @@ export default class Renderer {
         while (scene.renderedObjects.length > 0) {
             const next = scene.renderedObjects.pop();
 
-            this.ctx.setTransform(1, 0, 0, 1, -this.camera.x + this.camera.x * next.follow, -this.camera.y + this.camera.y * next.follow);
+            this.ctx.setTransform(1, 0, 0, 1, -scene.camera.x + scene.camera.x * next.follow, -scene.camera.y + scene.camera.y * next.follow);
 
             /*const diffX = next.x - next.prevX;
             const diffY = next.y - next.prevY;*/
             const diffX = 0;
             const diffY = 0;
 
-            if (next.sprite) {
-                this.ctx.drawImage(next.sprite,
-                    next.config.sheetX, next.config.sheetY,
-                    next.config.width, next.config.height,
-                    Math.round(next.x + diffX * tickPercent) + next.config.relativeX, Math.round(next.y + diffY * tickPercent) + next.config.relativeY,
-                    next.config.width, next.config.height);
-
-                    /*this.ctx.strokeStyle = "red";
-                    this.ctx.strokeRect(Math.round(next.x + diffX * tickPercent)+0.5, Math.round(next.y + diffY * tickPercent)+0.5, next.width-1, next.height-1);*/
-            }
-            else {
-                this.ctx.fillStyle = "black";
-                this.ctx.fillRect(Math.round(next.x + diffX * tickPercent), Math.round(next.y + diffY * tickPercent), next.width, next.height);
-            }
+            next.draw(this.ctx);
             if (next.string) {
                 this.ctx.font = "10px Pixellari";
                 this.ctx.textAlign = next.align;
