@@ -1,0 +1,38 @@
+{
+    "sprite": [
+            [20, 20, 10, 10],
+            [30, 10, 10, 10],
+            [0, 20, 10, 10],
+            [10, 10, 10, 10],
+            [10, 30, 10, 10],
+            [20, 30, 10, 10],
+            [0, 30, 10, 10],
+            [0, 30, 10, 10],
+            [20, 10, 10, 10],
+            [10, 20, 10, 10],
+            [0, 10, 10, 10],
+            [30, 0, 10, 10],
+            [20, 0, 10, 10],
+            [10, 0, 10, 10],
+            [0, 0, 10, 10],
+            [30, 30, 10, 10]
+    ],
+    "name": {
+        "outer_topleft": 0,
+        "outer_topright": 1,
+        "outer_bottomleft": 2,
+        "outer_bottomright": 3,
+        "edge_top": 4,
+        "edge_left": 5,
+        "edge_bottom": 6,
+        "edge_right": 7,
+        "pipe_horizontal": 8,
+        "pipe_vertical": 9,
+        "pipe_top": 10,
+        "pipe_left": 11,
+        "pipe_bottom": 12,
+        "pipe_right": 13,
+        "outer_all": 14,
+        "inner": 15
+    }
+}

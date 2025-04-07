@@ -225,24 +225,6 @@ class Level {
     }
 }
 
-// linear congruential generator implementation
-// taken from Mathematics of Computation Vol 68 #225 Jan 1999 pgs 249-260
-// shoutout my guy Pierre L'Ecuyer
-/**
- * @param {number} seed The seed for the RNG
- */
-function* prng(seed) {
-    const a = 5122456;
-    const c = 99;
-    const m = (1 << 30) - 35;
-    while (true) {
-        seed = (a * seed + c) % m;
-        yield seed;
-    }
-}
-
-const rand = prng(123456789);
-
 const tileTypes = {
     1: {
         offX: 0,

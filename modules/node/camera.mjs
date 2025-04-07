@@ -29,6 +29,9 @@ export default class Camera extends Node {
         addEventListener("game_camerasnap", (e) => {
             this.snapTo(e.detail.x, e.detail.y);
         });
+        addEventListener("game_camerazoom", (e) => {
+            this.zoomTo(e.detail.x, e.detail.y);
+        });
     }
     /**
      * 

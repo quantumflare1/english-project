@@ -1,32 +1,31 @@
 {
     "image": {
         "directories": [
-            "./data/assets/background",
-            "./data/assets/sprite",
-            "./data/assets/tile"
+            "background",
+            "sprite",
+            "tile"
         ],
         "files": [
-            ["bg_menu.png", "bg_temple.png"],
-            ["protagonist.png"],
-            ["tile_grass.png", "tile_spike.png", "tile_temple.png"]
+            ["bg_menu", "bg_temple"],
+            ["protagonist"],
+            ["tile_grass", "tile_spike", "tile_temple"]
         ]
     },
     "audio": {
         "directories": [
-            "./data/assets/bgm",
-            "./data/assets/sfx"
+            "bgm",
+            "sfx"
         ],
         "files": [
-            ["bgm_temple.ogg"],
-            []
+            ["bgm_temple"]
         ]
     },
     "font": {
         "directories": [
-            "./data/assets/font"
+            "font"
         ],
         "files": [
-            ["Pixellari.ttf"]
+            ["Pixellari"]
         ]
     }
 }
