@@ -23,10 +23,18 @@ export default class Entity extends Node {
     }
     /**
      * 
-     * @param {Vector} newPos 
+     * @param {Vector} move 
      */
-    update(newPos) {
-        this.pos.x = newPos.x;
-        this.pos.y = newPos.y;
+    update(move = new Vector()) {
+        this.pos.add(move);
+        this.sprite.update(move);
+        this.hitbox.update(move);
+    }
+    /**
+     * 
+     * @param {CanvasRenderingContext2D} ctx 
+     */
+    draw(ctx) {
+        this.sprite.draw(ctx);
     }
 }

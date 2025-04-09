@@ -2,7 +2,7 @@ import assets from "../data/config/assets.json" with { type: "json" };
 import { AssetLoadEvent } from "./event.mjs";
 
 export default class Assets {
-    static spritesheet = new OffscreenCanvas(800, 200);
+    static spritesheet = new OffscreenCanvas(800, 200); // couldn't figure dynamic resizing out so enjoy the hardcoded numbers
     static sprites = {};
     static spriteCtx = this.spritesheet.getContext("2d");
     static audio = [];
@@ -17,7 +17,7 @@ export default class Assets {
                 const file = this.#getFile(`./data/assets/${assets.image.directories[i]}/${assets.image.files[i][j]}.png`);
                 const json = this.#getJSON(`./data/tile/${assets.image.files[i][j]}.json`);
 
-                json.then((res) => {
+                await json.then((res) => {
                     if (res !== null) {
                         for (const i of res.sprite)
                             i[0] += sprWidth;
@@ -33,7 +33,6 @@ export default class Assets {
                 }).then((res) => {
                     if (res) {
                         this.spriteCtx.drawImage(res, sprWidth, 0);
-                        console.log(sprWidth);
                         sprWidth += res.width;
                     }
                 });
@@ -72,13 +71,13 @@ export default class Assets {
     static async #getFile(path) {
         return await fetch(path).then(async (res) => {
             if (!res.ok) return null;
-            return await res.blob();
+            return res.blob();
         });
     }
     static async #getJSON(path) {
         return await fetch(path).then(async (res) => {
             if (!res.ok) return null;
-            return await res.json();
+            return res.json();
         });
     }
 }

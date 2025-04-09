@@ -25,9 +25,9 @@ export default class Text extends Node {
     }
     /**
      * 
-     * @param {Vector} newPos 
+     * @param {Vector} move 
      */
-    update(newPos) {
-        this.pos = newPos;
+    update(move) {
+        this.pos.add(move);
     }
 }

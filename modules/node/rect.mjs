@@ -28,10 +28,9 @@ export default class Rect extends Node {
     }
     /**
      * 
-     * @param {Vector} newPos 
+     * @param {Vector} move 
      */
-    update(newPos) {
-        this.pos.x = newPos.x;
-        this.pos.y = newPos.y;
+    update(move) {
+        this.pos.add(move);
     }
 }

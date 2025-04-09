@@ -79,9 +79,9 @@ export default class Camera extends Node {
         this.zoom = lerp(this.prevZoom, this.targetZoom, this.zoomTime / Camera.FOLLOW_TICKS);
 
         if (this.pos.x < 0) this.pos.x = 0;
-        if (this.pos.x + Camera.BASE_DIMENSIONS.x > room.bounds.dimensions.x * 10) this.pos.x = room.bounds.dimensions.x * 10 - Camera.BASE_DIMENSIONS.x;
+        if (this.pos.x + Camera.BASE_DIMENSIONS.x > room.dimensions.x * 10) this.pos.x = room.dimensions.x * 10 - Camera.BASE_DIMENSIONS.x;
         if (this.pos.y < 0) this.pos.y = 0;
-        if (this.pos.y + Camera.BASE_DIMENSIONS.y > room.bounds.dimensions.y * 10) this.pos.y = room.bounds.dimensions.y * 10 - Camera.BASE_DIMENSIONS.y;
+        if (this.pos.y + Camera.BASE_DIMENSIONS.y > room.dimensions.y * 10) this.pos.y = room.dimensions.y * 10 - Camera.BASE_DIMENSIONS.y;
         
         this.x = Math.round(this.x);
         this.y = Math.round(this.y);

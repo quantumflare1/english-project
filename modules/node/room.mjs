@@ -1,45 +1,34 @@
 import Rect from "./rect.mjs";
-import Node from "./node.mjs";
-import Vector from "../misc/vector.mjs";
 
-export default class Room extends Node {
-    bounds;
+export default class Room extends Rect {
     up; down; left; right;
 
     constructor(x, y, w, h) {
-        super();
-        this.bounds = new Rect(x, y, w, h);
+        super(x, y, w, h);
     }
     /**
      * 
      * @param {Room} r 
+     * @param {string} dir 
      */
-    connectUp(r) {
-        this.up = r;
-        r.down = this;
-    }
-    /**
-     * 
-     * @param {Room} r 
-     */
-    connectDown(r) {
-        this.down = r;
-        r.up = this;
-    }
-    /**
-     * 
-     * @param {Room} r 
-     */
-    connectLeft(r) {
-        this.left = r;
-        r.right = this;
-    }
-    /**
-     * 
-     * @param {Room} r 
-     */
-    connectRight(r) {
-        this.right = r;
-        r.left = this;
+    connect(r, dir) {
+        switch (dir) {
+            case "up":
+                this.up = r;
+                r.down = this;
+                break;
+            case "down":
+                this.down = r;
+                r.up = this;
+                break;
+            case "left":
+                this.left = r;
+                r.right = this;
+                break;
+            case "right":
+                this.right = r;
+                r.left = this;
+                break;
+        }
     }
 }

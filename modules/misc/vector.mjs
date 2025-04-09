@@ -14,6 +14,10 @@ export default class Vector {
         this.x = 0;
         this.y = 0;
     }
+    add(v) {
+        this.x += v.x;
+        this.y += v.y;
+    }
     multiply(n) {
         this.x *= n;
         this.y *= n;

@@ -1,5 +1,6 @@
 import Node from "./node/node.mjs";
 import Camera from "./node/camera.mjs";
+import Room from "./node/room.mjs";
 import FlatQueue from "https://cdn.jsdelivr.net/npm/flatqueue/+esm";
 
 export default class Scene {
@@ -19,6 +20,13 @@ export default class Scene {
         this.camera = camera;
 
         // who the hell cares anymore
+        this.rooms.push(...rooms);
+    }
+    /**
+     * 
+     * @param  {...Room} rooms 
+     */
+    addRooms(...rooms) {
         this.rooms.push(...rooms);
     }
     /**

@@ -1,16 +1,7 @@
-import * as Thing from "./modules/thing.mjs";
-import Player from "./modules/node/player.mjs";
 import Renderer from "./modules/renderer.mjs";
-import * as Level from "./modules/level.mjs";
-import Camera from "./modules/camera.mjs";
+import { createLevel } from "./modules/level.mjs";
 import * as Audio from "./modules/audio.mjs";
-import Scene from "./modules/scene.mjs";
-import { testScene } from "./modules/scenes.mjs";
 import Assets from "./modules/assets.mjs";
-
-// for offline development
-//import FlatQueue from "./modules/flat_queue_mirror.mjs";
-import FlatQueue from "https://cdn.jsdelivr.net/npm/flatqueue/+esm";
 
 const $ = (l) => document.getElementById(l);
 const TPS = 60;
@@ -19,7 +10,7 @@ let lastTickTime = document.timeline.currentTime;
 let lastSecondTime = document.timeline.currentTime;
 let freezeTicks = 0;
 
-let renderer;
+let renderer, scene;
 
 let tps = 0;
 
@@ -65,9 +56,9 @@ function tick(ms) {
     }
     performance.mark("render");
 
-    testScene.update();
-    testScene.refreshRenderList();
-    renderer.draw((ms - lastTickTime) / MS_PER_TICK, testScene);
+    scene.update();
+    scene.refreshRenderList();
+    renderer.draw((ms - lastTickTime) / MS_PER_TICK, scene);
     //console.log(performance.measure("render"));
 
     requestAnimationFrame(tick);
@@ -83,10 +74,11 @@ function load() {
     //  addEventListener("keydown", (e) => {e.preventDefault()});
     //const bg = new Thing.Entity(0, 0, 320, 180, "./data/assets/background/bg_temple.png", -100, new Thing.SpriteConfig(0, 0, 0, 0, 320, 180), 1);
 
-    addEventListener("game_assetloaded", () => {
+    addEventListener("game_assetloaded", async () => {
         /*camera = new Camera(0, 0, level);
         player = new Player(230, 30, level);*/
         renderer = new Renderer();
+        scene = await createLevel("./data/level/level.json");
 
         requestAnimationFrame(tick);
         debugDraw();

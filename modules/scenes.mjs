@@ -7,8 +7,6 @@ import Camera from "./node/camera.mjs";
 import Rect from "./node/rect.mjs";
 import Room from "./node/room.mjs";
 
-const levelSceneNodes = [];
-
 const gameSceneNodes = [
     //new Player(0, 0, null)
 ];
@@ -31,12 +29,5 @@ const testSprite2 = new Sprite(10, 0, 10, testRect2);
 testScene.addNode(testSprite);
 testScene.addNode(testSprite2);
 testScene.refreshRenderList();
-
-/* --- */
-
-const sceneMap = new Map();
-sceneMap.set("test", testScene);
-
-let activeScene = "test";
 
 export { testScene };
