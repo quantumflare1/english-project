@@ -8,7 +8,7 @@
         "files": [
             ["bg_menu", "bg_temple"],
             ["player"],
-            ["tile_grass", "tile_spike", "tile_temple", "tile_placeholder"]
+            ["tile_grass", "tile_spike", "tile_temple2", "tile_placeholder"]
         ]
     },
     "audio": {

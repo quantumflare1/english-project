@@ -6,6 +6,7 @@ const BASE_SCALE = 20;
 export default class Renderer {
     canvas;
     ctx;
+    gradient; // test
 
     /**
      * Creates a new renderer.
@@ -13,6 +14,10 @@ export default class Renderer {
     constructor() {
         this.canvas = document.createElement("canvas");
         this.ctx = this.canvas.getContext("2d");
+
+        this.gradient = this.ctx.createLinearGradient(0, 0, 0, 9 * BASE_SCALE);
+        this.gradient.addColorStop(0, "#170007");
+        this.gradient.addColorStop(1, "#380300");
 
         this.canvas.width = 16 * BASE_SCALE;
         this.canvas.height = 9 * BASE_SCALE;
@@ -28,7 +33,7 @@ export default class Renderer {
      */
     draw(tickPercent, scene) {
         this.ctx.setTransform(1, 0, 0, 1, 0, 0);
-        this.ctx.fillStyle = "black";
+        this.ctx.fillStyle = this.gradient;
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         /*
         this.ctx.setTransform(1, 0, 0, 1, 0, 0);
