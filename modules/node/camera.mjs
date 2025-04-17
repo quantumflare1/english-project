@@ -26,13 +26,13 @@ export default class Camera extends Node {
         this.zoom = zoom;
 
         addEventListener("game_cameramove", (e) => {
-            this.moveTo(e.detail.x, e.detail.y);
+            this.moveTo(e.detail);
         });
         addEventListener("game_camerasnap", (e) => {
-            this.snapTo(e.detail.x, e.detail.y);
+            this.snapTo(e.detail);
         });
         addEventListener("game_camerazoom", (e) => {
-            this.zoomTo(e.detail.x, e.detail.y);
+            this.zoomTo(e.detail);
         });
     }
     /**
@@ -40,10 +40,11 @@ export default class Camera extends Node {
      * @param {Vector} pos 
      */
     moveTo(pos) {
+        // broken
         this.prevPos.x = this.pos.x;
         this.prevPos.y = this.pos.y;
-        this.targetPos = pos;
-        this.followTime = 0;
+        this.targetPos.x = pos.x;
+        this.targetPos.y = pos.y;
     }
     /**
      * 
@@ -56,6 +57,7 @@ export default class Camera extends Node {
         this.pos.y = pos.y;
         this.targetPos.x = pos.x;
         this.targetPos.y = pos.y;
+        this.followTime = 0;
     }
     /**
      * 
@@ -78,11 +80,12 @@ export default class Camera extends Node {
         this.zoomTime++;
         this.zoom = lerp(this.prevZoom, this.targetZoom, this.zoomTime / Camera.FOLLOW_TICKS);
 
-        if (this.pos.x < 0) this.pos.x = 0;
-        if (this.pos.x + Camera.BASE_DIMENSIONS.x > room.dimensions.x * 10) this.pos.x = room.dimensions.x * 10 - Camera.BASE_DIMENSIONS.x;
-        if (this.pos.y < 0) this.pos.y = 0;
-        if (this.pos.y + Camera.BASE_DIMENSIONS.y > room.dimensions.y * 10) this.pos.y = room.dimensions.y * 10 - Camera.BASE_DIMENSIONS.y;
         
+        if (this.pos.x < room.pos.x * 10) this.pos.x = room.pos.x * 10;
+        if (this.pos.x + Camera.BASE_DIMENSIONS.x > room.dimensions.x * 10 + room.pos.x * 10) this.pos.x = room.dimensions.x * 10 + room.pos.x * 10 - Camera.BASE_DIMENSIONS.x;
+        if (this.pos.y < room.pos.y * 10) this.pos.y = room.pos.y * 10;
+        if (this.pos.y + Camera.BASE_DIMENSIONS.y > room.dimensions.y * 10 + room.pos.y * 10) this.pos.y = room.dimensions.y * 10 + room.pos.y * 10 - Camera.BASE_DIMENSIONS.y;
+
         this.x = Math.round(this.x);
         this.y = Math.round(this.y);
     }

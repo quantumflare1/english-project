@@ -24,7 +24,7 @@ export default class Rect extends Node {
      * @param {Rect} r 
      */
     collidesWith(r) {
-        return (this.pos.x + this.dimensions.x > r.pos.x && this.pos.x < r.pos.x + r.dimensions.width && this.pos.y + this.dimensions.y > r.pos.y && this.pos.y < r.pos.y + r.dimensions.y);
+        return (this.pos.x + this.dimensions.x > r.pos.x && this.pos.x < r.pos.x + r.dimensions.x && this.pos.y + this.dimensions.y > r.pos.y && this.pos.y < r.pos.y + r.dimensions.y);
     }
     /**
      * 

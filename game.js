@@ -1,5 +1,5 @@
 import Renderer from "./modules/renderer.mjs";
-import { createLevel } from "./modules/level.mjs";
+import { Level } from "./modules/level.mjs";
 import * as Audio from "./modules/audio.mjs";
 import Assets from "./modules/assets.mjs";
 
@@ -43,6 +43,7 @@ function tick(ms) {
 
             // if refresh rate < tick rate, hurry it up
             //player.tick();
+            scene.update();
         }
         tps++;
         tickTime = ms - lastTickTime;
@@ -56,7 +57,6 @@ function tick(ms) {
     }
     performance.mark("render");
 
-    scene.update();
     scene.refreshRenderList();
     renderer.draw((ms - lastTickTime) / MS_PER_TICK, scene);
     //console.log(performance.measure("render"));
@@ -78,9 +78,11 @@ function load() {
         /*camera = new Camera(0, 0, level);
         player = new Player(230, 30, level);*/
         renderer = new Renderer();
-        scene = await createLevel("./data/level/level.json");
+        scene = new Level("./data/level/level.json");
 
-        requestAnimationFrame(tick);
+        addEventListener("game_levelloaded", () => {
+            requestAnimationFrame(tick);
+        });
         debugDraw();
     });
     Assets.load();

@@ -21,6 +21,10 @@ export default class Scene {
 
         // who the hell cares anymore
         this.rooms.push(...rooms);
+
+        addEventListener("game_roomtransition", (e) => {
+            this.curRoom = this.rooms[this.curRoom][e.detail].id;
+        });
     }
     /**
      * 
@@ -47,8 +51,9 @@ export default class Scene {
         this.renderedObjects.clear();
         this.renderedObjects.shrink();
         for (const i of this.nodes) {
-            if (i.draw)
+            if (i.draw) {
                 this.renderedObjects.push(i, i.z);
+            }
         }
     }
     update() {

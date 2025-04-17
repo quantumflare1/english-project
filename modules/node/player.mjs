@@ -1,8 +1,11 @@
-import * as Thing from "../thing.mjs";
-import * as Level from "../level.mjs";
-import Vector from "../misc/vector.mjs"
+import { Level } from "../level.mjs";
+import Vector from "../misc/vector.mjs";
 import * as Event from "../event.mjs";
 import config from "../../data/config/player.json" with { type: "json" };
+import Rect from "./rect.mjs";
+import Sprite from "./sprite.mjs";
+import Entity from "./entity.mjs";
+import Assets from "../assets.mjs";
 
 const WIDTH = config.width;
 const HEIGHT = config.height;
@@ -27,8 +30,9 @@ const BUFFER_TICKS = config.bufferTime;
 const TOUCH_THRESHOLD = 0.01;
 const CAMERA_OFFSET = new Vector(-160 + config.width / 2, -90 + config.height / 2);
 
-export default class Player extends Thing.Entity {
-    static state = {
+// todo: need to convert a lot of the x/y variable stuff into vectors
+export default class Player extends Entity {
+    static states = {
         DEFAULT: 0,
         INTRO: 1,
         GRAPPLED: 2
@@ -51,7 +55,7 @@ export default class Player extends Thing.Entity {
     canGrapple = false;
     grappleTime = 0;
     grapple = new Vector();
-    state = Player.state.DEFAULT;
+    state = Player.states.DEFAULT;
     grappleStarted = false;
     inControl = true;
     isDead = false;
@@ -70,14 +74,15 @@ export default class Player extends Thing.Entity {
         const step = Math.abs(d.x) > Math.abs(d.y) ? Math.abs(d.x) : Math.abs(d.y);
         const delta = new Vector(d.x / step, d.y / step);
 
-        if (pos.y >= this.level.rooms[this.level.curRoom].height || pos.y < 0 || pos.x >= this.level.rooms[this.level.curRoom].width || pos.x < 0) {
+        // compensate for room pos offset
+        pos.subtract(this.level.rooms[this.level.curRoom].pos);
+        if (pos.y >= this.level.rooms[this.level.curRoom].dimensions.y || pos.y < 0 || pos.x >= this.level.rooms[this.level.curRoom].dimensions.x || pos.x < 0) {
             return null;
         }
-        while (this.level.rooms[this.level.curRoom].rawTiles[Math.floor(pos.y)][Math.floor(pos.x)] === 0) {
-            pos.x += delta.x;
-            pos.y += delta.y;
+        while (this.level.roomBlocks[this.level.curRoom][Math.floor(pos.y)][Math.floor(pos.x)] === 0) {
+            pos.add(delta);
     
-            if (pos.y >= this.level.rooms[this.level.curRoom].height || pos.y < 0 || pos.x >= this.level.rooms[this.level.curRoom].width || pos.x < 0) {
+            if (pos.y >= this.level.rooms[this.level.curRoom].dimensions.y || pos.y < 0 || pos.x >= this.level.rooms[this.level.curRoom].dimensions.x || pos.x < 0) {
                 return null;
             }
         }
@@ -87,8 +92,8 @@ export default class Player extends Thing.Entity {
         if (d.y > 0) pos.y = Math.floor(pos.y);
         if (d.y < 0) pos.y = Math.ceil(pos.y);
     
-        pos.x *= 10;
-        pos.y *= 10;
+        pos.add(this.level.rooms[this.level.curRoom].pos);
+        pos.multiply(10);
     
         const rayLength = Math.sqrt((pos.y-s.y) ** 2 + (pos.x-s.x) ** 2);
         if (rayLength < GRAPPLE_DEAD_ZONE || rayLength > GRAPPLE_RANGE) {
@@ -101,39 +106,42 @@ export default class Player extends Thing.Entity {
      * Creates a new player
      * @param {number} x The X coordinate of the player
      * @param {number} y The Y coordinate of the player
-     * @param {Level.Level} level The level this player is in. 
+     * @param {Level} level The level this player is in. 
      */
     constructor(x, y, level) {
-        super(x, y, WIDTH, HEIGHT, config.spriteSrc, -1, new Thing.SpriteConfig(...config.sprite));
+        const texDetails = Assets.sprites.player.sprite[0];
+        super(x, y, new Rect(x, y, WIDTH, HEIGHT),
+        new Sprite(x + config.sprite[0], y + config.sprite[1], 0,
+            new Rect(texDetails[0], texDetails[1], texDetails[2], texDetails[3]),
+        0));
         this.spawnX = x;
         this.spawnY = y;
         this.level = level;
-        this.temp = this.#raycast(new Vector(x, y), this.facing);
+        this.temp = this.#raycast(this.pos, this.facing);
 
         this.touching.set("down", false);
         this.touching.set("up", false);
         this.touching.set("left", false);
         this.touching.set("right", false);
 
-        dispatchEvent(new Event.CameraMoveEvent(this.x + CAMERA_OFFSET.x, this.y + CAMERA_OFFSET.y, true));
+        dispatchEvent(new Event.CameraSnapEvent(this.pos.x + CAMERA_OFFSET.x, this.pos.y + CAMERA_OFFSET.y));
 
         addEventListener("keydown", this.keydown);
         addEventListener("keyup", this.keyup);
     }
     keydown = (e) => this.inputs.add(e.key.toLowerCase());
     keyup = (e) => this.inputs.delete(e.key.toLowerCase());
-    tick() {
+    update() {
         if (this.isDead) {
             this.respawnTime--;
             this.vel.zero();
             if (this.respawnTime <= 0) {
                 this.isDead = false;
-                this.x = this.spawnX;
-                this.y = this.spawnY;
+                super.update(new Vector(-this.pos.x + this.spawnX, -this.pos.y + this.spawnY));
                 this.jumpBufferTime = 0;
                 this.coyoteTime = 0;
                 this.respawnTime = RESPAWN_TICKS;
-                dispatchEvent(new Event.CameraMoveEvent(this.x + CAMERA_OFFSET.x, this.y + CAMERA_OFFSET.y, true));
+                dispatchEvent(new Event.CameraSnapEvent(this.pos.x + CAMERA_OFFSET.x, this.pos.y + CAMERA_OFFSET.y));
             }
             return;
         }
@@ -160,12 +168,6 @@ export default class Player extends Thing.Entity {
         this.processJump();
         this.processRun();
 
-        // DEBUG
-        if (this.inputs.has("t")) {
-            console.log(this.touching)
-            console.log(this.x, this.y);
-        }
-
         if (this.grappleTime > 0) {
             if (this.grapple !== null) {
                 this.vel.x = this.grapple.x;
@@ -175,13 +177,11 @@ export default class Player extends Thing.Entity {
             this.coyoteTime = COYOTE_TICKS;
         }
 
-        this.prevX = this.x;
-        this.prevY = this.y;
+        this.prevX = this.pos.x;
+        this.prevY = this.pos.y;
 
-        this.x += this.vel.x;
-        this.y += this.vel.y;
-
-        dispatchEvent(new Event.CameraMoveEvent(this.x + CAMERA_OFFSET.x, this.y + CAMERA_OFFSET.y));
+        super.update(this.vel);
+        dispatchEvent(new Event.CameraMoveEvent(this.pos.x + CAMERA_OFFSET.x, this.pos.y + CAMERA_OFFSET.y));
 
         this.collide();
 
@@ -212,34 +212,39 @@ export default class Player extends Thing.Entity {
             this.facing.x = this.lastFacedX;
     }
     changeRoom() {
-        if (this.level.rooms[this.level.curRoom].right && this.x > this.level.rooms[this.level.curRoom].width * 10 - WIDTH/2) {
+        const roomDimensions = new Vector(this.level.rooms[this.level.curRoom].dimensions.x, this.level.rooms[this.level.curRoom].dimensions.y);
+        const roomPos = new Vector(this.level.rooms[this.level.curRoom].pos.x, this.level.rooms[this.level.curRoom].pos.y);
+        roomDimensions.multiply(10);
+        roomPos.multiply(10);
+
+        if (this.level.rooms[this.level.curRoom].right && this.pos.x > roomDimensions.x - WIDTH/2 + roomPos.x) {
             const nextRoom = this.level.rooms[this.level.curRoom].right;
-            this.x = -WIDTH/2;
+            //super.update(new Vector(-(this.pos.x + WIDTH/2), 0));
+            //this.pos.x = -WIDTH/2;
             //this.y += Level.level.rooms[Level.curRoomId].leftOffset;
             dispatchEvent(new Event.RoomChangeEvent("right"));
-            dispatchEvent(new Event.CameraMoveEvent(this.x, this.y, true));
         }
         // stop player from going offscreen
-        if (this.level.rooms[this.level.curRoom].left && this.x < -WIDTH/2) {
+        if (this.level.rooms[this.level.curRoom].left && this.pos.x < -WIDTH/2 + roomPos.x) {
             const nextRoom = this.level.rooms[this.level.curRoom].left;
-            this.x = nextRoom.width * 10 - WIDTH/2;
+            //super.update(new Vector(nextRoom.dimensions.x * 10, 0));
+            //this.pos.x = nextRoom.width * 10 - WIDTH/2;
             //this.y += Level.level.rooms[Level.curRoomId].leftOffset;
             dispatchEvent(new Event.RoomChangeEvent("left"));
-            dispatchEvent(new Event.CameraMoveEvent(this.x, this.y, true));
         }
-        if (this.level.rooms[this.level.curRoom].down && this.x > this.level.rooms[this.level.curRoom].height * 10 - HEIGHT/2) {
+        if (this.level.rooms[this.level.curRoom].down && this.pos.x > roomDimensions.y - HEIGHT/2 + roomPos.y) {
             const nextRoom = this.level.rooms[this.level.curRoom].down;
-            this.y = -HEIGHT/2;
+            //super.update(new Vector(0, -(this.pos.y + HEIGHT/2)));
+            //this.pos.y = -HEIGHT/2;
             //this.y += Level.level.rooms[Level.curRoomId].leftOffset;
             dispatchEvent(new Event.RoomChangeEvent("down"));
-            dispatchEvent(new Event.CameraMoveEvent(this.x, this.y, true));
         }
-        if (this.level.rooms[this.level.curRoom].up && this.x < -HEIGHT/2) {
+        if (this.level.rooms[this.level.curRoom].up && this.pos.x < -HEIGHT/2 + roomPos.y) {
             const nextRoom = this.level.rooms[this.level.curRoom].up;
-            this.y = nextRoom.width * 10 - HEIGHT/2;
+            //super.update(new Vector(0, nextRoom.dimensions.y * 10));
+            //this.pos.y = nextRoom.width * 10 - HEIGHT/2;
             //this.y += Level.level.rooms[Level.curRoomId].leftOffset;
             dispatchEvent(new Event.RoomChangeEvent("up"));
-            dispatchEvent(new Event.CameraMoveEvent(this.x, this.y, true));
         }
     }
     processRun() {
@@ -281,7 +286,7 @@ export default class Player extends Thing.Entity {
         }
 
         if (this.grappleStarted) {
-            this.temp = this.#raycast(new Vector(this.x + GRAPPLE_OFFSET.x, this.y + GRAPPLE_OFFSET.y), this.facing);
+            this.temp = this.#raycast(new Vector(this.pos.x + GRAPPLE_OFFSET.x, this.pos.y + GRAPPLE_OFFSET.y), this.facing);
             this.grappleStarted = false;
             
             if (this.temp) {
@@ -325,8 +330,8 @@ export default class Player extends Thing.Entity {
         }
     }
     collide() {
-        let moveX = this.x - this.prevX;
-        let moveY = this.y - this.prevY;
+        let moveX = this.pos.x - this.prevX;
+        let moveY = this.pos.y - this.prevY;
 
         this.touching.set("down", false);
         this.touching.set("left", false);
@@ -336,31 +341,28 @@ export default class Player extends Thing.Entity {
         // broad phase
         const overlappingTiles = [];
 
-        for (const i of this.level.rooms[this.level.curRoom].tiles)
-            if (this.x + WIDTH > i.x && this.x < i.x + i.width && this.y + HEIGHT > i.y && this.y < i.y + i.height)
+        for (const i of this.level.blockList) 
+            if (this.hitbox.collidesWith(i))
                 overlappingTiles.push(i);
 
         // narrow phase
         for (const i of overlappingTiles) {
-            if (!(this.x + WIDTH > i.x &&
-                this.x < i.x + i.width &&
-                this.y + HEIGHT > i.y &&
-                this.y < i.y + i.height))
+            if (!this.hitbox.collidesWith(i))
                     continue;
 
             let kickX, kickY;
 
-            if (moveX > 0) kickX = i.x - (this.x + WIDTH);
-            else if (moveX < 0) kickX = (i.x + i.width) - this.x;
-            if (moveY > 0) kickY = i.y - (this.y + HEIGHT);
-            else if (moveY < 0) kickY = (i.y + i.width) - this.y;
+            if (moveX > 0) kickX = i.pos.x - (this.pos.x + WIDTH);
+            else if (moveX < 0) kickX = (i.pos.x + i.dimensions.x) - this.pos.x;
+            if (moveY > 0) kickY = i.pos.y - (this.pos.y + HEIGHT);
+            else if (moveY < 0) kickY = (i.pos.y + i.dimensions.x) - this.pos.y; // no clue if this should be i.pos.y + i.dimensions.y
 
             if (!kickX && kickY) {
-                this.y += kickY;
+                super.update(new Vector(0, kickY));
                 moveY -= kickY;
             }
             if (!kickY && kickX) {
-                this.x += kickX;
+                super.update(new Vector(kickX, 0));
                 moveX -= kickX;
             }
 
@@ -369,60 +371,56 @@ export default class Player extends Thing.Entity {
             
             if (kickX && kickY) {
                 if (Math.abs(kickXPercent) < Math.abs(kickYPercent)) { // kick x axis mostly
-                    this.x += kickX;
-                    moveX -= kickX;
+                    super.update(new Vector(kickX, 0));
                 }
                 else { // kick y axis mostly
-                    this.y += kickY;
-                    moveY -= kickY;
+                    super.update(new Vector(0, kickY));
                 }
             }
             this.grappleTime = 0;
         }
-        for (const i of this.level.rooms[this.level.curRoom].hazards) {
-            if (this.x + WIDTH > i.x &&
-                this.x < i.x + i.width &&
-                this.y + HEIGHT > i.y &&
-                this.y < i.y + i.height) {
-                    if (i.facing === "up" && this.vel.y < 0) continue;
-                    if (i.facing === "down" && this.vel.y > 0) continue;
-                    if (i.facing === "right" && this.vel.x < 0) continue;
-                    if (i.facing === "left" && this.vel.x > 0) continue;
 
-                    this.isDead = true;
+        for (const i of this.level.hazardList) {
+            if (this.hitbox.collidesWith(i)) {
+                if (i.facing === "up" && this.vel.y < 0) continue;
+                if (i.facing === "down" && this.vel.y > 0) continue;
+                if (i.facing === "right" && this.vel.x < 0) continue;
+                if (i.facing === "left" && this.vel.x > 0) continue;
+
+                this.isDead = true;
             }
         }
 
         const touchingTiles = [];
-        for (const i of this.level.rooms[this.level.curRoom].tiles) {
+        for (const i of this.level.blockList) {
             if (i.id !== 0 &&
-                this.x + WIDTH + TOUCH_THRESHOLD >= i.x &&
-                this.x <= i.x + i.width + TOUCH_THRESHOLD &&
-                this.y + HEIGHT + TOUCH_THRESHOLD >= i.y &&
-                this.y <= i.y + i.height + TOUCH_THRESHOLD)
+                this.pos.x + WIDTH + TOUCH_THRESHOLD >= i.pos.x &&
+                this.pos.x <= i.pos.x + i.dimensions.x + TOUCH_THRESHOLD &&
+                this.pos.y + HEIGHT + TOUCH_THRESHOLD >= i.pos.y &&
+                this.pos.y <= i.pos.y + i.dimensions.y + TOUCH_THRESHOLD)
                     touchingTiles.push(i);
         }
 
         for (const i of touchingTiles) {
-            if (this.x + WIDTH + TOUCH_THRESHOLD > i.x &&
-                this.x + TOUCH_THRESHOLD < i.x + i.width &&
-                this.y + HEIGHT > i.y &&
-                this.y < i.y + i.height && this.vel.x >= 0)
+            if (this.pos.x + WIDTH + TOUCH_THRESHOLD > i.pos.x &&
+                this.pos.x + TOUCH_THRESHOLD < i.pos.x + i.dimensions.x &&
+                this.pos.y + HEIGHT > i.pos.y &&
+                this.pos.y < i.pos.y + i.dimensions.y && this.vel.x >= 0)
                     this.touching.set("right", true);
-            if (this.x + WIDTH - TOUCH_THRESHOLD > i.x &&
-                this.x - TOUCH_THRESHOLD < i.x + i.width &&
-                this.y + HEIGHT > i.y &&
-                this.y < i.y + i.height && this.vel.x <= 0)
+            if (this.pos.x + WIDTH - TOUCH_THRESHOLD > i.pos.x &&
+                this.pos.x - TOUCH_THRESHOLD < i.pos.x + i.dimensions.x &&
+                this.pos.y + HEIGHT > i.pos.y &&
+                this.pos.y < i.pos.y + i.dimensions.y && this.vel.x <= 0)
                     this.touching.set("left", true);
-            if (this.x + WIDTH > i.x &&
-                this.x < i.x + i.width &&
-                this.y + HEIGHT + TOUCH_THRESHOLD > i.y &&
-                this.y + TOUCH_THRESHOLD < i.y + i.height && this.vel.y >= 0)
+            if (this.pos.x + WIDTH > i.pos.x &&
+                this.pos.x < i.pos.x + i.dimensions.x &&
+                this.pos.y + HEIGHT + TOUCH_THRESHOLD > i.pos.y &&
+                this.pos.y + TOUCH_THRESHOLD < i.pos.y + i.dimensions.y && this.vel.y >= 0)
                     this.touching.set("down", true);
-            if (this.x + WIDTH > i.x &&
-                this.x < i.x + i.width &&
-                this.y + HEIGHT - TOUCH_THRESHOLD > i.y &&
-                this.y - TOUCH_THRESHOLD < i.y + i.height && this.vel.y <= 0)
+            if (this.pos.x + WIDTH > i.pos.x &&
+                this.pos.x < i.pos.x + i.dimensions.x &&
+                this.pos.y + HEIGHT - TOUCH_THRESHOLD > i.pos.y &&
+                this.pos.y - TOUCH_THRESHOLD < i.pos.y + i.dimensions.y && this.vel.y <= 0)
                     this.touching.set("up", true);
         }
 

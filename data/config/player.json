@@ -8,7 +8,7 @@
     "grappleVel": 3.5,
     "grappleFreezeTime": 3,
     "grappleOffsetX": 4,
-    "grappleOffsetY": 4,
+    "grappleOffsetY": 6,
     "grappleRange": 140,
     "grappleDeadZone": 6,
     "jumpHeight": 24,
@@ -20,6 +20,6 @@
     "respawnTime": 40,
     "coyoteTime": 6,
     "bufferTime": 8,
-    "sprite": [-3, -4, 0, 0, 13, 16],
+    "sprite": [-2, -4, 0, 0, 12, 16],
     "spriteSrc": "./data/assets/sprites/player.png"
 }

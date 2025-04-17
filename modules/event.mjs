@@ -28,10 +28,16 @@ class AssetLoadEvent extends CustomEvent {
     }
 }
 
+class LevelLoadEvent extends CustomEvent {
+    constructor() {
+        super("game_levelloaded");
+    }
+}
+
 class FreezeTimeEvent extends CustomEvent {
     constructor(ticks) {
         super("game_freezetime", { detail: ticks });
     }
 }
 
-export { RoomChangeEvent, CameraSnapEvent, CameraMoveEvent, CameraZoomEvent, AssetLoadEvent, FreezeTimeEvent };
+export { RoomChangeEvent, CameraSnapEvent, CameraMoveEvent, CameraZoomEvent, AssetLoadEvent, LevelLoadEvent, FreezeTimeEvent };

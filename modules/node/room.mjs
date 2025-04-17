@@ -1,10 +1,11 @@
 import Rect from "./rect.mjs";
 
 export default class Room extends Rect {
-    up; down; left; right;
+    up; down; left; right; id;
 
-    constructor(x, y, w, h) {
+    constructor(x, y, w, h, id) {
         super(x, y, w, h);
+        this.id = id;
     }
     /**
      * 

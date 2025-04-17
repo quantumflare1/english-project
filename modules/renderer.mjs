@@ -27,6 +27,9 @@ export default class Renderer {
      * @param {Scene} scene
      */
     draw(tickPercent, scene) {
+        this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+        this.ctx.fillStyle = "black";
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         /*
         this.ctx.setTransform(1, 0, 0, 1, 0, 0);
         this.ctx.fillStyle = "white";
@@ -40,7 +43,7 @@ export default class Renderer {
         while (scene.renderedObjects.length > 0) {
             const next = scene.renderedObjects.pop();
 
-            this.ctx.setTransform(1, 0, 0, 1, -scene.camera.x + scene.camera.x * next.follow, -scene.camera.y + scene.camera.y * next.follow);
+            this.ctx.setTransform(1, 0, 0, 1, -scene.camera.pos.x, -scene.camera.pos.y);
 
             /*const diffX = next.x - next.prevX;
             const diffY = next.y - next.prevY;*/

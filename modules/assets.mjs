@@ -15,7 +15,7 @@ export default class Assets {
         for (let i = 0; i < assets.image.files.length; i++) {
             for (let j = 0; j < assets.image.files[i].length; j++) {
                 const file = this.#getFile(`./data/assets/${assets.image.directories[i]}/${assets.image.files[i][j]}.png`);
-                const json = this.#getJSON(`./data/tile/${assets.image.files[i][j]}.json`);
+                const json = this.#getJSON(`./data/${assets.image.directories[i]}/${assets.image.files[i][j]}.json`);
 
                 await json.then((res) => {
                     if (res !== null) {
