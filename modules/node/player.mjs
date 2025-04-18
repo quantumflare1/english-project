@@ -6,6 +6,7 @@ import Rect from "./rect.mjs";
 import Sprite from "./sprite.mjs";
 import Entity from "./entity.mjs";
 import Assets from "../assets.mjs";
+import input from "../inputs.mjs";
 
 const WIDTH = config.width;
 const HEIGHT = config.height;
@@ -45,7 +46,6 @@ export default class Player extends Entity {
 
     vel = new Vector();
     touching = new Map();
-    inputs = new Set();
     jumpTimer = 20;
     jumpBufferTime = BUFFER_TICKS;
     grappleBufferTime = BUFFER_TICKS;
@@ -125,12 +125,7 @@ export default class Player extends Entity {
         this.touching.set("right", false);
 
         dispatchEvent(new Event.CameraSnapEvent(this.pos.x + CAMERA_OFFSET.x, this.pos.y + CAMERA_OFFSET.y));
-
-        addEventListener("keydown", this.keydown);
-        addEventListener("keyup", this.keyup);
     }
-    keydown = (e) => this.inputs.add(e.key.toLowerCase());
-    keyup = (e) => this.inputs.delete(e.key.toLowerCase());
     update() {
         if (this.isDead) {
             this.respawnTime--;
@@ -189,11 +184,11 @@ export default class Player extends Entity {
         //this.y = Math.round(this.y);
     }
     findFacingDirection() {
-        if (this.inputs.has("arrowright")) {
+        if (input.continuous.has("arrowright")) {
             this.facing.x = 1;
             this.lastFacedX = 1;
         }
-        else if (this.inputs.has("arrowleft")) {
+        else if (input.continuous.has("arrowleft")) {
             this.facing.x = -1;
             this.lastFacedX = -1;
         }
@@ -201,9 +196,9 @@ export default class Player extends Entity {
             this.facing.x = 0;
         }
 
-        if (this.inputs.has("arrowdown"))
+        if (input.continuous.has("arrowdown"))
             this.facing.y = 1;
-        else if (this.inputs.has("arrowup"))
+        else if (input.continuous.has("arrowup"))
             this.facing.y = -1;
         else
             this.facing.y = 0;
@@ -250,7 +245,7 @@ export default class Player extends Entity {
     processRun() {
         const acceleration = this.touching.get("down") ? Player.#accelPerTick : Player.#accelPerTick * AIR_ACCEL_FACTOR;
         const deceleration = this.touching.get("down") ? Player.#decelPerTick : Player.#decelPerTick * AIR_DECEL_FACTOR;
-        if (this.inputs.has("arrowright") && !this.touching.get("right")) {
+        if (input.continuous.has("arrowright") && !this.touching.get("right")) {
             if (this.vel.x < MAX_VEL)
                 this.vel.x += acceleration;
             else if (this.vel.x > MAX_VEL) {
@@ -263,7 +258,7 @@ export default class Player extends Entity {
             if (this.vel.x < 0.05)
                 this.vel.x = 0;
         }
-        if (this.inputs.has("arrowleft") && !this.touching.get("left")) {
+        if (input.continuous.has("arrowleft") && !this.touching.get("left")) {
             if (this.vel.x > -MAX_VEL)
                 this.vel.x -= acceleration;
             else if (this.vel.x < -MAX_VEL) {
@@ -278,7 +273,7 @@ export default class Player extends Entity {
         }
     }
     processGrapple() {
-        if (this.inputs.has("z")) {
+        if (input.continuous.has("z")) {
             this.grappleBufferTime--;
         } else {
             this.grappleBufferTime = BUFFER_TICKS;
@@ -304,7 +299,8 @@ export default class Player extends Entity {
             }
         }
 
-        if (this.grappleBufferTime > 0 && this.canGrapple && this.inputs.has("z") && !this.grappleStarted) { // start grapple
+        if (this.grappleBufferTime > 0 && this.canGrapple && input.impulse.has("z") && !this.grappleStarted) { // start grapple
+            input.consumeInput("z");
             this.grappleStarted = true;
             this.grappleBufferTime = 0;
             const ev = new CustomEvent("game_freezetime", { detail: GRAPPLE_FREEZE_TICKS });
@@ -312,16 +308,17 @@ export default class Player extends Entity {
         }
     }
     processJump() {
-        if (this.inputs.has(" ")) // press jump
+        if (input.impulse.has(" ")) // press jump
             this.jumpBufferTime--;
         else // release jump
             this.jumpBufferTime = BUFFER_TICKS;
         
-        if (!this.inputs.has(" ") && this.vel.y < 0)
+        if (!input.impulse.has(" ") && this.vel.y < 0)
             if (this.vel.y < -Player.#baseJumpVel * MIN_JUMP_FACTOR)
                 this.vel.y = -Player.#baseJumpVel * MIN_JUMP_FACTOR;
 
-        if (this.jumpBufferTime >= 0 && this.coyoteTime >= 0 && this.inputs.has(" ")) { // start jump
+        if (this.jumpBufferTime >= 0 && this.coyoteTime >= 0 && input.impulse.has(" ")) { // start jump
+            input.consumeInput("z");
             this.vel.y = -Player.#baseJumpVel;
             this.jumpTimer = 10;
             this.coyoteTime = 0;

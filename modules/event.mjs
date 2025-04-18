@@ -40,4 +40,10 @@ class FreezeTimeEvent extends CustomEvent {
     }
 }
 
-export { RoomChangeEvent, CameraSnapEvent, CameraMoveEvent, CameraZoomEvent, AssetLoadEvent, LevelLoadEvent, FreezeTimeEvent };
+class SettingsChangeEvent extends CustomEvent {
+    constructor(name, value) {
+        super("game_settingschange", { detail: { setting: name, value: value } });
+    }
+}
+
+export { RoomChangeEvent, CameraSnapEvent, CameraMoveEvent, CameraZoomEvent, AssetLoadEvent, LevelLoadEvent, FreezeTimeEvent, SettingsChangeEvent };

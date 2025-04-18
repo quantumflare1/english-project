@@ -13,6 +13,7 @@ export default class Sprite extends Node {
      * 
      * @param {number} x 
      * @param {number} y 
+     * @param {number} z
      * @param {Rect} source
      * @param {number} follow 
      */
