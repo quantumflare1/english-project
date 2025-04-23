@@ -15,7 +15,7 @@ export default class Assets {
         for (let i = 0; i < assets.image.files.length; i++) {
             for (let j = 0; j < assets.image.files[i].length; j++) {
                 const file = this.#getFile(`./data/assets/${assets.image.directories[i]}/${assets.image.files[i][j]}.png`);
-                const json = this.#getJSON(`./data/${assets.image.directories[i]}/${assets.image.files[i][j]}.json`);
+                const json = this.#getJSON(`./data/img/${assets.image.directories[i]}/${assets.image.files[i][j]}.json`);
 
                 await json.then((res) => {
                     if (res !== null) {
@@ -54,14 +54,10 @@ export default class Assets {
         // load fonts
         for (let i = 0; i < assets.font.files.length; i++) {
             for (let j = 0; j < assets.font.files[i].length; j++) {
-                const file = this.#getFile(`./data/assets/${assets.font.directories[i]}/${assets.font.files[i][j]}.ttf`);
+                const font = new FontFace(`${assets.font.directories[i]}-${assets.font.files[i][j]}`, `url(./data/assets/${assets.font.directories[i]}/${assets.font.files[i][j]}.ttf)`);
 
-                // here too
-                await file.then((res) => {
-                    const src = URL.createObjectURL(res);
-                    document.fonts.add(new FontFace(`font${i}-${j}`, `url(${src})`));
-                    this.font.push(`font${i}-${j}`);
-                });
+                await font.load();
+                document.fonts.add(font);
             }
         }
 

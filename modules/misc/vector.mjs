@@ -14,16 +14,31 @@ export default class Vector {
         this.x = 0;
         this.y = 0;
     }
+    /**
+     * 
+     * @param {Vector} v 
+     */
     add(v) {
         this.x += v.x;
         this.y += v.y;
     }
+    /**
+     * 
+     * @param {Vector} v 
+     */
     subtract(v) {
         this.x -= v.x;
         this.y -= v.y;
     }
+    /**
+     * 
+     * @param {number} n 
+     */
     multiply(n) {
         this.x *= n;
         this.y *= n;
+    }
+    copy() {
+        return new Vector(this.x, this.y);
     }
 }

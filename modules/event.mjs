@@ -28,9 +28,15 @@ class AssetLoadEvent extends CustomEvent {
     }
 }
 
-class LevelLoadEvent extends CustomEvent {
+class SceneLoadEvent extends CustomEvent {
     constructor() {
-        super("game_levelloaded");
+        super("game_sceneloaded");
+    }
+}
+
+class SceneChangeEvent extends CustomEvent {
+    constructor(scene) {
+        super("game_scenechange", { detail: scene });
     }
 }
 
@@ -46,4 +52,4 @@ class SettingsChangeEvent extends CustomEvent {
     }
 }
 
-export { RoomChangeEvent, CameraSnapEvent, CameraMoveEvent, CameraZoomEvent, AssetLoadEvent, LevelLoadEvent, FreezeTimeEvent, SettingsChangeEvent };
+export { RoomChangeEvent, CameraSnapEvent, CameraMoveEvent, CameraZoomEvent, AssetLoadEvent, SceneLoadEvent, SceneChangeEvent, FreezeTimeEvent, SettingsChangeEvent };

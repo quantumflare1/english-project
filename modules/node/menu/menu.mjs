@@ -3,12 +3,8 @@ import MenuElement from "./element.mjs";
 import input from "../../inputs.mjs";
 
 export default class Menu extends Room {
-    cursor;
-    items = [];
-    constructor(x, y, w, h, id, ...inputs) {
+    constructor(x, y, w, h, id) {
         super(x, y, w, h, id);
-        this.items = [...inputs];
-        this.cursor = this.items[0];
     }
     /**
      * 

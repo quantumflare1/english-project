@@ -8,9 +8,9 @@ import Hazard from "./node/hazard.mjs";
 import Assets from "./assets.mjs";
 import Vector from "./misc/vector.mjs";
 import Player from "./node/player.mjs";
-import { LevelLoadEvent } from "./event.mjs";
+import { SceneLoadEvent } from "./event.mjs";
 
-import tiles from "../data/tile/tile.json" with { type: "json" };
+import tiles from "../data/img/tile/tile.json" with { type: "json" };
 
 class Level extends Scene {
     blockList = [];
@@ -173,7 +173,7 @@ class Level extends Scene {
         this.addRooms(...rooms);
         this.addNode(new Player(30, 0, this));
 
-        dispatchEvent(new LevelLoadEvent());
+        dispatchEvent(new SceneLoadEvent());
     }
 }
 

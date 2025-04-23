@@ -2,6 +2,7 @@ import Renderer from "./modules/renderer.mjs";
 import { Level } from "./modules/level.mjs";
 import * as Audio from "./modules/audio.mjs";
 import Assets from "./modules/assets.mjs";
+import { createMainMenu } from "./modules/node/menu/main_menu.mjs";
 
 const $ = (l) => document.getElementById(l);
 const TPS = 60;
@@ -75,15 +76,17 @@ function load() {
     //const bg = new Thing.Entity(0, 0, 320, 180, "./data/assets/background/bg_temple.png", -100, new Thing.SpriteConfig(0, 0, 0, 0, 320, 180), 1);
 
     addEventListener("game_assetloaded", async () => {
-        /*camera = new Camera(0, 0, level);
-        player = new Player(230, 30, level);*/
-        renderer = new Renderer();
-        scene = new Level("./data/level/level.json");
-
-        addEventListener("game_levelloaded", () => {
+        addEventListener("game_sceneloaded", () => {
             requestAnimationFrame(tick);
         });
+
+        renderer = new Renderer();
+        //scene = new Level("./data/level/level.json");
+        scene = createMainMenu();
         debugDraw();
+    });
+    addEventListener("game_scenechange", (e) => {
+        scene = e.detail;
     });
     Assets.load();
 }

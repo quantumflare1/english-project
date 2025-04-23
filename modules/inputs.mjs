@@ -15,6 +15,7 @@ const input = {
  * @param {KeyboardEvent} e 
  */
 function keydown(e) {
+    if (e.repeat) return;
     input.continuous.add(e.key.toLowerCase());
     input.impulse.add(e.key.toLowerCase());
 };

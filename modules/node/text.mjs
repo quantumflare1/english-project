@@ -18,7 +18,7 @@ export default class Text extends Node {
      * @param {string} color
      * @param {string} display 
      */
-    constructor(x, y, z = 10, text = "", align = "start", font = "font0-0 16px", color = "white", display = "follow") {
+    constructor(x, y, z = 10, text = "", align = "start", font = "16px Arial", color = "white", display = "follow") {
         super();
         this.pos.x = x;
         this.pos.y = y;
