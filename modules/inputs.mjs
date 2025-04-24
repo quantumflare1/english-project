@@ -10,6 +10,28 @@ const input = {
     }
 };
 
+const keybinds = {
+    left: "arrowleft",
+    right: "arrowright",
+    up: "arrowup",
+    down: "arrowdown",
+    jump: " ",
+    grapple: "z",
+    select: "z",
+    cancel: "x"
+};
+
+const defaults = {
+    left: "arrowleft",
+    right: "arrowright",
+    up: "arrowup",
+    down: "arrowdown",
+    jump: " ",
+    grapple: "z",
+    select: "z",
+    cancel: "x"
+};
+
 /**
  * 
  * @param {KeyboardEvent} e 
@@ -32,4 +54,4 @@ function keyup(e) {
 addEventListener("keydown", keydown);
 addEventListener("keyup", keyup);
 
-export default input;
+export { input, keybinds };

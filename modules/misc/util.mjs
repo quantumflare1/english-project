@@ -35,6 +35,11 @@ function* prng(seed) {
     }
 }
 
+/**
+ * 
+ * @param {any[][]} mat 
+ * @returns 
+ */
 function unpackMatrix(mat) {
     const arr = [];
     for (const i of mat)
@@ -43,4 +48,54 @@ function unpackMatrix(mat) {
     return arr;
 }
 
-export { clamp, lerp, prng, unpackMatrix };
+/**
+ * 
+ * @param {string} key 
+ * @returns 
+ */
+function displayKey(key) {
+    switch (key) {
+        case " ":
+            return "Space";
+        case "alt":
+            return "Alt";
+        case "shift":
+            return "Shift";
+        case "tab":
+            return "Tab";
+        case "capslock":
+            return "CapsLock";
+        case "enter":
+            return "Enter";
+        case "control":
+            return "Ctrl";
+        case "contextmenu":
+            return "ContextMenu";
+        case "backspace":
+            return "Backspace";
+        case "insert":
+            return "Insert";
+        case "delete":
+            return "Delete";
+        case "home":
+            return "Home";
+        case "end":
+            return "End";
+        case "pageup":
+            return "PageUp";
+        case "pagedown":
+            return "PageDown";
+        case "arrowup":
+            return "ArrowUp";
+        case "arrowdown":
+            return "ArrowDown";
+        case "arrowleft":
+            return "ArrowLeft";
+        case "arrowright":
+            return "ArrowRight";
+        default:
+            return key.toUpperCase();
+    }
+}
+
+export { clamp, lerp, prng, unpackMatrix, displayKey };

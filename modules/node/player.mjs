@@ -6,7 +6,7 @@ import Rect from "./rect.mjs";
 import Sprite from "./sprite.mjs";
 import Entity from "./entity.mjs";
 import Assets from "../assets.mjs";
-import input from "../inputs.mjs";
+import { input, keybinds } from "../inputs.mjs";
 
 const WIDTH = config.width;
 const HEIGHT = config.height;
@@ -184,11 +184,11 @@ export default class Player extends Entity {
         //this.y = Math.round(this.y);
     }
     findFacingDirection() {
-        if (input.continuous.has("arrowright")) {
+        if (input.continuous.has(keybinds.right)) {
             this.facing.x = 1;
             this.lastFacedX = 1;
         }
-        else if (input.continuous.has("arrowleft")) {
+        else if (input.continuous.has(keybinds.left)) {
             this.facing.x = -1;
             this.lastFacedX = -1;
         }
@@ -196,9 +196,9 @@ export default class Player extends Entity {
             this.facing.x = 0;
         }
 
-        if (input.continuous.has("arrowdown"))
+        if (input.continuous.has(keybinds.down))
             this.facing.y = 1;
-        else if (input.continuous.has("arrowup"))
+        else if (input.continuous.has(keybinds.up))
             this.facing.y = -1;
         else
             this.facing.y = 0;
@@ -245,7 +245,7 @@ export default class Player extends Entity {
     processRun() {
         const acceleration = this.touching.get("down") ? Player.#accelPerTick : Player.#accelPerTick * AIR_ACCEL_FACTOR;
         const deceleration = this.touching.get("down") ? Player.#decelPerTick : Player.#decelPerTick * AIR_DECEL_FACTOR;
-        if (input.continuous.has("arrowright") && !this.touching.get("right")) {
+        if (input.continuous.has(keybinds.right) && !this.touching.get("right")) {
             if (this.vel.x < MAX_VEL)
                 this.vel.x += acceleration;
             else if (this.vel.x > MAX_VEL) {
@@ -258,7 +258,7 @@ export default class Player extends Entity {
             if (this.vel.x < 0.05)
                 this.vel.x = 0;
         }
-        if (input.continuous.has("arrowleft") && !this.touching.get("left")) {
+        if (input.continuous.has(keybinds.left) && !this.touching.get("left")) {
             if (this.vel.x > -MAX_VEL)
                 this.vel.x -= acceleration;
             else if (this.vel.x < -MAX_VEL) {
@@ -273,7 +273,7 @@ export default class Player extends Entity {
         }
     }
     processGrapple() {
-        if (input.continuous.has("z")) {
+        if (input.continuous.has(keybinds.grapple)) {
             this.grappleBufferTime--;
         } else {
             this.grappleBufferTime = BUFFER_TICKS;
@@ -299,8 +299,8 @@ export default class Player extends Entity {
             }
         }
 
-        if (this.grappleBufferTime > 0 && this.canGrapple && input.impulse.has("z") && !this.grappleStarted) { // start grapple
-            input.consumeInput("z");
+        if (this.grappleBufferTime > 0 && this.canGrapple && input.impulse.has(keybinds.grapple) && !this.grappleStarted) { // start grapple
+            input.consumeInput(keybinds.grapple);
             this.grappleStarted = true;
             this.grappleBufferTime = 0;
             const ev = new CustomEvent("game_freezetime", { detail: GRAPPLE_FREEZE_TICKS });
@@ -308,17 +308,17 @@ export default class Player extends Entity {
         }
     }
     processJump() {
-        if (input.impulse.has(" ")) // press jump
+        if (input.impulse.has(keybinds.jump)) // press jump
             this.jumpBufferTime--;
         else // release jump
             this.jumpBufferTime = BUFFER_TICKS;
         
-        if (!input.impulse.has(" ") && this.vel.y < 0)
+        if (!input.impulse.has(keybinds.jump) && this.vel.y < 0)
             if (this.vel.y < -Player.#baseJumpVel * MIN_JUMP_FACTOR)
                 this.vel.y = -Player.#baseJumpVel * MIN_JUMP_FACTOR;
 
-        if (this.jumpBufferTime >= 0 && this.coyoteTime >= 0 && input.impulse.has(" ")) { // start jump
-            input.consumeInput("z");
+        if (this.jumpBufferTime >= 0 && this.coyoteTime >= 0 && input.impulse.has(keybinds.jump)) { // start jump
+            input.consumeInput(keybinds.grapple);
             this.vel.y = -Player.#baseJumpVel;
             this.jumpTimer = 10;
             this.coyoteTime = 0;

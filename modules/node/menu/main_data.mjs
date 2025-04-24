@@ -4,6 +4,8 @@ import { SceneChangeEvent, RoomChangeEvent, CameraZoomEvent, CursorMoveEvent } f
 import { Level } from "../../level.mjs";
 import Sprite from "../sprite.mjs";
 import Rect from "../rect.mjs";
+import { input, keybinds } from "../../inputs.mjs";
+import { displayKey } from "../../misc/util.mjs";
 
 const rooms = [
     {
@@ -146,7 +148,7 @@ const elements = [
     // AUDIO
     [
         {
-            params: [80, 30, 10, "Music", "center", "16px font-NotJamUICondensed16", "white", "follow", true,
+            params: [80, 30, 10, "Music (soon)", "center", "16px font-NotJamUICondensed16", "white", "follow", true,
                 () => {
 
                 }
@@ -212,9 +214,14 @@ const elements = [
     // KEYBINDS
     [
         {
-            params: [160, 30, 10, "Grapple", "center", "16px font-NotJamUICondensed16", "white", "follow", true,
-                () => {
-
+            params: [40, 30, 10, `Grapple: ${displayKey(keybinds.grapple)}`, "start", "16px font-NotJamUICondensed16", "white", "follow", false,
+                (element) => {
+                    if (input.impulse.size > 0) {
+                        const key = input.impulse.values().next().value;
+                        keybinds.grapple = key;
+                        element.text = `Grapple: ${displayKey(keybinds.grapple)}`;
+                        element.toggleSelect();
+                    }
                 }
             ],
             directions: {
@@ -223,56 +230,120 @@ const elements = [
             }
         },
         {
-            params: [160, 50, 10, "Jump", "center", "16px font-NotJamUICondensed16", "white", "follow", true],
+            params: [40, 50, 10, `Jump: ${displayKey(keybinds.jump)}`, "start", "16px font-NotJamUICondensed16", "white", "follow", false,
+                (element) => {
+                    if (input.impulse.size > 0) {
+                        const key = input.impulse.values().next().value;
+                        keybinds.jump = key;
+                        element.text = `Jump: ${displayKey(keybinds.jump)}`;
+                        element.toggleSelect();
+                    }
+
+                }
+            ],
             directions: {
                 down: 2,
                 up: 0
             }
         },
         {
-            params: [160, 70, 10, "Left", "center", "16px font-NotJamUICondensed16", "white", "follow", true],
+            params: [40, 70, 10, `Left: ${displayKey(keybinds.left)}`, "start", "16px font-NotJamUICondensed16", "white", "follow", false,
+                (element) => {
+                    if (input.impulse.size > 0) {
+                        const key = input.impulse.values().next().value;
+                        keybinds.left = key;
+                        element.text = `Left: ${displayKey(keybinds.left)}`;
+                        element.toggleSelect();
+                    }
+                }
+            ],
             directions: {
                 down: 3,
                 up: 1
             }
         },
         {
-            params: [160, 90, 10, "Right", "center", "16px font-NotJamUICondensed16", "white", "follow", true],
+            params: [40, 90, 10, `Right: ${displayKey(keybinds.right)}`, "start", "16px font-NotJamUICondensed16", "white", "follow", false,
+                (element) => {
+                    if (input.impulse.size > 0) {
+                        const key = input.impulse.values().next().value;
+                        keybinds.right = key;
+                        element.text = `Right: ${displayKey(keybinds.right)}`;
+                        element.toggleSelect();
+                    }
+                }
+            ],
             directions: {
                 down: 4,
                 up: 2
             }
         },
         {
-            params: [160, 110, 10, "Up", "center", "16px font-NotJamUICondensed16", "white", "follow", true],
+            params: [40, 110, 10, `Up: ${displayKey(keybinds.up)}`, "start", "16px font-NotJamUICondensed16", "white", "follow", false,
+                (element) => {
+                    if (input.impulse.size > 0) {
+                        const key = input.impulse.values().next().value;
+                        keybinds.up = key;
+                        element.text = `Up: ${displayKey(keybinds.up)}`;
+                        element.toggleSelect();
+                    }
+                }
+            ],
             directions: {
                 down: 5,
                 up: 3
             }
         },
         {
-            params: [160, 130, 10, "Down", "center", "16px font-NotJamUICondensed16", "white", "follow", true],
+            params: [40, 130, 10, `Down: ${displayKey(keybinds.down)}`, "start", "16px font-NotJamUICondensed16", "white", "follow", false,
+                (element) => {
+                    if (input.impulse.size > 0) {
+                        const key = input.impulse.values().next().value;
+                        keybinds.down = key;
+                        element.text = `Down: ${displayKey(keybinds.down)}`;
+                        element.toggleSelect();
+                    }
+                }
+            ],
             directions: {
                 down: 6,
                 up: 4
             }
         },
         {
-            params: [160, 150, 10, "Select", "center", "16px font-NotJamUICondensed16", "white", "follow", true],
+            params: [40, 150, 10, `Select: ${displayKey(keybinds.select)}`, "start", "16px font-NotJamUICondensed16", "white", "follow", false,
+                (element) => {
+                    if (input.impulse.size > 0) {
+                        const key = input.impulse.values().next().value;
+                        keybinds.select = key;
+                        element.text = `Select: ${displayKey(keybinds.select)}`;
+                        element.toggleSelect();
+                    }
+                }
+            ],
             directions: {
                 down: 7,
                 up: 5
             }
         },
         {
-            params: [160, 170, 10, "Cancel/Exit", "center", "16px font-NotJamUICondensed16", "white", "follow", true],
+            params: [40, 170, 10,  `Cancel: ${displayKey(keybinds.cancel)}`, "start", "16px font-NotJamUICondensed16", "white", "follow", false,
+                (element) => {
+                    if (input.impulse.size > 0) {
+                        const key = input.impulse.values().next().value;
+                        keybinds.cancel = key;
+                        element.text = `Cancel: ${displayKey(keybinds.cancel)}`;
+                        element.toggleSelect();
+                    }
+                }
+            ],
             directions: {
                 down: 8,
                 up: 6
             }
         },
         {
-            params: [160, 190, 10, "Back", "center", "16px font-NotJamUICondensed16", "white", "follow", true,
+            params: [40, 190, 10, "Back", "start", "16px font-NotJamUICondensed16", "white", "follow", true,
                 () => {
                     dispatchEvent(new RoomChangeEvent("up"));
                     dispatchEvent(new CursorMoveEvent(5));
