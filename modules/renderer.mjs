@@ -56,12 +56,6 @@ export default class Renderer {
             const diffY = 0;
 
             next.draw(this.ctx);
-            if (next.string) {
-                this.ctx.font = "10px Pixellari";
-                this.ctx.textAlign = next.align;
-                this.ctx.fillText(next.string, Math.round(next.x + diffX * tickPercent), Math.round(next.y + diffY * tickPercent));
-            }
-
 
             if (next.temp) {
                 this.ctx.strokeStyle = "red";

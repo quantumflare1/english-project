@@ -31,30 +31,27 @@ export default class MenuElement extends Text {
     /**
      * 
      * @param {MenuElement} e 
+     * @param {string} dir
      */
-    setAboveElement(e) {
-        this.up = e;
-    }
-    /**
-     * 
-     * @param {MenuElement} e 
-     */
-    setBelowElement(e) {
-        this.down = e;
-    }
-    /**
-     * 
-     * @param {MenuElement} e 
-     */
-    setLeftElement(e) {
-        this.left = e;
-    }
-    /**
-     * 
-     * @param {MenuElement} e 
-     */
-    setRightElement(e) {
-        this.right = e;
+    connect(e, dir) {
+        switch (dir) {
+            case "up":
+                this.up = e;
+                e.down = this;
+                break;
+            case "down":
+                this.down = e;
+                e.up = this;
+                break;
+            case "left":
+                this.left = e;
+                e.right = this;
+                break;
+            case "right":
+                this.right = e;
+                e.left = this;
+                break;
+        }
     }
     update() {
         if (this.isSelected) {

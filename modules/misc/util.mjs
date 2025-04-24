@@ -35,4 +35,12 @@ function* prng(seed) {
     }
 }
 
-export { clamp, lerp, prng };
+function unpackMatrix(mat) {
+    const arr = [];
+    for (const i of mat)
+        for (const j of i)
+            arr.push(j);
+    return arr;
+}
+
+export { clamp, lerp, prng, unpackMatrix };

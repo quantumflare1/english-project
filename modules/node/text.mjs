@@ -33,7 +33,7 @@ export default class Text extends Node {
      * 
      * @param {Vector} move 
      */
-    update(move) {
+    update(move = new Vector()) {
         this.pos.add(move);
     }
     /**

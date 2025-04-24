@@ -45,6 +45,7 @@ export default class Camera extends Node {
         this.prevPos.y = this.pos.y;
         this.targetPos.x = pos.x;
         this.targetPos.y = pos.y;
+        this.followTime = 0;
     }
     /**
      * 

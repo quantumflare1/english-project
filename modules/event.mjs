@@ -52,4 +52,10 @@ class SettingsChangeEvent extends CustomEvent {
     }
 }
 
-export { RoomChangeEvent, CameraSnapEvent, CameraMoveEvent, CameraZoomEvent, AssetLoadEvent, SceneLoadEvent, SceneChangeEvent, FreezeTimeEvent, SettingsChangeEvent };
+class CursorMoveEvent extends CustomEvent {
+    constructor(newSelected) {
+        super("game_cursormove", { detail: newSelected });
+    }
+}
+
+export { RoomChangeEvent, CameraSnapEvent, CameraMoveEvent, CameraZoomEvent, AssetLoadEvent, SceneLoadEvent, SceneChangeEvent, FreezeTimeEvent, SettingsChangeEvent, CursorMoveEvent };
