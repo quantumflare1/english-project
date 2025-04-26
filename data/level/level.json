@@ -1,6 +1,6 @@
 {
     "meta": {
-        "background": "./data/assets/background/bg_temple.png",
+        "name": "test level",
         "spawnRoom": 0
     },
     "rooms": [

@@ -1,5 +1,4 @@
 import Scene from "./scene.mjs";
-import Camera from "./node/camera.mjs";
 
 const BASE_SCALE = 20;
 
@@ -10,8 +9,10 @@ export default class Renderer {
 
     /**
      * Creates a new renderer.
+     * @param {HTMLElement} parent
+     * @param {HTMLElement | null} before
      */
-    constructor() {
+    constructor(parent = document.body, before = null) {
         this.canvas = document.createElement("canvas");
         this.ctx = this.canvas.getContext("2d");
 
@@ -22,7 +23,9 @@ export default class Renderer {
         this.canvas.width = 16 * BASE_SCALE;
         this.canvas.height = 9 * BASE_SCALE;
 
-        document.body.appendChild(this.canvas);
+        if (before === null)
+            parent.appendChild(this.canvas);
+        else parent.insertBefore(this.canvas, before);
 
         this.ctx.imageSmoothingEnabled = false;
         //this.ctx.setTransform(1, 0, 0, 1, -this.camera.x, -this.camera.y);

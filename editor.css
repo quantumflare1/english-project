@@ -1,0 +1,79 @@
+@font-face {
+    font-family: "Pixellari";
+    src: url("./data/assets/font/Pixellari.ttf");
+}
+
+body {
+    display: flex;
+    align-items: center;
+    justify-items: center;
+    flex-direction: column;
+    height: 100vh;
+
+    color: white;
+    font-family: Pixellari;
+}
+
+canvas {
+    position: relative;
+}
+
+button, input[type="text"] {
+    border: solid 4px white;
+    background-color: black;
+    color: white;
+    font-family: Pixellari;
+    font-size: 32px;
+    padding: 4px;
+}
+
+label {
+    color: white;
+    font-family: Pixellari;
+    font-size: 32px;
+}
+
+input[type="text"] {
+    width: 6em;
+}
+
+#wrapper {
+    width: 90vw;
+    margin: auto;
+    display: flex;
+}
+
+.menu {
+    margin: 8px;
+}
+
+#editMenu {
+    flex-grow: 4;
+}
+
+#metaMenu {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+}
+
+#editTabs {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+}
+
+.hide {
+    display: none;
+}
+
+.clickable {
+    cursor: pointer;
+}
+
+.tileOption {
+    padding: 2px;
+    image-rendering: pixelated;
+}

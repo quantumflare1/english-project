@@ -1,7 +1,8 @@
 import Renderer from "./modules/renderer.mjs";
-import * as Audio from "./modules/audio.mjs";
+import Editor from "./modules/editor/editor.mjs";
+import MenuItem from "./modules/editor/menu_item.mjs";
 import Assets from "./modules/assets.mjs";
-import { createMainMenu } from "./modules/node/menu/main_menu.mjs";
+import tiles from "./data/img/tile/tile.json" with { type: "json" };
 
 const $ = (l) => document.getElementById(l);
 const TPS = 60;
@@ -10,19 +11,9 @@ let lastTickTime = document.timeline.currentTime;
 let lastSecondTime = document.timeline.currentTime;
 let freezeTicks = 0;
 
-let renderer, scene;
+let renderer, scene, editor;
 
 let tps = 0;
-
-const debugCanvas = document.createElement("canvas");
-const debugCtx = debugCanvas.getContext("2d");
-debugCanvas.width = 752;
-debugCanvas.height = 180;
-document.body.appendChild(debugCanvas);
-
-function debugDraw() {
-    debugCtx.drawImage(Assets.spritesheet, 0, 0);
-}
 
 /**
  * Runs game logic
@@ -65,34 +56,56 @@ function tick(ms) {
 }
 
 function load() {
-    //Audio.load("./data/assets/bgm/bgm_temple.ogg");
-
-    //addEventListener("click", audioStarter);
     addEventListener("game_freezetime", (e) => {
         freezeTicks = e.detail;
     });
-    //  addEventListener("keydown", (e) => {e.preventDefault()});
-    //const bg = new Thing.Entity(0, 0, 320, 180, "./data/assets/background/bg_temple.png", -100, new Thing.SpriteConfig(0, 0, 0, 0, 320, 180), 1);
 
     addEventListener("game_assetloaded", async () => {
+        function loadTiles(tileType) {
+            // blocks
+            const menu = $(`${tileType}s`);
+            let defaultSprite;
+
+            for (const i of tiles[tileType]) { // ts so inefficient :wilted_rose:
+                switch (tileType) {
+                    case "block":
+                        defaultSprite = "outer_all";
+                        break;
+                    case "hazard":
+                        defaultSprite = `facing_${i.facing}`;
+                        break;
+                    default:
+                        defaultSprite = "default";
+                }
+                const thisTile = Assets.sprites[i.name];
+                const spr = thisTile.sprite[thisTile.name[defaultSprite]];
+                const osc = new OffscreenCanvas(spr[2], spr[3]);
+                const osctx = osc.getContext("2d");
+                osctx.putImageData(Assets.spriteCtx.getImageData(spr[0], spr[1], spr[2], spr[3]), 0, 0);
+
+                const img = new Image(spr[2], spr[3]);
+                osc.convertToBlob().then((res) => {
+                    img.src = URL.createObjectURL(res);
+                    menu.appendChild(new MenuItem(img, i.name).div);
+                });
+            }
+        }
+        loadTiles("block");
+        loadTiles("hazard");
+        loadTiles("decal");
+
         addEventListener("game_sceneloaded", () => {
             requestAnimationFrame(tick);
         });
 
-        renderer = new Renderer();
-        //scene = new Level("./data/level/level.json");
-        scene = createMainMenu();
-        debugDraw();
+        renderer = new Renderer($("wrapper"), $("metaMenu"));
+        editor = new Editor(renderer.canvas, renderer.ctx);
+        //scene = createMainMenu();
     });
     addEventListener("game_scenechange", (e) => {
         scene = e.detail;
     });
     Assets.load();
-}
-
-function audioStarter(e) {
-    Audio.play();
-    removeEventListener("click", audioStarter);
 }
 
 addEventListener("load", load);
