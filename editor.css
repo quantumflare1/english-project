@@ -3,21 +3,6 @@
     src: url("./data/assets/font/Pixellari.ttf");
 }
 
-body {
-    display: flex;
-    align-items: center;
-    justify-items: center;
-    flex-direction: column;
-    height: 100vh;
-
-    color: white;
-    font-family: Pixellari;
-}
-
-canvas {
-    position: relative;
-}
-
 button, input[type="text"] {
     border: solid 4px white;
     background-color: black;
@@ -25,12 +10,18 @@ button, input[type="text"] {
     font-family: Pixellari;
     font-size: 32px;
     padding: 4px;
+    cursor: pointer;
 }
 
 label {
     color: white;
     font-family: Pixellari;
     font-size: 32px;
+}
+
+button:hover {
+    border: solid 4px darkgray;
+    color: darkgray;
 }
 
 input[type="text"] {

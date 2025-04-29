@@ -41,4 +41,11 @@ export default class Vector {
     copy() {
         return new Vector(this.x, this.y);
     }
+    /**
+     * 
+     * @param {Vector} v 
+     */
+    equals(v) {
+        return (this.x === v.x && this.y === v.y);
+    }
 }

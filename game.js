@@ -18,7 +18,7 @@ const debugCanvas = document.createElement("canvas");
 const debugCtx = debugCanvas.getContext("2d");
 debugCanvas.width = 752;
 debugCanvas.height = 180;
-document.body.appendChild(debugCanvas);
+//document.body.appendChild(debugCanvas);
 
 function debugDraw() {
     debugCtx.drawImage(Assets.spritesheet, 0, 0);

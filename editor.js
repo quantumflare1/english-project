@@ -11,7 +11,7 @@ let lastTickTime = document.timeline.currentTime;
 let lastSecondTime = document.timeline.currentTime;
 let freezeTicks = 0;
 
-let renderer, scene, editor;
+let renderer, scene;
 
 let tps = 0;
 
@@ -62,7 +62,6 @@ function load() {
 
     addEventListener("game_assetloaded", async () => {
         function loadTiles(tileType) {
-            // blocks
             const menu = $(`${tileType}s`);
             let defaultSprite;
 
@@ -83,10 +82,12 @@ function load() {
                 const osctx = osc.getContext("2d");
                 osctx.putImageData(Assets.spriteCtx.getImageData(spr[0], spr[1], spr[2], spr[3]), 0, 0);
 
+                const name = (tileType === "hazard") ? `${i.name}_${i.facing}` : i.name;
+
                 const img = new Image(spr[2], spr[3]);
                 osc.convertToBlob().then((res) => {
                     img.src = URL.createObjectURL(res);
-                    menu.appendChild(new MenuItem(img, i.name).div);
+                    menu.appendChild(new MenuItem(img, tileType, name).div);
                 });
             }
         }
@@ -98,8 +99,8 @@ function load() {
             requestAnimationFrame(tick);
         });
 
-        renderer = new Renderer($("wrapper"), $("metaMenu"));
-        editor = new Editor(renderer.canvas, renderer.ctx);
+        renderer = new Renderer($("wrapper"), $("metaMenu"), "#4f3969", "#331f52");
+        scene = new Editor(renderer.canvas, renderer.ctx);
         //scene = createMainMenu();
     });
     addEventListener("game_scenechange", (e) => {
@@ -108,4 +109,5 @@ function load() {
     Assets.load();
 }
 
+addEventListener("contextmenu", (e) => { e.preventDefault() });
 addEventListener("load", load);

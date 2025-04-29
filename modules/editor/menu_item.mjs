@@ -4,8 +4,9 @@ export default class MenuItem {
      * 
      * @param {HTMLImageElement} img 
      * @param {string} type 
+     * @param {string} name
      */
-    constructor(img, type) {
+    constructor(img, type, name) {
         this.div = document.createElement("div");
 
         img.width *= 4;
@@ -15,7 +16,7 @@ export default class MenuItem {
 
         this.div.classList.add("clickable", "tileOption");
         this.div.addEventListener("click", () => {
-            dispatchEvent("editor_tileselect", type);
+            dispatchEvent(new CustomEvent("editor_tileselect", { detail: { type: type, name: name } }));
         });
     }
 }

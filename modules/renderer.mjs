@@ -12,13 +12,13 @@ export default class Renderer {
      * @param {HTMLElement} parent
      * @param {HTMLElement | null} before
      */
-    constructor(parent = document.body, before = null) {
+    constructor(parent = document.body, before = null, defaultBG1 = "#170007", defaultBG2 = "#380300") {
         this.canvas = document.createElement("canvas");
         this.ctx = this.canvas.getContext("2d");
 
         this.gradient = this.ctx.createLinearGradient(0, 0, 0, 9 * BASE_SCALE);
-        this.gradient.addColorStop(0, "#170007");
-        this.gradient.addColorStop(1, "#380300");
+        this.gradient.addColorStop(0, defaultBG1);
+        this.gradient.addColorStop(1, defaultBG2);
 
         this.canvas.width = 16 * BASE_SCALE;
         this.canvas.height = 9 * BASE_SCALE;
