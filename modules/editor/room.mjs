@@ -1,4 +1,7 @@
 export default class RoomData {
+    static DEFAULT_WIDTH = 32;
+    static DEFAULT_HEIGHT = 18;
+
     id;
     width; height;
     x; y;

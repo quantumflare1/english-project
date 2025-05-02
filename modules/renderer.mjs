@@ -12,7 +12,7 @@ export default class Renderer {
      * @param {HTMLElement} parent
      * @param {HTMLElement | null} before
      */
-    constructor(parent = document.body, before = null, defaultBG1 = "#170007", defaultBG2 = "#380300") {
+    constructor(parent = document.body, defaultBG1 = "#170007", defaultBG2 = "#380300") {
         this.canvas = document.createElement("canvas");
         this.ctx = this.canvas.getContext("2d");
 
@@ -23,9 +23,7 @@ export default class Renderer {
         this.canvas.width = 16 * BASE_SCALE;
         this.canvas.height = 9 * BASE_SCALE;
 
-        if (before === null)
-            parent.appendChild(this.canvas);
-        else parent.insertBefore(this.canvas, before);
+        parent.appendChild(this.canvas);
 
         this.ctx.imageSmoothingEnabled = false;
         //this.ctx.setTransform(1, 0, 0, 1, -this.camera.x, -this.camera.y);
@@ -51,7 +49,7 @@ export default class Renderer {
         while (scene.renderedObjects.length > 0) {
             const next = scene.renderedObjects.pop();
 
-            this.ctx.setTransform(1, 0, 0, 1, -scene.camera.pos.x, -scene.camera.pos.y);
+            this.ctx.setTransform(scene.camera.zoom, 0, 0, scene.camera.zoom, -scene.camera.pos.x, -scene.camera.pos.y);
 
             /*const diffX = next.x - next.prevX;
             const diffY = next.y - next.prevY;*/

@@ -1,3 +1,4 @@
+import { CameraZoomEvent } from "../event.mjs";
 import Vector from "../misc/vector.mjs";
 
 export default class Mouse {
@@ -25,6 +26,7 @@ export default class Mouse {
             this.down.bind(this)(e);
         });
         canvas.addEventListener("mouseup", this.up.bind(this));
+        canvas.addEventListener("wheel", this.wheel.bind(this));
     }
     /**
      * 
@@ -53,6 +55,16 @@ export default class Mouse {
      */
     up(e) {
         this.pressed.delete(e.button);
+    }
+    /**
+     * 
+     * @param {WheelEvent} e 
+     */
+    wheel(e) {
+        if (e.deltaMode === 0) {
+            const zoomLevel = 1 / e.deltaY;
+            dispatchEvent(new CameraZoomEvent(zoomLevel)); // zooming doesn't work
+        }
     }
     resize(entries, observer) {
         for (const i of entries) {

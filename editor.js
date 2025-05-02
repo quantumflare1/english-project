@@ -1,7 +1,9 @@
 import Renderer from "./modules/renderer.mjs";
-import Editor from "./modules/editor/editor.mjs";
+import Editor from "./modules/editor/room_editor.mjs";
 import MenuItem from "./modules/editor/menu_item.mjs";
 import Assets from "./modules/assets.mjs";
+import Mouse from "./modules/editor/mouse.mjs";
+
 import tiles from "./data/img/tile/tile.json" with { type: "json" };
 
 const $ = (l) => document.getElementById(l);
@@ -11,7 +13,9 @@ let lastTickTime = document.timeline.currentTime;
 let lastSecondTime = document.timeline.currentTime;
 let freezeTicks = 0;
 
-let renderer, scene;
+let renderer, scene, mouse;
+
+let prevTab;
 
 let tps = 0;
 
@@ -99,14 +103,68 @@ function load() {
             requestAnimationFrame(tick);
         });
 
-        renderer = new Renderer($("wrapper"), $("metaMenu"), "#4f3969", "#331f52");
-        scene = new Editor(renderer.canvas, renderer.ctx);
+        renderer = new Renderer($("wrapper"), "#4f3969", "#331f52");
+        mouse = new Mouse(renderer.canvas);
+        scene = new Editor(mouse, renderer.canvas);
+        updateRoomInfo();
+
         //scene = createMainMenu();
     });
     addEventListener("game_scenechange", (e) => {
         scene = e.detail;
     });
     Assets.load();
+
+    $("blockTab").addEventListener("click", () => { hideTabs($("blocks")); scene.state = "room"; });
+    $("hazardTab").addEventListener("click", () => { hideTabs($("hazards")); scene.state = "room"; });
+    $("decalTab").addEventListener("click", () => { hideTabs($("decals")); scene.state = "room"; });
+    $("roomTab").addEventListener("click", () => { hideTabs($("room")); updateRoomInfo(); scene.state = "level"; });
+    $("name").addEventListener("change", metaUpdate("name"));
+    $("spawnRoom").addEventListener("change", metaUpdate("spawnRoom", parseInt));
+
+    $("roomX").addEventListener("change", roomUpdate("x", parseInt));
+    $("roomY").addEventListener("change", roomUpdate("y", parseInt));
+    $("roomWidth").addEventListener("change", roomUpdate("width", parseInt));
+    $("roomHeight").addEventListener("change", roomUpdate("height", parseInt));
+
+    $("newRoom").addEventListener("click", () => {
+        scene.createRoom();
+    });
+
+    addEventListener("editor_changeroom", () => {
+        updateRoomInfo();
+    });
+}
+
+function hideTabs(tab) {
+    const tabs = $("editMenu").children;
+    for (const i of tabs) {
+        if (i.classList.contains("visible") && i.id !== "room") prevTab = i;
+        i.classList.add("hide");
+        i.classList.remove("visible");
+    }
+    tab.classList.remove("hide");
+    tab.classList.add("visible");
+}
+
+function updateRoomInfo() {
+    $("roomX").value = scene.room?.x;
+    $("roomY").value = scene.room?.y;
+    $("roomWidth").value = scene.room?.width;
+    $("roomHeight").value = scene.room?.height;
+    $("roomId").textContent = `Room ID ${scene.room?.id}`;
+}
+
+function metaUpdate(meta, parser = (v) => { return v; }) {
+    return function() {
+        scene.editMeta(meta, parser(this.value));
+    };
+}
+
+function roomUpdate(detail, parser = (v) => { return v; }) {
+    return function() {
+        scene.editRoom(detail, parser(this.value));
+    }
 }
 
 addEventListener("contextmenu", (e) => { e.preventDefault() });

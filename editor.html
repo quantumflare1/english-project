@@ -11,24 +11,51 @@
     <body>
         <div id="wrapper">
             <div id="editMenu" class="menu">
-                <div id="blocks"></div>
-                <div id="hazards"></div>
-                <div id="decals"></div>
-                <div id="room"></div>
+                <div id="blocks" class="hide"></div>
+                <div id="hazards" class="hide"></div>
+                <div id="decals" class="hide"></div>
+                <div id="room">
+                    <p id="roomId">Room ID</p>
+                    <div id="roomXGroup">
+                        <label for="roomX">X</label>
+                        <input type="number" id="roomX">
+                    </div>
+                    <div id="roomYGroup">
+                        <label for="roomY">Y</label>
+                        <input type="number" id="roomY">
+                    </div>
+                    <div id="roomWidthGroup">
+                        <label for="roomWidth">Width</label>
+                        <input type="number" min="32" id="roomWidth">
+                    </div>
+                    <div id="roomHeightGroup">
+                        <label for="roomHeight">Height</label>
+                        <input type="number" min="18" id="roomHeight">
+                    </div>
+                    <div id="newRoomWrapper">
+                        <button id="newRoom">Add</button>
+                    </div>
+                </div>
             </div>
             <div id="editTabs" class="menu">
                 <button id="blockTab">Blocks</button>
                 <button id="hazardTab">Hazards</button>
                 <button id="decalTab">Decals</button>
+                <button id="specialTab">Coming soon</button>
+                <button id="triggerTab">Coming soon</button>
+                <button id="roomTab">Room</button>
             </div>
-            <div id="metaMenu" class="menu">
-                <button id="changeView">Room view</button>
-                <div id="nameGroup">
-                    <label for="name">Name</label>
-                    <input type="text" id="name">
-                </div>
-                <button id="export">Export</button>
+        </div>
+        <div id="metaMenu" class="menu">
+            <div id="nameGroup">
+                <label for="name">Name</label>
+                <input type="text" id="name" value="default">
             </div>
+            <div id="spawnRoomGroup">
+                <label for="spawnRoom">1st room ID</label>
+                <input type="number" id="spawnRoom" value="0">
+            </div>
+            <button id="export">Export</button>
         </div>
     </body>
 </html>
