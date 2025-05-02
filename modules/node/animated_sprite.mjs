@@ -8,6 +8,7 @@ export default class AnimatedSprite extends Sprite {
     frameNum = 0;
     curTicks = 0;
     frameTime;
+    startFrame; endFrame;
     /**
      * 
      * @param {number} x 
@@ -16,10 +17,29 @@ export default class AnimatedSprite extends Sprite {
      * @param {Rect[]} sources 
      * @param {string} display 
      */
-    constructor(x = 0, y = 0, z = 0, sources = [new Rect()], display = "follow", animPeriod = 5) {
-        super(x, y, z, sources[0].pos.x, sources[0].pos.y, sources[0].dimensions.x, sources[0].dimensions.x, display);
+    constructor(x = 0, y = 0, z = 0, sources = [new Rect()], follow = 0, animPeriod = 5) {
+        super(x, y, z, sources[0].pos.x, sources[0].pos.y, sources[0].dimensions.x, sources[0].dimensions.x, follow);
         this.frames = sources;
         this.frameTime = animPeriod;
+        this.startFrame = 0;
+        this.endFrame = sources.length - 1;
+    }
+    /**
+     * 
+     * @param {Vector} move 
+     */
+    update(move) {
+        super.update(move);
+        this.curTicks++;
+
+        if (this.curTicks === this.frameTime) {
+            this.frameNum++;
+            this.curTicks = 0;
+
+            if (this.frameNum > this.endFrame) {
+                this.frameNum = this.startFrame;
+            }
+        }
     }
     /**
      * 
@@ -27,15 +47,27 @@ export default class AnimatedSprite extends Sprite {
      */
     draw(ctx) {
         ctx.drawImage(Assets.spritesheet,
-            this.sources[this.frameNum].pos.x, this.sources[this.frameNum].pos.y,
-            this.sources[this.frameNum].dimensions.x, this.sources[this.frameNum].dimensions.y,
+            this.frames[this.frameNum].pos.x, this.frames[this.frameNum].pos.y,
+            this.frames[this.frameNum].dimensions.x, this.frames[this.frameNum].dimensions.y,
             this.pos.x, this.pos.y,
-            this.sources[this.frameNum].dimensions.x, this.sources[this.frameNum].dimensions.y);
-        frameTicks++;
-
-        if (this.curTicks === this.frameTime) {
-            this.frameNum++;
-            this.curTicks = 0;
-        }
+            this.frames[this.frameNum].dimensions.x, this.frames[this.frameNum].dimensions.y);
+    }
+    /**
+     * 
+     * @param {number} num 
+     */
+    setStartFrame(num) {
+        this.startFrame = num;
+        if (this.frameNum < this.startFrame)
+            this.frameNum = num;
+    }
+    /**
+     * 
+     * @param {number} num 
+     */
+    setEndFrame(num) {
+        this.endFrame = num;
+        if (this.frameNum > this.endFrame)
+            this.frameNum = num;
     }
 }

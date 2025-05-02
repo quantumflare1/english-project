@@ -6,7 +6,7 @@
             "w": 10,
             "h": 10,
             "z": 0,
-            "name": "tile_grass",
+            "name": "tile_temple",
             "path": "./data/assets/tiles"
         },
         {
@@ -46,7 +46,7 @@
             "w": 3,
             "h": 10,
             "z": 1,
-            "facing": "left",
+            "facing": "right",
             "name": "tile_spike",
             "path": "./data/assets/tiles"
         },
@@ -56,7 +56,7 @@
             "w": 3,
             "h": 10,
             "z": 1,
-            "facing": "right",
+            "facing": "left",
             "name": "tile_spike",
             "path": "./data/assets/tiles"
         }

@@ -47,7 +47,7 @@ const elements = [
         {
             params: [160.5, 30, 10, "Play", "center", "16px font-NotJamUICondensed16", "black", "follow", true,
                 () => {
-                    const scene = new Level("./data/level/level.json");
+                    const scene = new Level("./data/level/pre.json");
                     dispatchEvent(new SceneChangeEvent(scene));
                 }
             ],

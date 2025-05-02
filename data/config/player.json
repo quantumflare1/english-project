@@ -19,7 +19,5 @@
     "airDecelFactor": 0.2,
     "respawnTime": 40,
     "coyoteTime": 6,
-    "bufferTime": 8,
-    "sprite": [-2, -4, 0, 0, 12, 16],
-    "spriteSrc": "./data/assets/sprites/player.png"
+    "bufferTime": 8
 }

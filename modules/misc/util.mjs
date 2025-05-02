@@ -2,6 +2,8 @@
 // taken from Mathematics of Computation Vol 68 #225 Jan 1999 pgs 249-260
 // shoutout my guy Pierre L'Ecuyer
 
+import Rect from "../node/rect.mjs";
+
 /**
  * Clamps a value to between 0 and 1.
  * @param {number} n The value to be clamped.
@@ -45,6 +47,18 @@ function unpackMatrix(mat) {
     for (const i of mat)
         for (const j of i)
             arr.push(j);
+    return arr;
+}
+
+/**
+ * 
+ * @param {number[][]} mat 
+ */
+function convertToAnimSpriteList(mat) {
+    const arr = [];
+    for (const i of mat) {
+        arr.push(new Rect(i[0], i[1], i[2], i[3]));
+    }
     return arr;
 }
 
@@ -98,4 +112,4 @@ function displayKey(key) {
     }
 }
 
-export { clamp, lerp, prng, unpackMatrix, displayKey };
+export { clamp, lerp, prng, unpackMatrix, convertToAnimSpriteList, displayKey };

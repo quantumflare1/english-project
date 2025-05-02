@@ -3,10 +3,12 @@ import Vector from "../misc/vector.mjs";
 import * as Event from "../event.mjs";
 import config from "../../data/config/player.json" with { type: "json" };
 import Rect from "./rect.mjs";
-import Sprite from "./sprite.mjs";
+import AnimatedSprite from "./animated_sprite.mjs";
 import Entity from "./entity.mjs";
 import Assets from "../assets.mjs";
 import { input, keybinds } from "../inputs.mjs";
+import { convertToAnimSpriteList } from "../misc/util.mjs";
+import sprite from "../../data/img/sprite/player.json";
 
 const WIDTH = config.width;
 const HEIGHT = config.height;
@@ -31,7 +33,6 @@ const BUFFER_TICKS = config.bufferTime;
 const TOUCH_THRESHOLD = 0.01;
 const CAMERA_OFFSET = new Vector(-160 + config.width / 2, -90 + config.height / 2);
 
-// todo: need to convert a lot of the x/y variable stuff into vectors
 export default class Player extends Entity {
     static states = {
         DEFAULT: 0,
@@ -109,11 +110,11 @@ export default class Player extends Entity {
      * @param {Level} level The level this player is in. 
      */
     constructor(x, y, level) {
-        const texDetails = Assets.sprites.player.sprite[0];
+        const texDetails = Assets.sprites.player.sprite;
         super(x, y, new Rect(x, y, WIDTH, HEIGHT),
-        new Sprite(x + config.sprite[0], y + config.sprite[1], 0,
-            new Rect(texDetails[0], texDetails[1], texDetails[2], texDetails[3]),
-        0));
+        new AnimatedSprite(x + sprite.sprite[0][4], y + sprite.sprite[0][5], 0,
+            convertToAnimSpriteList(texDetails),
+        0, 10)); // todo: update sprite to animatedsprite
         this.spawnX = x;
         this.spawnY = y;
         this.level = level;
@@ -175,6 +176,7 @@ export default class Player extends Entity {
         this.prevX = this.pos.x;
         this.prevY = this.pos.y;
 
+        this.setSprite();
         super.update(this.vel);
         dispatchEvent(new Event.CameraMoveEvent(this.pos.x + CAMERA_OFFSET.x, this.pos.y + CAMERA_OFFSET.y));
 
@@ -326,6 +328,36 @@ export default class Player extends Entity {
             this.jumpBufferTime = 0;
         }
     }
+    setSprite() {
+        if (input.continuous.has(keybinds.left) && this.vel.x > 0 || input.continuous.has(keybinds.right) && this.vel.x < 0) {
+            this.sprite.setStartFrame(sprite.name.turning);
+            this.sprite.setEndFrame(sprite.name.turning);
+        }
+        else if (input.continuous.has(keybinds.right) && this.vel.x >= MAX_VEL) {
+            this.sprite.setStartFrame(sprite.name.run_right1);
+            this.sprite.setEndFrame(sprite.name.run_right2);
+        }
+        else if (input.continuous.has(keybinds.right)) {
+            this.sprite.setStartFrame(sprite.name.walk_right1);
+            this.sprite.setEndFrame(sprite.name.walk_right2);
+        }
+        else if (input.continuous.has(keybinds.left) && this.vel.x <= -MAX_VEL) {
+            this.sprite.setStartFrame(sprite.name.run_left1);
+            this.sprite.setEndFrame(sprite.name.run_left2);
+        }
+        else if (input.continuous.has(keybinds.left)) {
+            this.sprite.setStartFrame(sprite.name.walk_left1);
+            this.sprite.setEndFrame(sprite.name.walk_left2);
+        }
+        else if (this.facing.x < 0) {
+            this.sprite.setStartFrame(sprite.name.facing_left);
+            this.sprite.setEndFrame(sprite.name.facing_left);
+        }
+        else {
+            this.sprite.setStartFrame(sprite.name.facing_right);
+            this.sprite.setEndFrame(sprite.name.facing_right);
+        }
+    }
     collide() {
         let moveX = this.pos.x - this.prevX;
         let moveY = this.pos.y - this.prevY;
@@ -381,8 +413,8 @@ export default class Player extends Entity {
             if (this.hitbox.collidesWith(i)) {
                 if (i.facing === "up" && this.vel.y < 0) continue;
                 if (i.facing === "down" && this.vel.y > 0) continue;
-                if (i.facing === "right" && this.vel.x < 0) continue;
-                if (i.facing === "left" && this.vel.x > 0) continue;
+                if (i.facing === "left" && this.vel.x < 0) continue;
+                if (i.facing === "right" && this.vel.x > 0) continue;
 
                 this.isDead = true;
             }

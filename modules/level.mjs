@@ -21,7 +21,7 @@ class Level extends Scene {
     roomBlocks = [];
 
     constructor(path) {
-        super("placeholder", new Camera());
+        super("placeholder", new Camera(0, 0, 1));
         this.init(path);
     }
     async init(path) {
@@ -30,25 +30,25 @@ class Level extends Scene {
         const rooms = [];
         // preprocess room data
         for (const i of json.rooms) {
-            this.roomBlocks.push(i.tiles);
+            this.roomBlocks.push(i.blocks);
             for (let r = 0; r < i.height; r++) {
                 for (let c = 0; c < i.width; c++) {
                     const globalPos = new Vector(c + i.x, r + i.y);
                     globalPos.multiply(10);
     
-                    if (i.tiles[r][c] !== 0) {
-                        const thisBlock = tiles.block[i.tiles[r][c]-1];
+                    if (i.blocks[r][c] !== 0) {
+                        const thisBlock = tiles.block[i.blocks[r][c]-1];
                         const thisBlockSprite = Assets.sprites[thisBlock.name];
                         let textureId = 0;
     
-                        const nw = (c - 1 >= 0 && r - 1 >= 0) ?             i.tiles[r-1][c-1] > 0 : true;
-                        const n =  (r - 1 >= 0) ?                           i.tiles[r-1][c] > 0 : true;
-                        const ne = (c + 1 < i.width && r - 1 >= 0) ?        i.tiles[r-1][c+1] > 0 : true;
-                        const e =  (c + 1 < i.width) ?                      i.tiles[r][c+1] > 0 : true;
-                        const se = (c + 1 < i.width && r + 1 < i.height) ?  i.tiles[r+1][c+1] > 0 : true;
-                        const s =  (r + 1 < i.height) ?                     i.tiles[r+1][c] > 0 : true;
-                        const sw = (c - 1 >= 0 && r + 1 < i.height) ?       i.tiles[r+1][c-1] > 0 : true;
-                        const w =  (c - 1 >= 0) ?                           i.tiles[r][c-1] > 0 : true;
+                        const nw = (c - 1 >= 0 && r - 1 >= 0) ?             i.blocks[r-1][c-1] > 0 : true;
+                        const n =  (r - 1 >= 0) ?                           i.blocks[r-1][c] > 0 : true;
+                        const ne = (c + 1 < i.width && r - 1 >= 0) ?        i.blocks[r-1][c+1] > 0 : true;
+                        const e =  (c + 1 < i.width) ?                      i.blocks[r][c+1] > 0 : true;
+                        const se = (c + 1 < i.width && r + 1 < i.height) ?  i.blocks[r+1][c+1] > 0 : true;
+                        const s =  (r + 1 < i.height) ?                     i.blocks[r+1][c] > 0 : true;
+                        const sw = (c - 1 >= 0 && r + 1 < i.height) ?       i.blocks[r+1][c-1] > 0 : true;
+                        const w =  (c - 1 >= 0) ?                           i.blocks[r][c-1] > 0 : true;
 
                         const texVariant = thisBlockSprite.name;
     
