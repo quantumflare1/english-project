@@ -20,7 +20,7 @@ export default class MenuElement extends Text {
         super(x, y, z, text, align, font, color, display);
         this.isSelected = false;
         this.isShallow = shallow;
-        this.interact = interact;
+        this.interact = interact.bind(this);
     }
     toggleSelect() {
         this.isSelected = !this.isSelected;
@@ -58,7 +58,7 @@ export default class MenuElement extends Text {
             this.color = "yellow";
         }
         else if (this.isHighlighted) {
-            this.color = "pink";
+            this.color = "gray";
         }
         else {
             this.color = "white";

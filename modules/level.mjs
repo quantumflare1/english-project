@@ -8,9 +8,10 @@ import Hazard from "./node/hazard.mjs";
 import Assets from "./assets.mjs";
 import Vector from "./misc/vector.mjs";
 import Player from "./node/player.mjs";
-import { SceneLoadEvent } from "./event.mjs";
 
 import tiles from "../data/img/tile/tile.json" with { type: "json" };
+import { options } from "./options.mjs";
+import Text from "./node/text.mjs";
 
 class Level extends Scene {
     blockList = [];
@@ -173,7 +174,39 @@ class Level extends Scene {
         this.addRooms(...rooms);
         this.addNode(new Player(30, 0, this));
 
-        dispatchEvent(new SceneLoadEvent());
+        if (options.showFps) {
+            const fpsDisplay = new Text(5, 14, 100, "60 FPS", "start", "12px font-Pixellari", "white", "follow");
+
+            addEventListener("ui_fpschange", (e) => {
+                fpsDisplay.text = e.detail + " FPS";
+            });
+            this.addNode(fpsDisplay);
+        }
+        if (options.showTimer) {
+            const timerDisplay = new Text(315, 14, 100, "0.00", "end", "12px font-Pixellari", "white", "follow");
+            timerDisplay.ms = 0; // secret hardcoded hack
+            timerDisplay.startMs = document.timeline.currentTime;
+
+            addEventListener("ui_timechange", (e) => {
+                function force2Digits(num) {
+                    if (num < 10) return `0${num}`;
+                    return num;
+                }
+                timerDisplay.ms = e.detail - timerDisplay.startMs;
+
+                const cs = Math.floor(timerDisplay.ms / 10) % 100;
+                const sec = Math.floor(timerDisplay.ms / 1000) % 60;
+                const min = Math.floor(timerDisplay.ms / 60000);
+
+                if (min < 1) {
+                    timerDisplay.text = `${sec}.${force2Digits(cs)}`;
+                }
+                else {
+                    timerDisplay.text = `${min}:${force2Digits(sec)}.${force2Digits(cs)}`;
+                }
+            });
+            this.addNode(timerDisplay);
+        }
     }
 }
 

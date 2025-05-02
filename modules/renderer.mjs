@@ -56,7 +56,12 @@ export default class Renderer {
             const diffX = 0;
             const diffY = 0;
 
-            next.draw(this.ctx);
+            if (next.display === "follow") {
+                this.ctx.setTransform(scene.camera.zoom, 0, 0, scene.camera.zoom, 0, 0);
+                next.draw(this.ctx);
+                this.ctx.setTransform(scene.camera.zoom, 0, 0, scene.camera.zoom, -scene.camera.pos.x, -scene.camera.pos.y);
+            }
+            else next.draw(this.ctx);
 
             if (next.temp) {
                 this.ctx.strokeStyle = "red";

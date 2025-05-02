@@ -20,6 +20,7 @@ export default class Entity extends Node {
         this.pos.y = y;
         this.hitbox = hitbox;
         this.sprite = sprite;
+        this.z = this.sprite.z;
     }
     /**
      * 

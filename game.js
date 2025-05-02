@@ -2,6 +2,7 @@ import Renderer from "./modules/renderer.mjs";
 import * as Audio from "./modules/audio.mjs";
 import Assets from "./modules/assets.mjs";
 import { createMainMenu } from "./modules/node/menu/main_menu.mjs";
+import { FPSUpdateEvent, TimeUpdateEvent } from "./modules/event.mjs";
 
 const $ = (l) => document.getElementById(l);
 const TPS = 60;
@@ -31,6 +32,7 @@ function debugDraw() {
 function tick(ms) {
     let tickTime = ms - lastTickTime;
 
+    dispatchEvent(new TimeUpdateEvent(ms));
     while (tickTime > MS_PER_TICK) {
         performance.mark("tick");
         lastTickTime += MS_PER_TICK;
@@ -53,6 +55,7 @@ function tick(ms) {
     if (ms - lastSecondTime > 1000) {
         lastSecondTime = ms;
         console.log(tps);
+        dispatchEvent(new FPSUpdateEvent(tps));
         tps = 0;
     }
     performance.mark("render");

@@ -58,4 +58,16 @@ class CursorMoveEvent extends CustomEvent {
     }
 }
 
-export { RoomChangeEvent, CameraSnapEvent, CameraMoveEvent, CameraZoomEvent, AssetLoadEvent, SceneLoadEvent, SceneChangeEvent, FreezeTimeEvent, SettingsChangeEvent, CursorMoveEvent };
+class FPSUpdateEvent extends CustomEvent {
+    constructor(fps) {
+        super("ui_fpschange", { detail: fps });
+    }
+}
+
+class TimeUpdateEvent extends CustomEvent {
+    constructor(fps) {
+        super("ui_timechange", { detail: fps });
+    }
+}
+
+export { RoomChangeEvent, CameraSnapEvent, CameraMoveEvent, CameraZoomEvent, AssetLoadEvent, SceneLoadEvent, SceneChangeEvent, FreezeTimeEvent, SettingsChangeEvent, CursorMoveEvent, FPSUpdateEvent, TimeUpdateEvent };

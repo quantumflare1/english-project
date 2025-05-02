@@ -14,6 +14,7 @@ const WIDTH = config.width;
 const HEIGHT = config.height;
 const ACCEL_TICKS = config.accelTime;
 const MAX_VEL = config.maxVel;
+const RUN_VEL = MAX_VEL * 0.7;
 const DECEL_TICKS = config.decelTime;
 const MAX_GRAPPLE_TICKS = config.maxGrappleTime;
 const GRAPPLE_VEL = config.grappleVel;
@@ -62,6 +63,7 @@ export default class Player extends Entity {
     isDead = false;
     respawnTime = RESPAWN_TICKS;
     temp; spawnX; spawnY; level;
+    z;
 
     /**
      * Finds the nearest tile in the direction the player is facing
@@ -114,7 +116,7 @@ export default class Player extends Entity {
         super(x, y, new Rect(x, y, WIDTH, HEIGHT),
         new AnimatedSprite(x + sprite.sprite[0][4], y + sprite.sprite[0][5], 0,
             convertToAnimSpriteList(texDetails),
-        0, 10)); // todo: update sprite to animatedsprite
+        0, 8));
         this.spawnX = x;
         this.spawnY = y;
         this.level = level;
@@ -333,7 +335,7 @@ export default class Player extends Entity {
             this.sprite.setStartFrame(sprite.name.turning);
             this.sprite.setEndFrame(sprite.name.turning);
         }
-        else if (input.continuous.has(keybinds.right) && this.vel.x >= MAX_VEL) {
+        else if (input.continuous.has(keybinds.right) && this.vel.x >= RUN_VEL) {
             this.sprite.setStartFrame(sprite.name.run_right1);
             this.sprite.setEndFrame(sprite.name.run_right2);
         }
@@ -341,7 +343,7 @@ export default class Player extends Entity {
             this.sprite.setStartFrame(sprite.name.walk_right1);
             this.sprite.setEndFrame(sprite.name.walk_right2);
         }
-        else if (input.continuous.has(keybinds.left) && this.vel.x <= -MAX_VEL) {
+        else if (input.continuous.has(keybinds.left) && this.vel.x <= -RUN_VEL) {
             this.sprite.setStartFrame(sprite.name.run_left1);
             this.sprite.setEndFrame(sprite.name.run_left2);
         }
