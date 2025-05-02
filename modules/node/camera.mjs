@@ -23,6 +23,8 @@ export default class Camera extends Node {
         this.pos.y = y;
         this.prevPos.x = x;
         this.prevPos.y = y;
+        this.prevZoom = zoom;
+        this.targetZoom = zoom;
         this.zoom = zoom;
 
         addEventListener("game_cameramove", (e) => {
@@ -81,7 +83,6 @@ export default class Camera extends Node {
         this.zoomTime++;
         this.zoom = lerp(this.prevZoom, this.targetZoom, this.zoomTime / Camera.FOLLOW_TICKS);
 
-        
         if (this.pos.x < room.pos.x * 10) this.pos.x = room.pos.x * 10;
         if (this.pos.x + Camera.BASE_DIMENSIONS.x > room.dimensions.x * 10 + room.pos.x * 10) this.pos.x = room.dimensions.x * 10 + room.pos.x * 10 - Camera.BASE_DIMENSIONS.x;
         if (this.pos.y < room.pos.y * 10) this.pos.y = room.pos.y * 10;

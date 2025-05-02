@@ -1,4 +1,5 @@
 import Scene from "./scene.mjs";
+import Camera from "./node/camera.mjs";
 
 const BASE_SCALE = 20;
 
@@ -46,10 +47,9 @@ export default class Renderer {
         let tempX = 0;
         let tempY = 0;
 
+        this.ctx.setTransform(scene.camera.zoom, 0, 0, scene.camera.zoom, -scene.camera.pos.x, -scene.camera.pos.y);
         while (scene.renderedObjects.length > 0) {
             const next = scene.renderedObjects.pop();
-
-            this.ctx.setTransform(scene.camera.zoom, 0, 0, scene.camera.zoom, -scene.camera.pos.x, -scene.camera.pos.y);
 
             /*const diffX = next.x - next.prevX;
             const diffY = next.y - next.prevY;*/

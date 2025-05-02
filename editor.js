@@ -130,6 +130,7 @@ function load() {
     $("newRoom").addEventListener("click", () => {
         scene.createRoom();
     });
+    $("export").addEventListener("click", () => { download(scene.level); });
 
     addEventListener("editor_changeroom", () => {
         updateRoomInfo();
@@ -165,6 +166,17 @@ function roomUpdate(detail, parser = (v) => { return v; }) {
     return function() {
         scene.editRoom(detail, parser(this.value));
     }
+}
+
+// half taken from thirtydollar.website half from stackoverflow
+function download(data) {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
+    let downloader = document.createElement('a');
+    downloader.href = dataStr;
+    downloader.dataset.downloadurl = ['text/json', downloader.download, downloader.href].join(':');
+    downloader.style.display = "none"; downloader.download = data.meta.name + ".json";
+    downloader.target = "_blank"; document.body.appendChild(downloader);
+    downloader.click(); document.body.removeChild(downloader);
 }
 
 addEventListener("contextmenu", (e) => { e.preventDefault() });

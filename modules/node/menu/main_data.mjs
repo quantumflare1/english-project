@@ -72,7 +72,7 @@ const elements = [
             params: [240, 30, 10, "Credits", "center", "16px font-NotJamUICondensed16", "black", "follow", true,
                 () => {
                     dispatchEvent(new RoomChangeEvent("right"));
-                    dispatchEvent(new CameraZoomEvent(0.8)); // zoom is currently bugged
+                    //dispatchEvent(new CameraZoomEvent(0.8)); // zoom is currently bugged
                     dispatchEvent(new CursorMoveEvent(7));
                 }
             ],

@@ -12,7 +12,7 @@ class CameraSnapEvent extends CustomEvent {
 
 class CameraZoomEvent extends CustomEvent {
     constructor(zoom) {
-        super("game_camerazoom", { detail: { zoom: zoom } });
+        super("game_camerazoom", { detail: zoom });
     }
 }
 

@@ -47,6 +47,7 @@ function createMainMenu() {
     
     const cursor = new Cursor(...unpackMatrix(mainMenuElements));
     scene.addNode(cursor);
+    console.log(scene.rooms)
 
     dispatchEvent(new SceneLoadEvent()); // todo: figure out putting this right into the scene class
     return scene;

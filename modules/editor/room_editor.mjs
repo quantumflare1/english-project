@@ -75,6 +75,7 @@ export default class Editor extends Scene {
         
         if (this.mouse.pressed.has(0)) {
             if (this.selectedTile && this.state === "room") {
+                console.log(this.room.width)
                 if (mouseTile.x >= 0 && mouseTile.x < this.room?.width && mouseTile.y >= 0 && mouseTile.y < this.room?.height && this.room[`${this.selectedType}s`][mouseTile.y][mouseTile.x] === 0) {
                     this.room[`${this.selectedType}s`][mouseTile.y][mouseTile.x] = this[`${this.selectedType}Map`].get(this.selectedTile);
 
@@ -186,9 +187,40 @@ export default class Editor extends Scene {
                 break;
             case "width":
                 this.roomIndicators[this.room?.id].dimensions.x = value * 10;
+
+                for (let i = 0; i < this.room.height; i++) {
+                    for (let j = this.room.blocks[i].length; j < this.room.width; j++)
+                        this.room.blocks[i][j] = 0;
+                    for (let j = this.room.hazards[i].length; j < this.room.width; j++)
+                        this.room.hazards[i][j] = 0;
+                    for (let j = this.room.decals[i].length; j < this.room.width; j++)
+                        this.room.decals[i][j] = 0;
+                    for (let j = this.room.triggers[i].length; j < this.room.width; j++)
+                        this.room.triggers[i][j] = 0;
+                    for (let j = this.room.specials[i].length; j < this.room.width; j++)
+                        this.room.specials[i][j] = 0;
+                }
                 break;
             case "height":
                 this.roomIndicators[this.room?.id].dimensions.y = value * 10;
+
+                for (let i = this.room.blocks.length; i < this.room.height; i++) {
+                    this.room.blocks[i] = [];
+                    for (let j = 0; j < this.room.width; j++)
+                        this.room.blocks[i][j] = 0;
+                    this.room.hazards[i] = [];
+                    for (let j = 0; j < this.room.width; j++)
+                        this.room.hazards[i][j] = 0;
+                    this.room.decals[i] = [];
+                    for (let j = 0; j < this.room.width; j++)
+                        this.room.decals[i][j] = 0;
+                    this.room.triggers[i] = [];
+                    for (let j = 0; j < this.room.width; j++)
+                        this.room.triggers[i][j] = 0;
+                    this.room.specials[i] = [];
+                    for (let j = 0; j < this.room.width; j++)
+                        this.room.specials[i][j] = 0;
+                }
                 break;
         }
     }
