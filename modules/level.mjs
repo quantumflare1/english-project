@@ -8,16 +8,17 @@ import Hazard from "./node/hazard.mjs";
 import Assets from "./assets.mjs";
 import Vector from "./misc/vector.mjs";
 import Player from "./node/player.mjs";
+import Text from "./node/text.mjs";
+import Trigger from "./node/trigger.mjs";
 
 import tiles from "../data/img/tile/tile.json" with { type: "json" };
 import { options } from "./options.mjs";
-import Text from "./node/text.mjs";
+import * as triggers from "./triggers.mjs";
 
 class Level extends Scene {
     blockList = [];
     hazardList = [];
-    // specialList = [];
-    // triggerList = [];
+    triggerList = [];
 
     roomBlocks = [];
 
@@ -143,16 +144,15 @@ class Level extends Scene {
                             new Rect(texDetails[0], texDetails[1], texDetails[2], texDetails[3]),
                         1)));
                     }
-    
-                    /*if (i.specials[r][c] !== 0) {
-                        const thisSpecial = decalTypes[i.specials[r][c]];
-                        curRoomSpecials.push(new Tile.Special(c * 10 + thisSpecial.offX, r * 10 + thisSpecial.offY, thisSpecial.w, thisSpecial.h, false, i.specials[r][c], thisSpecial.z));
-                    }
-    
+
                     if (i.triggers[r][c] !== 0) {
-                        const thisTrigger = decalTypes[i.triggers[r][c]];
-                        curRoomTriggers.push(new Tile.Trigger(c * 10 + thisTrigger.offX, r * 10 + thisTrigger.offY, thisTrigger.w, thisTrigger.h, () => {}));
-                    }*/
+                        const thisTrigger = tiles.trigger[i.triggers[r][c]-1];
+                        const pixelPos = new Vector(globalPos.x + thisTrigger.offX, globalPos.y + thisTrigger.offY);
+                        
+                        const triggerRect = new Trigger(pixelPos.x, pixelPos.y, thisTrigger.w, thisTrigger.h, thisTrigger.trigger, thisTrigger.type, thisTrigger.maxActivations, triggers[thisTrigger.name]);
+                        this.addNode(triggerRect);
+                        this.triggerList.push(triggerRect);
+                    }
                 }
             }
     

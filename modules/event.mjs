@@ -70,4 +70,10 @@ class TimeUpdateEvent extends CustomEvent {
     }
 }
 
-export { RoomChangeEvent, CameraSnapEvent, CameraMoveEvent, CameraZoomEvent, AssetLoadEvent, SceneLoadEvent, SceneChangeEvent, FreezeTimeEvent, SettingsChangeEvent, CursorMoveEvent, FPSUpdateEvent, TimeUpdateEvent };
+class PlayerStateChangeEvent extends CustomEvent {
+    constructor(state) {
+        super("game_playerstatechange", { detail: state });
+    }
+}
+
+export { RoomChangeEvent, CameraSnapEvent, CameraMoveEvent, CameraZoomEvent, AssetLoadEvent, SceneLoadEvent, SceneChangeEvent, FreezeTimeEvent, SettingsChangeEvent, CursorMoveEvent, FPSUpdateEvent, TimeUpdateEvent, PlayerStateChangeEvent };

@@ -57,7 +57,7 @@ export default class Player extends Entity {
     canGrapple = false;
     grappleTime = 0;
     grapple = new Vector();
-    state = Player.states.DEFAULT;
+    state = Player.states.INTRO;
     grappleStarted = false;
     inControl = true;
     isDead = false;
@@ -128,6 +128,10 @@ export default class Player extends Entity {
         this.touching.set("right", false);
 
         dispatchEvent(new Event.CameraSnapEvent(this.pos.x + CAMERA_OFFSET.x, this.pos.y + CAMERA_OFFSET.y));
+
+        addEventListener("game_playerstatechange", (e) => {
+            this.state = e.detail;
+        });
     }
     update() {
         if (this.isDead) {
@@ -277,6 +281,7 @@ export default class Player extends Entity {
         }
     }
     processGrapple() {
+        if (this.state === Player.states.INTRO) return;
         if (input.continuous.has(keybinds.grapple)) {
             this.grappleBufferTime--;
         } else {
@@ -368,6 +373,19 @@ export default class Player extends Entity {
         this.touching.set("left", false);
         this.touching.set("right", false);
         this.touching.set("up", false);
+
+        // probably should move this to trigger class
+        for (const i of this.level.triggerList) {
+            if (i.trigger === "touch" && this.hitbox.collidesWith(i)) {
+                if (!i.disabled && !i.done) {
+                    i.func();
+                    if (i.type === "impulse") i.disabled = true;
+                }
+            }
+            else {
+                i.disabled = false;
+            }
+        }
 
         // broad phase
         const overlappingTiles = [];
