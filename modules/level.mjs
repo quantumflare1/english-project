@@ -150,7 +150,20 @@ class Level extends Scene {
                         const pixelPos = new Vector(globalPos.x + thisTrigger.offX, globalPos.y + thisTrigger.offY);
                         
                         const triggerRect = new Trigger(pixelPos.x, pixelPos.y, thisTrigger.w, thisTrigger.h, thisTrigger.trigger, thisTrigger.type, thisTrigger.maxActivations, triggers[thisTrigger.name]);
-                        this.addNode(triggerRect);
+
+                        if (thisTrigger.sprite) {
+                            const thisTriggerSprite = Assets.sprites[thisTrigger.sprite.name];
+                            const textureId = thisTriggerSprite.name.default; // placeholder!!
+                            const texDetails = thisTriggerSprite.sprite[textureId];
+
+                            this.addNode(new Entity(pixelPos.x, pixelPos.y, triggerRect, new Sprite(
+                                pixelPos.x + texDetails[4], pixelPos.y + texDetails[5], thisTrigger.z,
+                                new Rect(texDetails[0], texDetails[1], texDetails[2], texDetails[3]),
+                            1)));
+                        }
+                        else {
+                            this.addNode(triggerRect);
+                        }
                         this.triggerList.push(triggerRect);
                     }
                 }

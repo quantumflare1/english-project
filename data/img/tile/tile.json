@@ -78,10 +78,24 @@
             "offY": 0,
             "w": 10,
             "h": 10,
-            "name": "pickUpGrapple",
+            "name": "test",
             "trigger": "touch",
             "type": "impulse",
             "maxActivations": -1
+        },
+        {
+            "offX": 0,
+            "offY": 0,
+            "w": 10,
+            "h": 10,
+            "name": "pickUpGrapple",
+            "trigger": "touch",
+            "type": "impulse",
+            "maxActivations": 1,
+            "sprite": {
+                "name": "tile_placeholder",
+                "path": "./data/assets/tiles"
+            }
         }
     ]
 }

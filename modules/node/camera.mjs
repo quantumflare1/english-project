@@ -17,6 +17,8 @@ export default class Camera extends Node {
     targetZoom;
     zoomTime = 0;
 
+    locked = false;
+
     constructor(x, y, zoom) {
         super();
         this.pos.x = x;
@@ -83,10 +85,12 @@ export default class Camera extends Node {
         this.zoomTime++;
         this.zoom = lerp(this.prevZoom, this.targetZoom, this.zoomTime / Camera.FOLLOW_TICKS);
 
-        if (this.pos.x < room.pos.x * 10) this.pos.x = room.pos.x * 10;
-        if (this.pos.x + Camera.BASE_DIMENSIONS.x > room.dimensions.x * 10 + room.pos.x * 10) this.pos.x = room.dimensions.x * 10 + room.pos.x * 10 - Camera.BASE_DIMENSIONS.x;
-        if (this.pos.y < room.pos.y * 10) this.pos.y = room.pos.y * 10;
-        if (this.pos.y + Camera.BASE_DIMENSIONS.y > room.dimensions.y * 10 + room.pos.y * 10) this.pos.y = room.dimensions.y * 10 + room.pos.y * 10 - Camera.BASE_DIMENSIONS.y;
+        if (room && !this.locked) {
+            if (this.pos.x < room.pos.x * 10) this.pos.x = room.pos.x * 10;
+            if (this.pos.x + Camera.BASE_DIMENSIONS.x > room.dimensions.x * 10 + room.pos.x * 10) this.pos.x = room.dimensions.x * 10 + room.pos.x * 10 - Camera.BASE_DIMENSIONS.x;
+            if (this.pos.y < room.pos.y * 10) this.pos.y = room.pos.y * 10;
+            if (this.pos.y + Camera.BASE_DIMENSIONS.y > room.dimensions.y * 10 + room.pos.y * 10) this.pos.y = room.dimensions.y * 10 + room.pos.y * 10 - Camera.BASE_DIMENSIONS.y;
+        }
 
         this.x = Math.round(this.x);
         this.y = Math.round(this.y);
