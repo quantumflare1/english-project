@@ -30,7 +30,7 @@ export default class Rect extends Node {
      * 
      * @param {Vector} move 
      */
-    update(move) {
+    move(move) {
         this.pos.add(move);
     }
 }

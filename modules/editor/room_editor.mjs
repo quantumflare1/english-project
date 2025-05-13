@@ -21,7 +21,7 @@ export default class Editor extends Scene {
     mouse;
     level; room;
     selectedTile; selectedType;
-    blockMap; hazardMap; decalMap;
+    blockMap; hazardMap; decalMap; specialMap; triggerMap;
     roomIndicators;
     state;
     /**
@@ -46,6 +46,8 @@ export default class Editor extends Scene {
         this.blockMap = new Map();
         this.hazardMap = new Map();
         this.decalMap = new Map();
+        this.triggerMap = new Map();
+        this.specialMap = new Map();
 
         for (let i = 0; i < tiles.block.length; i++)
             this.blockMap.set(tiles.block[i].name, i+1);
@@ -53,6 +55,10 @@ export default class Editor extends Scene {
             this.hazardMap.set(`${tiles.hazard[i].name}_${tiles.hazard[i].facing}`, i+1);
         for (let i = 0; i < tiles.decal.length; i++)
             this.decalMap.set(tiles.decal[i].name, i+1);
+        for (let i = 0; i < tiles.special.length; i++)
+            this.specialMap.set(tiles.special[i].name, i+1);
+        for (let i = 0; i < tiles.trigger.length; i++)
+            this.triggerMap.set(tiles.trigger[i].name, i+1);
 
         addEventListener("editor_tileselect", (e) => {
             this.selectedTile = e.detail.name;

@@ -40,7 +40,7 @@ export default class Sprite extends Node {
      * 
      * @param {Vector} move 
      */
-    update(move = new Vector()) {
+    move(move = new Vector()) {
         this.pos.add(move);
     }
 }

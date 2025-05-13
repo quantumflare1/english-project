@@ -81,7 +81,7 @@ function load() {
                         defaultSprite = "default";
                 }
                 const thisTile = Assets.sprites[i.name];
-                const spr = thisTile.sprite[thisTile.name[defaultSprite]];
+                const spr = thisTile.sprite[thisTile.name[defaultSprite]]; // errorrss
                 const osc = new OffscreenCanvas(spr[2], spr[3]);
                 const osctx = osc.getContext("2d");
                 osctx.putImageData(Assets.spriteCtx.getImageData(spr[0], spr[1], spr[2], spr[3]), 0, 0);
@@ -98,6 +98,7 @@ function load() {
         loadTiles("block");
         loadTiles("hazard");
         loadTiles("decal");
+        loadTiles("special");
 
         addEventListener("game_sceneloaded", () => {
             requestAnimationFrame(tick);
@@ -118,6 +119,8 @@ function load() {
     $("blockTab").addEventListener("click", () => { hideTabs($("blocks")); scene.state = "room"; });
     $("hazardTab").addEventListener("click", () => { hideTabs($("hazards")); scene.state = "room"; });
     $("decalTab").addEventListener("click", () => { hideTabs($("decals")); scene.state = "room"; });
+    $("specialTab").addEventListener("click", () => { hideTabs($("specials")); scene.state = "room"; });
+    $("triggerTab").addEventListener("click", () => { hideTabs($("triggers")); scene.state = "room"; });
     $("roomTab").addEventListener("click", () => { hideTabs($("room")); updateRoomInfo(); scene.state = "level"; });
     $("name").addEventListener("change", metaUpdate("name"));
     $("spawnRoom").addEventListener("change", metaUpdate("spawnRoom", parseInt));

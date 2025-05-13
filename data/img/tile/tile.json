@@ -91,11 +91,29 @@
             "name": "pickUpGrapple",
             "trigger": "touch",
             "type": "impulse",
-            "maxActivations": 1,
-            "sprite": {
-                "name": "tile_placeholder",
-                "path": "./data/assets/tiles"
-            }
+            "maxActivations": 1
+        }
+    ],
+    "special": [
+        {
+            "offX": 0,
+            "offY": 0,
+            "w": 10,
+            "h": 10,
+            "name": "tile_placeholder",
+            "path": "./data/assets/tiles",
+            "functions": [
+                {
+                "trigger": "touch",
+                "name": "startMove",
+                "params": [60, 30, 0]
+                },
+                {
+                "trigger": "active",
+                "name": "move",
+                "params": []
+                }
+            ]
         }
     ]
 }

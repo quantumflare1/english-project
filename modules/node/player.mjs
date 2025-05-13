@@ -139,7 +139,7 @@ export default class Player extends Entity {
             this.vel.zero();
             if (this.respawnTime <= 0) {
                 this.isDead = false;
-                super.update(new Vector(-this.pos.x + this.spawnX, -this.pos.y + this.spawnY));
+                super.move(new Vector(-this.pos.x + this.spawnX, -this.pos.y + this.spawnY));
                 this.jumpBufferTime = 0;
                 this.coyoteTime = 0;
                 this.respawnTime = RESPAWN_TICKS;
@@ -183,7 +183,7 @@ export default class Player extends Entity {
         this.prevY = this.pos.y;
 
         this.setSprite();
-        super.update(this.vel);
+        super.move(this.vel);
         dispatchEvent(new Event.CameraMoveEvent(this.pos.x + CAMERA_OFFSET.x, this.pos.y + CAMERA_OFFSET.y));
 
         this.collide();
@@ -386,6 +386,17 @@ export default class Player extends Entity {
                 i.disabled = false;
             }
         }
+        for (const i of this.level.specialList) {
+            if (i.touchScripts.length > 0 && this.hitbox.collidesWith(i.hitbox)) {
+                if (!i.disabled && !i.done) {
+                    i.ontouch();
+                    i.disabled = true;
+                }
+            }
+            else {
+                i.disabled = false;
+            }
+        }
 
         // broad phase
         const overlappingTiles = [];
@@ -407,11 +418,11 @@ export default class Player extends Entity {
             else if (moveY < 0) kickY = (i.pos.y + i.dimensions.x) - this.pos.y; // no clue if this should be i.pos.y + i.dimensions.y
 
             if (!kickX && kickY) {
-                super.update(new Vector(0, kickY));
+                super.move(new Vector(0, kickY));
                 moveY -= kickY;
             }
             if (!kickY && kickX) {
-                super.update(new Vector(kickX, 0));
+                super.move(new Vector(kickX, 0));
                 moveX -= kickX;
             }
 
@@ -420,10 +431,10 @@ export default class Player extends Entity {
             
             if (kickX && kickY) {
                 if (Math.abs(kickXPercent) < Math.abs(kickYPercent)) { // kick x axis mostly
-                    super.update(new Vector(kickX, 0));
+                    super.move(new Vector(kickX, 0));
                 }
                 else { // kick y axis mostly
-                    super.update(new Vector(0, kickY));
+                    super.move(new Vector(0, kickY));
                 }
             }
             this.grappleTime = 0;

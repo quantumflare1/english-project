@@ -28,7 +28,7 @@ export default class Trigger extends Rect {
         this.done = false;
         this.activations = 0;
         this.maxActivations = maxActivations;
-        this.func = func;
+        this.func = func.bind(this);
     }
     update() {
         if (this.activations === this.maxActivations)

@@ -24,12 +24,7 @@ export default class AnimatedSprite extends Sprite {
         this.startFrame = 0;
         this.endFrame = sources.length - 1;
     }
-    /**
-     * 
-     * @param {Vector} move 
-     */
-    update(move) {
-        super.update(move);
+    update() {
         this.curTicks++;
 
         if (this.curTicks === this.frameTime) {

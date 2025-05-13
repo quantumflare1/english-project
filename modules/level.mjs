@@ -10,15 +10,17 @@ import Vector from "./misc/vector.mjs";
 import Player from "./node/player.mjs";
 import Text from "./node/text.mjs";
 import Trigger from "./node/trigger.mjs";
+import Special from "./node/special.mjs";
 
 import tiles from "../data/img/tile/tile.json" with { type: "json" };
 import { options } from "./options.mjs";
-import * as triggers from "./triggers.mjs";
+import * as triggers from "./scripts.mjs";
 
 class Level extends Scene {
     blockList = [];
     hazardList = [];
     triggerList = [];
+    specialList = [];
 
     roomBlocks = [];
 
@@ -165,6 +167,25 @@ class Level extends Scene {
                             this.addNode(triggerRect);
                         }
                         this.triggerList.push(triggerRect);
+                    }
+
+                    if (i.specials[r][c] !== 0) {
+                        const thisSpecial = tiles.special[i.specials[r][c]-1];
+                        const pixelPos = new Vector(globalPos.x + thisSpecial.offX, globalPos.y + thisSpecial.offY);
+                        
+                        const thisSpecialSprite = Assets.sprites[thisSpecial.name];
+                        const textureId = thisSpecialSprite.name.default; // placeholder!!
+                        const texDetails = thisSpecialSprite.sprite[textureId];
+
+                        const special = new Special(pixelPos.x, pixelPos.y, new Rect(
+                            pixelPos.x, pixelPos.y, thisSpecial.w, thisSpecial.h), new Sprite(
+                            pixelPos.x + texDetails[4], pixelPos.y + texDetails[5], thisSpecial.z,
+                            new Rect(texDetails[0], texDetails[1], texDetails[2], texDetails[3]),
+                        1), ...thisSpecial.functions)
+
+                        this.addNode(special);
+                        
+                        this.specialList.push(special);
                     }
                 }
             }

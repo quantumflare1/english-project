@@ -22,14 +22,10 @@ export default class Entity extends Node {
         this.sprite = sprite;
         this.z = this.sprite.z;
     }
-    /**
-     * 
-     * @param {Vector} move 
-     */
-    update(move = new Vector()) {
+    move(move = new Vector()) {
         this.pos.add(move);
-        this.sprite.update(move);
-        this.hitbox.update(move);
+        this.sprite.move(move);
+        this.hitbox.move(move);
     }
     /**
      * 
