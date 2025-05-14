@@ -122,6 +122,17 @@ function load() {
     $("specialTab").addEventListener("click", () => { hideTabs($("specials")); scene.state = "room"; });
     $("triggerTab").addEventListener("click", () => { hideTabs($("triggers")); scene.state = "room"; });
     $("roomTab").addEventListener("click", () => { hideTabs($("room")); updateRoomInfo(); scene.state = "level"; });
+    addEventListener("editor_tileselect", (e) => {
+        for (const i of $("editMenu").children) {
+            for (const j of i.children) {
+                if (j.id === `${e.detail.type}_${e.detail.name}`) j.classList.add("selected");
+                else j.classList.remove("selected");
+            }
+        }
+    })
+    addEventListener("editor_editspecial", (e) => {
+
+    });
     $("name").addEventListener("change", metaUpdate("name"));
     $("spawnRoom").addEventListener("change", metaUpdate("spawnRoom", parseInt));
 
@@ -133,7 +144,12 @@ function load() {
     $("newRoom").addEventListener("click", () => {
         scene.createRoom();
     });
-    $("export").addEventListener("click", () => { download(scene.level); });
+    $("export").addEventListener("click", exportFile);
+    $("import").addEventListener("click", importFile);
+    addEventListener("editor_import", (e) => {
+        $("name").value = e.detail.name;
+        $("spawnRoom").value = e.detail.spawnRoom;
+    });
 
     addEventListener("editor_changeroom", () => {
         updateRoomInfo();
@@ -172,14 +188,52 @@ function roomUpdate(detail, parser = (v) => { return v; }) {
 }
 
 // half taken from thirtydollar.website half from stackoverflow
-function download(data) {
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
-    let downloader = document.createElement('a');
-    downloader.href = dataStr;
-    downloader.dataset.downloadurl = ['text/json', downloader.download, downloader.href].join(':');
-    downloader.style.display = "none"; downloader.download = data.meta.name + ".json";
-    downloader.target = "_blank"; document.body.appendChild(downloader);
-    downloader.click(); document.body.removeChild(downloader);
+function safeFilename(str) { return str.replace(/[/\\:*?"<>|]/g, ""); }
+
+function importFile() {
+    if ("showOpenFilePicker" in window) {
+        showOpenFilePicker({
+            excludeAcceptAllOption: true, id: 1, types: [{
+                description: "Angalta Level format",
+                accept: { "application/json": [".json", ".angle"] }
+            }]
+        }).then((res) => {
+            res[0].getFile().then((res) => {
+                res.text().then((res) => {
+                    scene.importLevel(JSON.parse(res));
+                });
+            });
+        });
+    }
+    else {
+        $("importWarning").classList.remove("hide");
+    }
+}
+
+function exportFile() {
+    const data = scene.level;
+    if ("showSaveFilePicker" in window) {
+        showSaveFilePicker({
+            excludeAcceptAllOption: true, id: 1, types: [{
+                description: "Angalta Level format",
+                accept: { "application/json": [".json", ".angle"] }
+            }],
+            suggestedName: scene.level.meta.name + ".angle"
+        }).then(async (res) => {
+            const writeStream = await res.createWritable();
+            await writeStream.write(JSON.stringify(data));
+            await writeStream.close();
+        });
+    }
+    else {
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
+        let downloader = document.createElement('a');
+        downloader.href = dataStr;
+        downloader.dataset.downloadurl = ['text/json', downloader.download, downloader.href].join(':');
+        downloader.style.display = "none"; downloader.download = safeFilename(data.meta.name) + ".json";
+        downloader.target = "_blank"; document.body.appendChild(downloader);
+        downloader.click(); document.body.removeChild(downloader);
+    }
 }
 
 addEventListener("contextmenu", (e) => { e.preventDefault() });

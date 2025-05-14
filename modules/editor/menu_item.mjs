@@ -13,6 +13,7 @@ export default class MenuItem {
         img.height *= 4;
         
         this.div.appendChild(img);
+        this.div.id = `${type}_${name}`;
 
         this.div.classList.add("clickable", "tileOption");
         this.div.addEventListener("click", () => {

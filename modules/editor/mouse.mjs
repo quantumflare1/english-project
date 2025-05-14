@@ -1,4 +1,4 @@
-import { CameraZoomEvent } from "../event.mjs";
+import { CameraSnapEvent, CameraZoomEvent } from "../event.mjs";
 import Vector from "../misc/vector.mjs";
 
 export default class Mouse {

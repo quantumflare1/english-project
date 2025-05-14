@@ -90,6 +90,10 @@ input[type="number"] {
     float: right;
 }
 
+#fileStuff * {
+    margin: 4px;
+}
+
 .hide {
     display: none;
 }
@@ -106,10 +110,20 @@ input[type="number"] {
 }
 
 .clickable {
+    border: solid 4px #333;
     cursor: pointer;
 }
 
 .tileOption {
-    padding: 2px;
+    padding: 4px;
+    padding-bottom: 0;
     image-rendering: pixelated;
+}
+
+.selected {
+    border: solid 4px yellow;
+}
+
+.important {
+    color: #ff4040;
 }
