@@ -81,8 +81,9 @@ function load() {
                         defaultSprite = "default";
                 }
                 const thisTile = Assets.sprites[i.name];
-                const spr = thisTile.sprite[thisTile.name[defaultSprite]]; // errorrss
-                const osc = new OffscreenCanvas(spr[2], spr[3]);
+                const spr = thisTile.sprite[thisTile.name[defaultSprite]];
+                console.log(spr);
+                const osc = new OffscreenCanvas(spr[2], spr[3]); // ??
                 const osctx = osc.getContext("2d");
                 osctx.putImageData(Assets.spriteCtx.getImageData(spr[0], spr[1], spr[2], spr[3]), 0, 0);
 

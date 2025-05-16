@@ -29,4 +29,9 @@ function move() {
         this.active = false;
 }
 
-export { test, pickUpGrapple, startMove, move };
+function setSpawnPoint(player) {
+    player.setSpawn(this.pos.x + (this.hitbox.dimensions.x - player.hitbox.dimensions.x) / 2, this.pos.y + (this.hitbox.dimensions.y - player.hitbox.dimensions.x) / 2);
+    this.done = true;
+}
+
+export { test, pickUpGrapple, startMove, move, setSpawnPoint };

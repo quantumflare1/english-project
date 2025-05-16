@@ -156,7 +156,7 @@ export default class Editor extends Scene {
             for (const i of this.nodes) {
                 if ("fancy" in i && i.fancy) {
                     for (const node of this.nodes) { // inefficient and slow please patch this later (also visually broken?)
-                        if ("collidesWith" in node && node.collidesWith(i)) {
+                        if (node instanceof Entity && i.collidesWith(node.hitbox)) {
                             this.removeNode(node);
                         }
                     }
@@ -165,7 +165,8 @@ export default class Editor extends Scene {
                     this.roomIndicators.splice(this.room?.id, 1);
 
                     if (i.id === this.room?.id) {
-                        this.room = null;
+                        this.room = this.level.rooms[0];
+                        this.roomIndicators[0].fancy = true;
                         dispatchEvent(new Event("editor_changeroom"));
                     } else if (this.room) {
                         this.room.id = i.id;

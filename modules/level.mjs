@@ -177,6 +177,7 @@ class Level extends Scene {
                         const textureId = thisSpecialSprite.name.default; // placeholder!!
                         const texDetails = thisSpecialSprite.sprite[textureId];
 
+                        console.log(texDetails)
                         const special = new Special(pixelPos.x, pixelPos.y, new Rect(
                             pixelPos.x, pixelPos.y, thisSpecial.w, thisSpecial.h), new Sprite(
                             pixelPos.x + texDetails[4], pixelPos.y + texDetails[5], thisSpecial.z,

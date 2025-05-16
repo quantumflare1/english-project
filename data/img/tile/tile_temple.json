@@ -96,6 +96,7 @@
         "bottom_corner_both": 43,
         "corner_opposite_left": 44,
         "corner_opposite_right": 45,
-        "corner_all": 46
+        "corner_all": 46,
+        "default": 0
     }
 }

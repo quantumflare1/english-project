@@ -36,9 +36,9 @@ export default class Special extends Entity {
     update() {
         if (this.active) this.onactive();
     }
-    ontouch() {
+    ontouch(player) {
         for (let i = 0; i < this.touchScripts.length; i++)
-            this.touchScripts[i](...this.touchParams[i]);
+            this.touchScripts[i](...this.touchParams[i], player);
     }
     onactive() {
         for (let i = 0; i < this.activeScripts.length; i++)

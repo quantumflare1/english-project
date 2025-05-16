@@ -389,7 +389,7 @@ export default class Player extends Entity {
         for (const i of this.level.specialList) {
             if (i.touchScripts.length > 0 && this.hitbox.collidesWith(i.hitbox)) {
                 if (!i.disabled && !i.done) {
-                    i.ontouch();
+                    i.ontouch(this);
                     i.disabled = true;
                 }
             }
@@ -485,5 +485,9 @@ export default class Player extends Entity {
         }
 
         if (this.touching.get("up")) this.vel.y = 0;
+    }
+    setSpawn(x, y) {
+        this.spawnX = x;
+        this.spawnY = y;
     }
 }

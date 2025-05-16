@@ -100,6 +100,7 @@
             "offY": 0,
             "w": 10,
             "h": 10,
+            "z": 50,
             "name": "tile_placeholder",
             "path": "./data/assets/tiles",
             "functions": [
@@ -112,6 +113,22 @@
                 "trigger": "active",
                 "name": "move",
                 "params": []
+                }
+            ]
+        },
+        {
+            "offX": 0,
+            "offY": 0,
+            "w": 10,
+            "h": 10,
+            "z": -1,
+            "name": "tile_temple",
+            "path": "./data/assets/tiles",
+            "functions": [
+                {
+                    "trigger": "touch",
+                    "name": "setSpawnPoint",
+                    "params": []
                 }
             ]
         }
