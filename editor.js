@@ -5,6 +5,7 @@ import Assets from "./modules/assets.mjs";
 import Mouse from "./modules/editor/mouse.mjs";
 
 import tiles from "./data/img/tile/tile.json" with { type: "json" };
+import { AssetLoadEvent, EditorImportEvent, EditorRoomChangeEvent, EditorTileSelectEvent, FreezeTimeEvent, SceneChangeEvent, SceneLoadEvent } from "./modules/event.mjs";
 
 const $ = (l) => document.getElementById(l);
 const TPS = 60;
@@ -60,11 +61,11 @@ function tick(ms) {
 }
 
 function load() {
-    addEventListener("game_freezetime", (e) => {
+    addEventListener(FreezeTimeEvent.code, (e) => {
         freezeTicks = e.detail;
     });
 
-    addEventListener("game_assetloaded", async () => {
+    addEventListener(AssetLoadEvent.code, async () => {
         function loadTiles(tileType) {
             const menu = $(`${tileType}s`);
             let defaultSprite;
@@ -101,7 +102,7 @@ function load() {
         loadTiles("decal");
         loadTiles("special");
 
-        addEventListener("game_sceneloaded", () => {
+        addEventListener(SceneLoadEvent.code, () => {
             requestAnimationFrame(tick);
         });
 
@@ -112,7 +113,7 @@ function load() {
 
         //scene = createMainMenu();
     });
-    addEventListener("game_scenechange", (e) => {
+    addEventListener(SceneChangeEvent.code, (e) => {
         scene = e.detail;
     });
     Assets.load();
@@ -123,7 +124,7 @@ function load() {
     $("specialTab").addEventListener("click", () => { hideTabs($("specials")); scene.state = "room"; });
     $("triggerTab").addEventListener("click", () => { hideTabs($("triggers")); scene.state = "room"; });
     $("roomTab").addEventListener("click", () => { hideTabs($("room")); updateRoomInfo(); scene.state = "level"; });
-    addEventListener("editor_tileselect", (e) => {
+    addEventListener(EditorTileSelectEvent.code, (e) => {
         for (const i of $("editMenu").children) {
             for (const j of i.children) {
                 if (j.id === `${e.detail.type}_${e.detail.name}`) j.classList.add("selected");
@@ -131,9 +132,6 @@ function load() {
             }
         }
     })
-    addEventListener("editor_editspecial", (e) => {
-
-    });
     $("name").addEventListener("change", metaUpdate("name"));
     $("spawnRoom").addEventListener("change", metaUpdate("spawnRoom", parseInt));
 
@@ -147,12 +145,12 @@ function load() {
     });
     $("export").addEventListener("click", exportFile);
     $("import").addEventListener("click", importFile);
-    addEventListener("editor_import", (e) => {
+    addEventListener(EditorImportEvent.code, (e) => {
         $("name").value = e.detail.name;
         $("spawnRoom").value = e.detail.spawnRoom;
     });
 
-    addEventListener("editor_changeroom", () => {
+    addEventListener(EditorRoomChangeEvent.code, () => {
         updateRoomInfo();
     });
 }

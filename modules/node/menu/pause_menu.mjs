@@ -1,12 +1,12 @@
 import Room from "../room.mjs";
 import MenuElement from "./element.mjs";
 import { unpackMatrix } from "../../misc/util.mjs";
-import Scene from "../../scene.mjs";
 import Camera from "../camera.mjs";
 import Cursor from "./cursor.mjs";
 
 import { SceneLoadEvent } from "../../event.mjs";
-import * as MenuData from "../../scripts/main_data.mjs";
+import * as MenuData from "../../scripts/pause_data.mjs";
+import PauseScene from "../../pause.mjs";
 
 
 function connectGraph(arr, target) {
@@ -19,37 +19,37 @@ function connectGraph(arr, target) {
     }
 }
 
-function createMainMenu() {
-    // note: if text is an odd number of pixels wide then you have to add a 0.5px offset for them to render properly (stupid as hell)
-    const mainMenuElements = [];
-    const mainMenus = [];
+function createPauseMenu(prevScene) {
+    const menuElements = [];
+    const menus = [];
 
     for (let i = 0; i < MenuData.rooms.length; i++) {
-        mainMenus.push(new Room(...MenuData.rooms[i].params));
-        mainMenuElements.push([]);
+        menus.push(new Room(...MenuData.rooms[i].params));
+        menuElements.push([]);
 
         const elData = MenuData.elements[i];
         for (let j = 0; j < elData.length; j++) {
-            elData[j].params[0] += mainMenus[i].pos.x * 10;
-            elData[j].params[1] += mainMenus[i].pos.y * 10;
-            mainMenuElements[i].push(new MenuElement(...elData[j].params));
+            elData[j].params[0] += menus[i].pos.x * 10;
+            elData[j].params[1] += menus[i].pos.y * 10;
+            menuElements[i].push(new MenuElement(...elData[j].params));
         }
-        connectGraph(elData, mainMenuElements[i]);
+        connectGraph(elData, menuElements[i]);
     }
-    connectGraph(MenuData.rooms, mainMenus);
+    connectGraph(MenuData.rooms, menus);
     
-    const scene = new Scene("main", new Camera(0, 0, 1), ...mainMenus);
+    const scene = new PauseScene(new Camera(0, 0, 1), prevScene, ...menus);
     for (const i of MenuData.other)
         scene.addNode(i);
-    for (const i of mainMenuElements)
+    for (const i of menuElements)
         for (const j of i)
             scene.addNode(j);
     
-    const cursor = new Cursor(scene, ...unpackMatrix(mainMenuElements));
+    const cursor = new Cursor(scene, ...unpackMatrix(menuElements));
     scene.addNode(cursor);
 
-    dispatchEvent(new SceneLoadEvent()); // todo: figure out putting this right into the scene class
+    dispatchEvent(new SceneLoadEvent());
     return scene;
 }
 
-export { createMainMenu };
+// todo: put this and createMainMenu into one generic method
+export { createPauseMenu };

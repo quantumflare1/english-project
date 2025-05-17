@@ -2,7 +2,7 @@ import Renderer from "./modules/renderer.mjs";
 import * as Audio from "./modules/audio.mjs";
 import Assets from "./modules/assets.mjs";
 import { createMainMenu } from "./modules/node/menu/main_menu.mjs";
-import { FPSUpdateEvent, TimeUpdateEvent } from "./modules/event.mjs";
+import { AssetLoadEvent, FPSUpdateEvent, FreezeTimeEvent, PauseEvent, SceneChangeEvent, SceneLoadEvent, TimeUpdateEvent, UnpauseEvent } from "./modules/event.mjs";
 
 const $ = (l) => document.getElementById(l);
 const TPS = 60;
@@ -37,7 +37,7 @@ function tick(ms) {
         performance.mark("tick");
         lastTickTime += MS_PER_TICK;
 
-        if (freezeTicks > 0) freezeTicks--;
+        if (freezeTicks !== 0) freezeTicks--;
         
         else {
             // avoid speedup if you tab out (or lag for more than 3 ticks)
@@ -71,14 +71,14 @@ function load() {
     //Audio.load("./data/assets/bgm/bgm_temple.ogg");
 
     //addEventListener("click", audioStarter);
-    addEventListener("game_freezetime", (e) => {
+    addEventListener(FreezeTimeEvent.code, (e) => {
         freezeTicks = e.detail;
     });
     //  addEventListener("keydown", (e) => {e.preventDefault()});
     //const bg = new Thing.Entity(0, 0, 320, 180, "./data/assets/background/bg_temple.png", -100, new Thing.SpriteConfig(0, 0, 0, 0, 320, 180), 1);
 
-    addEventListener("game_assetloaded", async () => {
-        addEventListener("game_sceneloaded", () => {
+    addEventListener(AssetLoadEvent.code, async () => {
+        addEventListener(SceneLoadEvent.code, () => {
             requestAnimationFrame(tick);
         });
 
@@ -87,7 +87,7 @@ function load() {
         scene = createMainMenu();
         debugDraw();
     });
-    addEventListener("game_scenechange", (e) => {
+    addEventListener(SceneChangeEvent.code, (e) => {
         scene = e.detail;
     });
     Assets.load();

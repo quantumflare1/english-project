@@ -1,7 +1,7 @@
-import Player from "./node/player.mjs";
-import { PlayerStateChangeEvent } from "./event.mjs";
-import Vector from "./misc/vector.mjs";
-import { lerp } from "./misc/util.mjs";
+import Player from "../node/player.mjs";
+import { PlayerStateChangeEvent } from "../event.mjs";
+import Vector from "../misc/vector.mjs";
+import { lerp } from "../misc/util.mjs";
 
 function test() {
     console.log("Activated!")
@@ -11,7 +11,7 @@ function pickUpGrapple() {
     dispatchEvent(new PlayerStateChangeEvent(Player.states.DEFAULT));
 }
 
-function startMove(time, moveX, moveY) {
+function startMove(player, time, moveX, moveY) {
     this.targetTime = time;
     this.targetPos = new Vector(this.pos.x + moveX, this.pos.y + moveY);
     this.startPos = this.pos.copy();
@@ -34,4 +34,9 @@ function setSpawnPoint(player) {
     this.done = true;
 }
 
-export { test, pickUpGrapple, startMove, move, setSpawnPoint };
+function givePlayerGrapple(player) {
+    player.state = Player.states.DEFAULT;
+    this.done = true;
+}
+
+export { test, pickUpGrapple, startMove, move, setSpawnPoint, givePlayerGrapple };

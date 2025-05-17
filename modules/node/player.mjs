@@ -1,6 +1,6 @@
 import { Level } from "../level.mjs";
 import Vector from "../misc/vector.mjs";
-import * as Event from "../event.mjs";
+import { CameraMoveEvent, CameraSnapEvent, CameraZoomEvent, PlayerStateChangeEvent, RoomChangeEvent } from "../event.mjs";
 import config from "../../data/config/player.json" with { type: "json" };
 import Rect from "./rect.mjs";
 import AnimatedSprite from "./animated_sprite.mjs";
@@ -127,9 +127,9 @@ export default class Player extends Entity {
         this.touching.set("left", false);
         this.touching.set("right", false);
 
-        dispatchEvent(new Event.CameraSnapEvent(this.pos.x + CAMERA_OFFSET.x, this.pos.y + CAMERA_OFFSET.y));
+        dispatchEvent(new CameraSnapEvent(this.pos.x + CAMERA_OFFSET.x, this.pos.y + CAMERA_OFFSET.y));
 
-        addEventListener("game_playerstatechange", (e) => {
+        addEventListener(PlayerStateChangeEvent.code, (e) => {
             this.state = e.detail;
         });
     }
@@ -143,7 +143,7 @@ export default class Player extends Entity {
                 this.jumpBufferTime = 0;
                 this.coyoteTime = 0;
                 this.respawnTime = RESPAWN_TICKS;
-                dispatchEvent(new Event.CameraSnapEvent(this.pos.x + CAMERA_OFFSET.x, this.pos.y + CAMERA_OFFSET.y));
+                dispatchEvent(new CameraSnapEvent(this.pos.x + CAMERA_OFFSET.x, this.pos.y + CAMERA_OFFSET.y));
             }
             return;
         }
@@ -184,7 +184,7 @@ export default class Player extends Entity {
 
         this.setSprite();
         super.move(this.vel);
-        dispatchEvent(new Event.CameraMoveEvent(this.pos.x + CAMERA_OFFSET.x, this.pos.y + CAMERA_OFFSET.y));
+        dispatchEvent(new CameraMoveEvent(this.pos.x + CAMERA_OFFSET.x, this.pos.y + CAMERA_OFFSET.y));
 
         this.collide();
 
@@ -225,7 +225,7 @@ export default class Player extends Entity {
             //super.update(new Vector(-(this.pos.x + WIDTH/2), 0));
             //this.pos.x = -WIDTH/2;
             //this.y += Level.level.rooms[Level.curRoomId].leftOffset;
-            dispatchEvent(new Event.RoomChangeEvent("right"));
+            dispatchEvent(new RoomChangeEvent("right"));
         }
         // stop player from going offscreen
         if (this.level.rooms[this.level.curRoom].left && this.pos.x < -WIDTH/2 + roomPos.x) {
@@ -233,21 +233,21 @@ export default class Player extends Entity {
             //super.update(new Vector(nextRoom.dimensions.x * 10, 0));
             //this.pos.x = nextRoom.width * 10 - WIDTH/2;
             //this.y += Level.level.rooms[Level.curRoomId].leftOffset;
-            dispatchEvent(new Event.RoomChangeEvent("left"));
+            dispatchEvent(new RoomChangeEvent("left"));
         }
         if (this.level.rooms[this.level.curRoom].down && this.pos.x > roomDimensions.y - HEIGHT/2 + roomPos.y) {
             const nextRoom = this.level.rooms[this.level.curRoom].down;
             //super.update(new Vector(0, -(this.pos.y + HEIGHT/2)));
             //this.pos.y = -HEIGHT/2;
             //this.y += Level.level.rooms[Level.curRoomId].leftOffset;
-            dispatchEvent(new Event.RoomChangeEvent("down"));
+            dispatchEvent(new RoomChangeEvent("down"));
         }
         if (this.level.rooms[this.level.curRoom].up && this.pos.x < -HEIGHT/2 + roomPos.y) {
             const nextRoom = this.level.rooms[this.level.curRoom].up;
             //super.update(new Vector(0, nextRoom.dimensions.y * 10));
             //this.pos.y = nextRoom.width * 10 - HEIGHT/2;
             //this.y += Level.level.rooms[Level.curRoomId].leftOffset;
-            dispatchEvent(new Event.RoomChangeEvent("up"));
+            dispatchEvent(new RoomChangeEvent("up"));
         }
     }
     processRun() {
@@ -364,6 +364,7 @@ export default class Player extends Entity {
             this.sprite.setStartFrame(sprite.name.facing_right);
             this.sprite.setEndFrame(sprite.name.facing_right);
         }
+        this.sprite.update();
     }
     collide() {
         let moveX = this.pos.x - this.prevX;
@@ -387,7 +388,7 @@ export default class Player extends Entity {
             }
         }
         for (const i of this.level.specialList) {
-            if (i.touchScripts.length > 0 && this.hitbox.collidesWith(i.hitbox)) {
+            if (this.hitbox.collidesWith(i.hitbox)) {
                 if (!i.disabled && !i.done) {
                     i.ontouch(this);
                     i.disabled = true;

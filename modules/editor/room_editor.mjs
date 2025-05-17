@@ -9,7 +9,7 @@ import Assets from "../assets.mjs";
 import Mouse from "./mouse.mjs";
 import Room from "../node/room.mjs";
 
-import { CameraSnapEvent, SceneLoadEvent } from "../event.mjs";
+import { CameraSnapEvent, EditorImportEvent, EditorRoomChangeEvent, EditorTileSelectEvent, SceneLoadEvent } from "../event.mjs";
 
 import tiles from "../../data/img/tile/tile.json" with { type: "json" };
 import RoomBG from "./room_bg.mjs";
@@ -61,7 +61,7 @@ export default class Editor extends Scene {
         for (let i = 0; i < tiles.trigger.length; i++)
             this.triggerMap.set(tiles.trigger[i].name, i+1);
 
-        addEventListener("editor_tileselect", (e) => {
+        addEventListener(EditorTileSelectEvent.code, (e) => {
             this.curTile = e.detail.name;
             this.curType = e.detail.type;
         });
@@ -132,7 +132,7 @@ export default class Editor extends Scene {
                         if (this.room) this.roomIndicators[this.room?.id].fancy = false;
                         this.room = this.level.rooms[i.id];
                         i.fancy = true;
-                        dispatchEvent(new Event("editor_changeroom"));
+                        dispatchEvent(new EditorRoomChangeEvent());
                         break;
                     }
                 }
@@ -167,7 +167,7 @@ export default class Editor extends Scene {
                     if (i.id === this.room?.id) {
                         this.room = this.level.rooms[0];
                         this.roomIndicators[0].fancy = true;
-                        dispatchEvent(new Event("editor_changeroom"));
+                        dispatchEvent(new EditorRoomChangeEvent());
                     } else if (this.room) {
                         this.room.id = i.id;
                     }
@@ -244,7 +244,7 @@ export default class Editor extends Scene {
         this.roomIndicators.push(new RoomBG(room.x, room.y, room.width, room.height, room.id));
         this.roomIndicators[this.room?.id].fancy = true;
         this.addNode(this.roomIndicators[this.roomIndicators.length-1]);
-        dispatchEvent(new Event("editor_changeroom"));
+        dispatchEvent(new EditorRoomChangeEvent());
     }
     importLevel(newLevel) {
         this.level = newLevel;
@@ -281,7 +281,7 @@ export default class Editor extends Scene {
             }
         }
 
-        dispatchEvent(new CustomEvent("editor_import", { detail: { name: this.level.meta.name, spawnRoom: this.level.meta.spawnRoom }}));
+        dispatchEvent(new EditorImportEvent(newLevel.meta.name, newLevel.meta.spawnRoom));
     }
     findObjectWithProperty(arr, ...kvPairs) {
         for (const i of arr) {

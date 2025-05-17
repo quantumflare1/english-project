@@ -18,7 +18,8 @@ const keybinds = {
     jump: " ",
     grapple: "z",
     select: "z",
-    cancel: "x"
+    cancel: "x",
+    pause: "escape"
 };
 
 const defaults = {
@@ -29,7 +30,8 @@ const defaults = {
     jump: " ",
     grapple: "z",
     select: "z",
-    cancel: "x"
+    cancel: "x",
+    pause: "escape"
 };
 
 /**

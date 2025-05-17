@@ -14,7 +14,13 @@ import Special from "./node/special.mjs";
 
 import tiles from "../data/img/tile/tile.json" with { type: "json" };
 import { options } from "./options.mjs";
-import * as triggers from "./scripts.mjs";
+import * as triggers from "./scripts/scripts.mjs";
+import * as specialData from "./scripts/special_data.mjs";
+import AnimatedSprite from "./node/animated_sprite.mjs";
+import { convertToAnimSpriteList } from "./misc/util.mjs";
+import { FPSUpdateEvent, SceneChangeEvent, TimeUpdateEvent } from "./event.mjs";
+import { input, keybinds } from "./inputs.mjs";
+import { createPauseMenu } from "./node/menu/pause_menu.mjs";
 
 class Level extends Scene {
     blockList = [];
@@ -173,16 +179,19 @@ class Level extends Scene {
                         const thisSpecial = tiles.special[i.specials[r][c]-1];
                         const pixelPos = new Vector(globalPos.x + thisSpecial.offX, globalPos.y + thisSpecial.offY);
                         
+                        const thisSpecialData = specialData[thisSpecial.type];
                         const thisSpecialSprite = Assets.sprites[thisSpecial.name];
                         const textureId = thisSpecialSprite.name.default; // placeholder!!
                         const texDetails = thisSpecialSprite.sprite[textureId];
 
-                        console.log(texDetails)
+                        // convertToAnimSpriteList(thisSpecialSprite.sprite)
                         const special = new Special(pixelPos.x, pixelPos.y, new Rect(
-                            pixelPos.x, pixelPos.y, thisSpecial.w, thisSpecial.h), new Sprite(
+                            pixelPos.x, pixelPos.y, thisSpecial.w, thisSpecial.h), thisSpecialData?.animated ? new AnimatedSprite(
+                            pixelPos.x + texDetails[4], pixelPos.y + texDetails[5], thisSpecial.z, convertToAnimSpriteList(thisSpecialSprite.sprite), 0, 5) : new Sprite(
                             pixelPos.x + texDetails[4], pixelPos.y + texDetails[5], thisSpecial.z,
                             new Rect(texDetails[0], texDetails[1], texDetails[2], texDetails[3]),
-                        1), ...thisSpecial.functions)
+                        1),
+                        thisSpecialData?.ontouch?.func, thisSpecialData?.ontouch?.params, thisSpecialData?.whileActive?.func, thisSpecialData?.whileActive?.params)
 
                         this.addNode(special);
                         
@@ -212,7 +221,7 @@ class Level extends Scene {
         if (options.showFps) {
             const fpsDisplay = new Text(5, 14, 100, "60 FPS", "start", "12px font-Pixellari", "white", "follow");
 
-            addEventListener("ui_fpschange", (e) => {
+            addEventListener(FPSUpdateEvent.code, (e) => {
                 fpsDisplay.text = e.detail + " FPS";
             });
             this.addNode(fpsDisplay);
@@ -222,7 +231,7 @@ class Level extends Scene {
             timerDisplay.ms = 0; // secret hardcoded hack
             timerDisplay.startMs = document.timeline.currentTime;
 
-            addEventListener("ui_timechange", (e) => {
+            addEventListener(TimeUpdateEvent.code, (e) => {
                 function force2Digits(num) {
                     if (num < 10) return `0${num}`;
                     return num;
@@ -241,6 +250,13 @@ class Level extends Scene {
                 }
             });
             this.addNode(timerDisplay);
+        }
+    }
+    update() {
+        super.update();
+        if (input.impulse.has(keybinds.pause)) {
+            input.consumeInput(keybinds.pause);
+            dispatchEvent(new SceneChangeEvent(createPauseMenu(this)));
         }
     }
 }

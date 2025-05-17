@@ -1,3 +1,5 @@
+import { EditorTileSelectEvent } from "../event.mjs";
+
 export default class MenuItem {
     div;
     /**
@@ -17,7 +19,7 @@ export default class MenuItem {
 
         this.div.classList.add("clickable", "tileOption");
         this.div.addEventListener("click", () => {
-            dispatchEvent(new CustomEvent("editor_tileselect", { detail: { type: type, name: name } }));
+            dispatchEvent(new EditorTileSelectEvent(type, name));
         });
     }
 }

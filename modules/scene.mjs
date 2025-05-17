@@ -2,6 +2,7 @@ import Node from "./node/node.mjs";
 import Camera from "./node/camera.mjs";
 import Room from "./node/room.mjs";
 import FlatQueue from "https://cdn.jsdelivr.net/npm/flatqueue/+esm";
+import { RoomChangeEvent } from "./event.mjs";
 
 export default class Scene {
     nodes = new Set();
@@ -22,7 +23,7 @@ export default class Scene {
         // who the hell cares anymore
         this.rooms.push(...rooms);
 
-        addEventListener("game_roomtransition", (e) => {
+        addEventListener(RoomChangeEvent.code, (e) => {
             this.curRoom = this.rooms[this.curRoom][e.detail].id;
         });
     }

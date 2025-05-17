@@ -14,9 +14,9 @@ export default class MenuElement extends Text {
      * @param {string} color
      * @param {string} display
      * @param {boolean} shallow 
-     * @param {() => void} interact 
+     * @param {(Scene) => void} interact 
      */
-    constructor(x, y, z = 10, text = "", align = "start", font = "16px Arial", color = "white", display = "follow", shallow = true, interact = () => {}) {
+    constructor(x, y, z = 10, text = "", align = "start", font = "16px Arial", color = "white", display = "follow", shallow = true, interact = (parent) => {}) {
         super(x, y, z, text, align, font, color, display);
         this.isSelected = false;
         this.isShallow = shallow;

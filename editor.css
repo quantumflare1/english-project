@@ -111,6 +111,7 @@ input[type="number"] {
 
 .clickable {
     border: solid 4px #333;
+    height: fit-content;
     cursor: pointer;
 }
 

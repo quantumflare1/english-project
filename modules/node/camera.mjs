@@ -2,6 +2,7 @@ import Node from "./node.mjs";
 import Vector from "../misc/vector.mjs";
 import { lerp } from "../misc/util.mjs";
 import Room from "./room.mjs";
+import { CameraMoveEvent, CameraSnapEvent, CameraZoomEvent } from "../event.mjs";
 
 export default class Camera extends Node {
     static BASE_DIMENSIONS = new Vector(320, 180);
@@ -29,13 +30,13 @@ export default class Camera extends Node {
         this.targetZoom = zoom;
         this.zoom = zoom;
 
-        addEventListener("game_cameramove", (e) => {
+        addEventListener(CameraMoveEvent.code, (e) => {
             this.moveTo(e.detail);
         });
-        addEventListener("game_camerasnap", (e) => {
+        addEventListener(CameraSnapEvent.code, (e) => {
             this.snapTo(e.detail);
         });
-        addEventListener("game_camerazoom", (e) => {
+        addEventListener(CameraZoomEvent.code, (e) => {
             this.zoomTo(e.detail);
         });
     }

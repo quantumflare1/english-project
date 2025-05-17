@@ -103,34 +103,27 @@
             "z": 50,
             "name": "tile_placeholder",
             "path": "./data/assets/tiles",
-            "functions": [
-                {
-                "trigger": "touch",
-                "name": "startMove",
-                "params": [60, 30, 0]
-                },
-                {
-                "trigger": "active",
-                "name": "move",
-                "params": []
-                }
-            ]
+            "type": "test"
         },
         {
-            "offX": 0,
-            "offY": 0,
-            "w": 10,
-            "h": 10,
-            "z": -1,
-            "name": "tile_temple",
+            "offX": -2,
+            "offY": -3,
+            "w": 13,
+            "h": 15,
+            "z": -2,
+            "name": "tile_checkpoint",
             "path": "./data/assets/tiles",
-            "functions": [
-                {
-                    "trigger": "touch",
-                    "name": "setSpawnPoint",
-                    "params": []
-                }
-            ]
+            "type": "checkpoint"
+        },
+        {
+            "offX": 1,
+            "offY": 1,
+            "w": 8,
+            "h": 8,
+            "z": -1,
+            "name": "tile_grapple",
+            "path": "./data/assets/tiles",
+            "type": "grapple"
         }
     ]
 }

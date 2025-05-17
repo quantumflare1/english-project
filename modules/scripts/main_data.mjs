@@ -1,12 +1,12 @@
-import Text from "../text.mjs";
+import Text from "../node/text.mjs";
 
-import { SceneChangeEvent, RoomChangeEvent, CameraZoomEvent, CursorMoveEvent } from "../../event.mjs";
-import { Level } from "../../level.mjs";
-import Sprite from "../sprite.mjs";
-import Rect from "../rect.mjs";
-import { input, keybinds } from "../../inputs.mjs";
-import { displayKey } from "../../misc/util.mjs";
-import { options, setOption } from "../../options.mjs";
+import { SceneChangeEvent, RoomChangeEvent, CameraZoomEvent, CursorMoveEvent } from "../event.mjs";
+import { Level } from "../level.mjs";
+import Sprite from "../node/sprite.mjs";
+import Rect from "../node/rect.mjs";
+import { input, keybinds } from "../inputs.mjs";
+import { displayKey } from "../misc/util.mjs";
+import { options, setOption } from "../options.mjs";
 
 function setTimer() {
     setOption("showTimer", !options.showTimer);

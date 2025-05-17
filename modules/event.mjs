@@ -1,79 +1,143 @@
 class CameraMoveEvent extends CustomEvent {
+    static code = "game_cameramove";
     constructor(x, y) {
-        super("game_cameramove", { detail: { x: x, y: y } });
+        super(CameraMoveEvent.code, { detail: { x: x, y: y } });
     }
 }
 
 class CameraSnapEvent extends CustomEvent {
+    static code = "game_camerasnap";
     constructor(x, y) {
-        super("game_camerasnap", { detail: { x: x, y: y } });
+        super(CameraSnapEvent.code, { detail: { x: x, y: y } });
     }
 }
 
 class CameraZoomEvent extends CustomEvent {
+    static code = "game_camerazoom";
     constructor(zoom) {
-        super("game_camerazoom", { detail: zoom });
+        super(CameraZoomEvent.code, { detail: zoom });
     }
 }
 
 class RoomChangeEvent extends CustomEvent {
+    static code = "game_roomchange";
     constructor(dir) {
-        super("game_roomtransition", { detail: dir });
+        super(RoomChangeEvent.code, { detail: dir });
     }
 }
 
-class AssetLoadEvent extends CustomEvent {
+class AssetLoadEvent extends Event {
+    static code = "game_assetload";
     constructor() {
-        super("game_assetloaded");
+        super(AssetLoadEvent.code);
     }
 }
 
-class SceneLoadEvent extends CustomEvent {
+class SceneLoadEvent extends Event {
+    static code = "game_sceneload";
     constructor() {
-        super("game_sceneloaded");
+        super(SceneLoadEvent.code);
     }
 }
 
 class SceneChangeEvent extends CustomEvent {
+    static code = "game_scenechange";
     constructor(scene) {
-        super("game_scenechange", { detail: scene });
+        super(SceneChangeEvent.code, { detail: scene });
     }
 }
 
 class FreezeTimeEvent extends CustomEvent {
+    static code = "game_freezetime";
     constructor(ticks) {
-        super("game_freezetime", { detail: ticks });
+        super(FreezeTimeEvent.code, { detail: ticks });
     }
 }
 
 class SettingsChangeEvent extends CustomEvent {
+    static code = "game_settingschange";
     constructor(name, value) {
-        super("game_settingschange", { detail: { setting: name, value: value } });
+        super(SettingsChangeEvent.code, { detail: { setting: name, value: value } });
     }
 }
 
 class CursorMoveEvent extends CustomEvent {
+    static code = "game_cursormove";
     constructor(newSelected) {
-        super("game_cursormove", { detail: newSelected });
+        super(CursorMoveEvent.code, { detail: newSelected });
     }
 }
 
 class FPSUpdateEvent extends CustomEvent {
+    static code = "ui_fpschange";
     constructor(fps) {
-        super("ui_fpschange", { detail: fps });
+        super(FPSUpdateEvent.code, { detail: fps });
     }
 }
 
 class TimeUpdateEvent extends CustomEvent {
+    static code = "ui_timechange";
     constructor(fps) {
-        super("ui_timechange", { detail: fps });
+        super(TimeUpdateEvent.code, { detail: fps });
     }
 }
 
 class PlayerStateChangeEvent extends CustomEvent {
+    static code = "game_playerstatechange";
     constructor(state) {
-        super("game_playerstatechange", { detail: state });
+        super(PlayerStateChangeEvent.code, { detail: state });
     }
 }
 
-export { RoomChangeEvent, CameraSnapEvent, CameraMoveEvent, CameraZoomEvent, AssetLoadEvent, SceneLoadEvent, SceneChangeEvent, FreezeTimeEvent, SettingsChangeEvent, CursorMoveEvent, FPSUpdateEvent, TimeUpdateEvent, PlayerStateChangeEvent };
+class PauseEvent extends Event {
+    static code = "game_pause";
+    constructor() {
+        super(PauseEvent.code);
+    }
+}
+
+class UnpauseEvent extends Event {
+    static code = "game_unpause";
+    constructor() {
+        super(UnpauseEvent.code);
+    }
+}
+
+class EditorRoomChangeEvent extends Event {
+    static code = "editor_roomchange";
+    constructor() {
+        super(EditorRoomChangeEvent.code);
+    }
+}
+
+class EditorTileSelectEvent extends CustomEvent {
+    static code = "editor_tileselect";
+    constructor(type, name) {
+        super(EditorTileSelectEvent.code, { detail: {
+            type: type,
+            name: name
+        }});
+    }
+}
+
+class EditorImportEvent extends CustomEvent {
+    static code = "editor_import";
+    constructor(name, spawnRoom) {
+        super(EditorImportEvent.code, { detail: {
+            name: name,
+            spawnRoom: spawnRoom
+        }});
+    }
+}
+
+export {
+    CameraSnapEvent, CameraMoveEvent, CameraZoomEvent,              // camera
+    AssetLoadEvent,                                                 // assets
+    SceneLoadEvent, SceneChangeEvent,                               // scene
+    FreezeTimeEvent, PauseEvent, UnpauseEvent,                      // control
+    RoomChangeEvent,                                                // room
+    SettingsChangeEvent, CursorMoveEvent,                           // menu
+    FPSUpdateEvent, TimeUpdateEvent,                                // ui
+    PlayerStateChangeEvent,                                         // player
+    EditorRoomChangeEvent, EditorTileSelectEvent, EditorImportEvent // editor
+};

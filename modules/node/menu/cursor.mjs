@@ -1,5 +1,5 @@
 import { input, keybinds } from "../../inputs.mjs";
-import { CameraMoveEvent, CameraSnapEvent } from "../../event.mjs";
+import { CameraMoveEvent, CameraSnapEvent, CursorMoveEvent } from "../../event.mjs";
 import Node from "../node.mjs";
 import MenuElement from "./element.mjs";
 import Camera from "../camera.mjs";
@@ -7,17 +7,19 @@ import Camera from "../camera.mjs";
 export default class Cursor extends Node {
     elements;
     curElement;
+    parent;
     /**
      * 
      * @param  {...MenuElement} elements 
      */
-    constructor(...elements) {
+    constructor(parent, ...elements) {
         super();
 
+        this.parent = parent;
         this.elements = [...elements];
         this.curElement = elements[0];
 
-        addEventListener("game_cursormove", (e) => {
+        addEventListener(CursorMoveEvent.code, (e) => {
             this.curElement.toggleHighlight();
             this.curElement = elements[e.detail]; // this fucking sucks. please change this
             dispatchEvent(new CameraSnapEvent(this.curElement.pos.x - Camera.BASE_DIMENSIONS.x/2, this.curElement.pos.y - Camera.BASE_DIMENSIONS.y/2));
@@ -60,7 +62,7 @@ export default class Cursor extends Node {
         if (input.impulse.has(keybinds.select)) {
             input.consumeInput(keybinds.select);
             if (this.curElement.isShallow) {
-                this.curElement.interact();
+                this.curElement.interact(this.parent);
             }
             else {
                 this.curElement.toggleSelect();

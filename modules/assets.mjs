@@ -2,7 +2,7 @@ import assets from "../data/config/assets.json" with { type: "json" };
 import { AssetLoadEvent } from "./event.mjs";
 
 export default class Assets {
-    static spritesheet = new OffscreenCanvas(800, 200); // couldn't figure dynamic resizing out so enjoy the hardcoded numbers
+    static spritesheet = new OffscreenCanvas(1000, 180); // couldn't figure dynamic resizing out so enjoy the hardcoded numbers
     static sprites = {};
     static spriteCtx = this.spritesheet.getContext("2d");
     static audio = [];
@@ -61,7 +61,7 @@ export default class Assets {
             }
         }
 
-        dispatchEvent(new Event("game_assetloaded"));
+        dispatchEvent(new AssetLoadEvent());
         console.log("done")
     }
     static async #getFile(path) {
