@@ -38,7 +38,9 @@ export default class Editor extends Scene {
         this.level = {
             meta: {
                 name: "default",
-                spawnRoom: 0
+                spawnRoom: 0,
+                spawnX: 0,
+                spawnY: 0
             },
             rooms: [ this.room ]
         };
@@ -65,6 +67,7 @@ export default class Editor extends Scene {
             this.curTile = e.detail.name;
             this.curType = e.detail.type;
         });
+        addEventListener("mousemove", this.moveCamera.bind(this));
 
         this.roomIndicators = [new RoomBG(this.room?.x, this.room?.y, this.room?.width, this.room?.height, 0)];
         this.roomIndicators[0].fancy = true;
@@ -111,11 +114,12 @@ export default class Editor extends Scene {
             this.addNode(entity);
         }
     }
-    update() {
-        if (this.mouse.pressed.has(1)) {
-            dispatchEvent(new CameraSnapEvent(this.camera.pos.x - 2 * this.mouse.movement.x, this.camera.pos.y - 2 * this.mouse.movement.y));
+    moveCamera() {
+        if (this.mouse.pressed.has(1) || (this.state === "level" && this.mouse.pressed.has(2))) {
+            dispatchEvent(new CameraSnapEvent(this.camera.pos.x - this.mouse.movement.x, this.camera.pos.y - this.mouse.movement.y));
         }
-
+    }
+    update() {
         const mouseTile = new Vector(Math.floor((this.mouse.pos.x + this.camera.pos.x) / (10 * this.camera.zoom)) - this.room?.x, Math.floor((this.mouse.pos.y + this.camera.pos.y) / (10 * this.camera.zoom) - this.room?.y));
         
         if (this.mouse.pressed.has(0)) {
@@ -145,11 +149,8 @@ export default class Editor extends Scene {
                     const tilePos = new Vector(mouseTile.x * 10 + thisTile.offX + this.room?.x * 10, mouseTile.y * 10 + thisTile.offY + this.room?.y * 10);
 
                     this.room[`${this.curType}s`][mouseTile.y][mouseTile.x] = 0;
-                    this.removeNode(this.findObjectWithProperty(this.nodes, { key: "pos", value: tilePos }));
+                    this.removeNode(this.findObjectWithProperty(this.nodes, { key: "pos", value: tilePos }, { key: "hitbox", value: new Rect(tilePos.x, tilePos.y, thisTile.w, thisTile.h) }));
                 }
-            }
-            else if (this.state === "level") {
-                dispatchEvent(new CameraSnapEvent(this.camera.pos.x - 2 * this.mouse.movement.x, this.camera.pos.y - 2 * this.mouse.movement.y));
             }
         }
         if (this.state === "level" && input.impulse.has("delete")) {
@@ -287,11 +288,18 @@ export default class Editor extends Scene {
         for (const i of arr) {
             let matchingPairs = 0;
             for (const j of kvPairs) {
+                if (!(j.key in i)) break;
                 if (!i[j.key].equals(j.value)) break;
                 matchingPairs++;
                 if (matchingPairs === kvPairs.length)
                     return i;
             }
+        }
+        return null;
+    }
+    findObjectOfType(arr, type) {
+        for (const i of arr) {
+            if (i instanceof type) return i;
         }
         return null;
     }

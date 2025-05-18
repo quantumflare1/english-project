@@ -94,6 +94,12 @@ input[type="number"] {
     margin: 4px;
 }
 
+#spawnRoomGroup {
+    display: flex;
+    flex-direction: column;
+    align-items: end;
+}
+
 .hide {
     display: none;
 }

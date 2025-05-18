@@ -134,6 +134,8 @@ function load() {
     })
     $("name").addEventListener("change", metaUpdate("name"));
     $("spawnRoom").addEventListener("change", metaUpdate("spawnRoom", parseInt));
+    $("spawnX").addEventListener("change", metaUpdate("spawnX", parseInt));
+    $("spawnY").addEventListener("change", metaUpdate("spawnY", parseInt));
 
     $("roomX").addEventListener("change", roomUpdate("x", parseInt));
     $("roomY").addEventListener("change", roomUpdate("y", parseInt));

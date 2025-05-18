@@ -224,7 +224,7 @@ class Level extends Scene {
             rooms.push(thisRoom);
         }
         this.addRooms(...rooms);
-        this.addNode(new Player(30, 0, this));
+        this.addNode(new Player(json.meta.spawnX, json.meta.spawnY, this));
 
         if (options.showFps) {
             const fpsDisplay = new Text(5, 14, 100, "60 FPS", "start", "12px font-Pixellari", "white", "follow");

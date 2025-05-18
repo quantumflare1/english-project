@@ -33,4 +33,11 @@ export default class Rect extends Node {
     move(move) {
         this.pos.add(move);
     }
+    /**
+     * 
+     * @param {Rect} r 
+     */
+    equals(r) {
+        return this.pos.equals(r.pos) && this.dimensions.equals(r.dimensions);
+    }
 }
