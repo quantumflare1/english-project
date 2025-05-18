@@ -7,8 +7,8 @@
         ],
         "files": [
             ["bg_menu", "bg_temple"],
-            ["player"],
-            ["tile_temple", "tile_spike", "tile_temple2", "tile_placeholder", "tile_checkpoint", "tile_grapple"]
+            ["player", "tile_checkpoint"],
+            ["tile_temple", "tile_spike", "tile_temple2", "tile_placeholder", "tile_grapple", "tile_pedestal", "tile_templeplatform"]
         ]
     },
     "audio": {

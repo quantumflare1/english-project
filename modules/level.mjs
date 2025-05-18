@@ -11,6 +11,7 @@ import Player from "./node/player.mjs";
 import Text from "./node/text.mjs";
 import Trigger from "./node/trigger.mjs";
 import Special from "./node/special.mjs";
+import Platform from "./node/platform.mjs";
 
 import tiles from "../data/img/tile/tile.json" with { type: "json" };
 import { options } from "./options.mjs";
@@ -50,15 +51,24 @@ class Level extends Scene {
                         const thisBlock = tiles.block[i.blocks[r][c]-1];
                         const thisBlockSprite = Assets.sprites[thisBlock.name];
                         let textureId = 0;
+
+                        const nwBlock = (c - 1 >= 0 && r - 1 >= 0) ?            i.blocks[r-1][c-1]-1 : 0;
+                        const nBlock = (r - 1 >= 0) ?                           i.blocks[r-1][c]-1 : 0;
+                        const neBlock = (c + 1 < i.width && r - 1 >= 0) ?       i.blocks[r-1][c+1]-1 : 0;
+                        const eBlock = (c + 1 < i.width) ?                      i.blocks[r][c+1]-1 : 0;
+                        const seBlock = (c + 1 < i.width && r + 1 < i.height) ? i.blocks[r+1][c+1]-1 : 0;
+                        const sBlock = (r + 1 < i.height) ?                     i.blocks[r+1][c]-1 : 0;
+                        const swBlock = (c - 1 >= 0 && r + 1 < i.height) ?      i.blocks[r+1][c-1]-1 : 0;
+                        const wBlock = (c - 1 >= 0) ?                           i.blocks[r][c-1]-1 : 0;
     
-                        const nw = (c - 1 >= 0 && r - 1 >= 0) ?             i.blocks[r-1][c-1] > 0 : true;
-                        const n =  (r - 1 >= 0) ?                           i.blocks[r-1][c] > 0 : true;
-                        const ne = (c + 1 < i.width && r - 1 >= 0) ?        i.blocks[r-1][c+1] > 0 : true;
-                        const e =  (c + 1 < i.width) ?                      i.blocks[r][c+1] > 0 : true;
-                        const se = (c + 1 < i.width && r + 1 < i.height) ?  i.blocks[r+1][c+1] > 0 : true;
-                        const s =  (r + 1 < i.height) ?                     i.blocks[r+1][c] > 0 : true;
-                        const sw = (c - 1 >= 0 && r + 1 < i.height) ?       i.blocks[r+1][c-1] > 0 : true;
-                        const w =  (c - 1 >= 0) ?                           i.blocks[r][c-1] > 0 : true;
+                        const nw = (c - 1 >= 0 && r - 1 >= 0) ?             nwBlock > -1 && (tiles.block[nwBlock].connective || i.blocks[r][c]-1 === nwBlock) : true;
+                        const n =  (r - 1 >= 0) ?                           nBlock > -1 && (tiles.block[nBlock].connective || i.blocks[r][c]-1 === nBlock) : true;
+                        const ne = (c + 1 < i.width && r - 1 >= 0) ?        neBlock > -1 && (tiles.block[neBlock].connective || i.blocks[r][c]-1 === neBlock) : true;
+                        const e =  (c + 1 < i.width) ?                      eBlock > -1 && (tiles.block[eBlock].connective || i.blocks[r][c]-1 === eBlock) : true;
+                        const se = (c + 1 < i.width && r + 1 < i.height) ?  seBlock > -1 && (tiles.block[seBlock].connective || i.blocks[r][c]-1 === seBlock) : true;
+                        const s =  (r + 1 < i.height) ?                     sBlock > -1 && (tiles.block[sBlock].connective || i.blocks[r][c]-1 === sBlock) : true;
+                        const sw = (c - 1 >= 0 && r + 1 < i.height) ?       swBlock > -1 && (tiles.block[swBlock].connective || i.blocks[r][c]-1 === swBlock) : true;
+                        const w =  (c - 1 >= 0) ?                           wBlock > -1 && (tiles.block[wBlock].connective || i.blocks[r][c]-1 === wBlock) : true;
 
                         const texVariant = thisBlockSprite.name;
     
@@ -114,7 +124,7 @@ class Level extends Scene {
                         const texDetails = thisBlockSprite.sprite[textureId];
     
                         // incomprehensible
-                        const blockRect = new Rect(pixelPos.x, pixelPos.y, thisBlock.w, thisBlock.h);
+                        const blockRect = new Platform(pixelPos.x, pixelPos.y, thisBlock.w, thisBlock.h, thisBlock.blockDir);
                         this.addNode(new Entity(pixelPos.x, pixelPos.y, blockRect, new Sprite(
                             pixelPos.x + texDetails[4], pixelPos.y + texDetails[5], thisBlock.z,
                             new Rect(texDetails[0], texDetails[1], texDetails[2], texDetails[3]),
@@ -145,9 +155,7 @@ class Level extends Scene {
                         const texDetails = thisDecalSprite.sprite[textureId];
                         const pixelPos = new Vector(globalPos.x + thisDecal.offX, globalPos.y + thisDecal.offY);
                         
-                        this.addNode(new Entity(pixelPos.x, pixelPos.y, new Rect(
-                            pixelPos.x, pixelPos.y, thisDecal.w, thisDecal.h
-                        ), new Sprite(
+                        this.addNode(new Entity(pixelPos.x, pixelPos.y, new Rect(), new Sprite(
                             pixelPos.x + texDetails[4], pixelPos.y + texDetails[5], thisDecal.z,
                             new Rect(texDetails[0], texDetails[1], texDetails[2], texDetails[3]),
                         1)));

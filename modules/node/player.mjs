@@ -33,6 +33,7 @@ const COYOTE_TICKS = config.coyoteTime;
 const BUFFER_TICKS = config.bufferTime;
 const TOUCH_THRESHOLD = 0.01;
 const CAMERA_OFFSET = new Vector(-160 + config.width / 2, -90 + config.height / 2);
+const LOOK_OFFSET = 40;
 
 export default class Player extends Entity {
     static states = {
@@ -53,6 +54,7 @@ export default class Player extends Entity {
     grappleBufferTime = BUFFER_TICKS;
     coyoteTime = COYOTE_TICKS;
     facing = new Vector(1, 0);
+    looking = new Vector(0, 0);
     lastFacedX = 1;
     canGrapple = false;
     grappleTime = 0;
@@ -63,6 +65,7 @@ export default class Player extends Entity {
     isDead = false;
     respawnTime = RESPAWN_TICKS;
     temp; spawnX; spawnY; level;
+    touchbox;
     z;
 
     /**
@@ -121,6 +124,7 @@ export default class Player extends Entity {
         this.spawnY = y;
         this.level = level;
         this.temp = this.#raycast(this.pos, this.facing);
+        this.touchbox = new Rect(x - TOUCH_THRESHOLD, y - TOUCH_THRESHOLD, WIDTH + 2 * TOUCH_THRESHOLD, HEIGHT + 2 * TOUCH_THRESHOLD);
 
         this.touching.set("down", false);
         this.touching.set("up", false);
@@ -162,9 +166,6 @@ export default class Player extends Entity {
         this.findFacingDirection();
         this.processGrapple();
 
-        if (this.touching.get("right") || this.touching.get("left"))
-            this.vel.x = 0;
-
         this.changeRoom();
 
         this.processJump();
@@ -184,7 +185,8 @@ export default class Player extends Entity {
 
         this.setSprite();
         super.move(this.vel);
-        dispatchEvent(new CameraMoveEvent(this.pos.x + CAMERA_OFFSET.x, this.pos.y + CAMERA_OFFSET.y));
+        this.touchbox.move(this.vel);
+        dispatchEvent(new CameraMoveEvent(this.pos.x + CAMERA_OFFSET.x + this.looking.x * LOOK_OFFSET, this.pos.y + CAMERA_OFFSET.y + this.looking.y * LOOK_OFFSET));
 
         this.collide();
 
@@ -195,21 +197,30 @@ export default class Player extends Entity {
         if (input.continuous.has(keybinds.right)) {
             this.facing.x = 1;
             this.lastFacedX = 1;
+            this.looking.x = 1;
         }
         else if (input.continuous.has(keybinds.left)) {
             this.facing.x = -1;
             this.lastFacedX = -1;
+            this.looking.x = -1;
         }
         else {
             this.facing.x = 0;
+            this.looking.x = 0;
         }
 
-        if (input.continuous.has(keybinds.down))
+        if (input.continuous.has(keybinds.down)) {
             this.facing.y = 1;
-        else if (input.continuous.has(keybinds.up))
+            this.looking.y = 1;
+        }
+        else if (input.continuous.has(keybinds.up)) {
             this.facing.y = -1;
-        else
+            this.looking.y = -1;
+        }
+        else {
             this.facing.y = 0;
+            this.looking.y = 0;
+        }
 
         if (this.facing.x === 0 && this.facing.y === 0)
             this.facing.x = this.lastFacedX;
@@ -221,32 +232,16 @@ export default class Player extends Entity {
         roomPos.multiply(10);
 
         if (this.level.rooms[this.level.curRoom].right && this.pos.x > roomDimensions.x - WIDTH/2 + roomPos.x) {
-            const nextRoom = this.level.rooms[this.level.curRoom].right;
-            //super.update(new Vector(-(this.pos.x + WIDTH/2), 0));
-            //this.pos.x = -WIDTH/2;
-            //this.y += Level.level.rooms[Level.curRoomId].leftOffset;
             dispatchEvent(new RoomChangeEvent("right"));
         }
         // stop player from going offscreen
         if (this.level.rooms[this.level.curRoom].left && this.pos.x < -WIDTH/2 + roomPos.x) {
-            const nextRoom = this.level.rooms[this.level.curRoom].left;
-            //super.update(new Vector(nextRoom.dimensions.x * 10, 0));
-            //this.pos.x = nextRoom.width * 10 - WIDTH/2;
-            //this.y += Level.level.rooms[Level.curRoomId].leftOffset;
             dispatchEvent(new RoomChangeEvent("left"));
         }
         if (this.level.rooms[this.level.curRoom].down && this.pos.x > roomDimensions.y - HEIGHT/2 + roomPos.y) {
-            const nextRoom = this.level.rooms[this.level.curRoom].down;
-            //super.update(new Vector(0, -(this.pos.y + HEIGHT/2)));
-            //this.pos.y = -HEIGHT/2;
-            //this.y += Level.level.rooms[Level.curRoomId].leftOffset;
             dispatchEvent(new RoomChangeEvent("down"));
         }
         if (this.level.rooms[this.level.curRoom].up && this.pos.x < -HEIGHT/2 + roomPos.y) {
-            const nextRoom = this.level.rooms[this.level.curRoom].up;
-            //super.update(new Vector(0, nextRoom.dimensions.y * 10));
-            //this.pos.y = nextRoom.width * 10 - HEIGHT/2;
-            //this.y += Level.level.rooms[Level.curRoomId].leftOffset;
             dispatchEvent(new RoomChangeEvent("up"));
         }
     }
@@ -409,7 +404,7 @@ export default class Player extends Entity {
         // narrow phase
         for (const i of overlappingTiles) {
             if (!this.hitbox.collidesWith(i))
-                    continue;
+                continue;
 
             let kickX, kickY;
 
@@ -418,12 +413,29 @@ export default class Player extends Entity {
             if (moveY > 0) kickY = i.pos.y - (this.pos.y + HEIGHT);
             else if (moveY < 0) kickY = (i.pos.y + i.dimensions.x) - this.pos.y; // no clue if this should be i.pos.y + i.dimensions.y
 
+            const kickXVec = new Vector(kickX);
+            const kickYVec = new Vector(0, kickY);
+
+            switch (i.blockDir) {
+                case "down":
+                    // only collide IF: player is moving vertically downward and was above the platform last tick
+                    if (kickY && kickY < 0 && this.prevY + this.hitbox.dimensions.y < i.pos.y) {
+                        super.move(kickYVec);
+                        this.touchbox.move(kickYVec);
+                        moveY -= kickY;
+                    }
+                    continue;
+                // add other cases later
+            }
+
             if (!kickX && kickY) {
-                super.move(new Vector(0, kickY));
+                super.move(kickYVec);
+                this.touchbox.move(kickYVec);
                 moveY -= kickY;
             }
             if (!kickY && kickX) {
-                super.move(new Vector(kickX, 0));
+                super.move(kickXVec);
+                this.touchbox.move(kickXVec);
                 moveX -= kickX;
             }
 
@@ -432,10 +444,12 @@ export default class Player extends Entity {
             
             if (kickX && kickY) {
                 if (Math.abs(kickXPercent) < Math.abs(kickYPercent)) { // kick x axis mostly
-                    super.move(new Vector(kickX, 0));
+                    super.move(kickXVec);
+                    this.touchbox.move(kickXVec);
                 }
                 else { // kick y axis mostly
-                    super.move(new Vector(0, kickY));
+                    super.move(kickYVec);
+                    this.touchbox.move(kickYVec);
                 }
             }
             this.grappleTime = 0;
@@ -454,8 +468,7 @@ export default class Player extends Entity {
 
         const touchingTiles = [];
         for (const i of this.level.blockList) {
-            if (i.id !== 0 &&
-                this.pos.x + WIDTH + TOUCH_THRESHOLD >= i.pos.x &&
+            if (this.pos.x + WIDTH + TOUCH_THRESHOLD >= i.pos.x &&
                 this.pos.x <= i.pos.x + i.dimensions.x + TOUCH_THRESHOLD &&
                 this.pos.y + HEIGHT + TOUCH_THRESHOLD >= i.pos.y &&
                 this.pos.y <= i.pos.y + i.dimensions.y + TOUCH_THRESHOLD)
@@ -463,6 +476,13 @@ export default class Player extends Entity {
         }
 
         for (const i of touchingTiles) {
+            // check for passable tiles first then handle things normally
+            if (this.hitbox.collidesWith(i)) {
+                if (i.blockDir === "down" && this.pos.y + HEIGHT > i.pos.y) continue;
+                if (i.blockDir === "up" && this.pos.y < i.pos.y + i.dimensions.y) continue;
+                if (i.blockDir === "left" && this.pos.x < i.pos.x + i.dimensions.x) continue;
+                if (i.blockDir === "right" && this.pos.x + WIDTH > i.pos.x) continue; 
+            }
             if (this.pos.x + WIDTH + TOUCH_THRESHOLD > i.pos.x &&
                 this.pos.x + TOUCH_THRESHOLD < i.pos.x + i.dimensions.x &&
                 this.pos.y + HEIGHT > i.pos.y &&
@@ -485,6 +505,9 @@ export default class Player extends Entity {
                     this.touching.set("up", true);
         }
 
+
+        if (this.touching.get("right") || this.touching.get("left"))
+            this.vel.x = 0;
         if (this.touching.get("up")) this.vel.y = 0;
     }
     setSpawn(x, y) {

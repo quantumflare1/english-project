@@ -33,6 +33,7 @@ function setSpawnPoint(player) {
     player.setSpawn(this.pos.x + (this.hitbox.dimensions.x - player.hitbox.dimensions.x) / 2, this.pos.y + (this.hitbox.dimensions.y - player.hitbox.dimensions.x) / 2);
     this.done = true;
 }
+// oh yeah i need to animate the checkpoints
 
 function givePlayerGrapple(player) {
     player.state = Player.states.DEFAULT;
