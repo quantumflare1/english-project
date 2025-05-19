@@ -40,7 +40,8 @@ export default class Editor extends Scene {
                 name: "default",
                 spawnRoom: 0,
                 spawnX: 0,
-                spawnY: 0
+                spawnY: 0,
+                playerState: 0
             },
             rooms: [ this.room ]
         };
@@ -249,16 +250,14 @@ export default class Editor extends Scene {
     }
     importLevel(newLevel) {
         this.level = newLevel;
+        this.roomIndicators.length = 0;
         this.nodes.forEach((v) => {
             this.nodes.delete(v);
         });
         
         for (const room of newLevel.rooms) {
-            if (this.room) this.roomIndicators[this.room.id].fancy = false;
-            
             this.room = room;
             this.roomIndicators.push(new RoomBG(room.x, room.y, room.width, room.height, room.id));
-            this.roomIndicators[this.room?.id].fancy = true;
             this.addNode(this.roomIndicators[this.roomIndicators.length-1]);
 
             for (let i = 0; i < room.height; i++) {
@@ -281,8 +280,9 @@ export default class Editor extends Scene {
                 }
             }
         }
+        this.roomIndicators[this.room.id].fancy = true;
 
-        dispatchEvent(new EditorImportEvent(newLevel.meta.name, newLevel.meta.spawnRoom));
+        dispatchEvent(new EditorImportEvent(newLevel.meta));
     }
     findObjectWithProperty(arr, ...kvPairs) {
         for (const i of arr) {

@@ -83,7 +83,6 @@ function load() {
                 }
                 const thisTile = Assets.sprites[i.name];
                 const spr = thisTile.sprite[thisTile.name[defaultSprite]];
-                console.log(spr);
                 const osc = new OffscreenCanvas(spr[2], spr[3]); // ??
                 const osctx = osc.getContext("2d");
                 osctx.putImageData(Assets.spriteCtx.getImageData(spr[0], spr[1], spr[2], spr[3]), 0, 0);
@@ -151,6 +150,9 @@ function load() {
     addEventListener(EditorImportEvent.code, (e) => {
         $("name").value = e.detail.name;
         $("spawnRoom").value = e.detail.spawnRoom;
+        $("spawnX").value = e.detail.spawnX;
+        $("spawnY").value = e.detail.spawnY;
+        $("spawnState").value = e.detail.playerState;
     });
 
     addEventListener(EditorRoomChangeEvent.code, () => {

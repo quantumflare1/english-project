@@ -122,11 +122,8 @@ class EditorTileSelectEvent extends CustomEvent {
 
 class EditorImportEvent extends CustomEvent {
     static code = "editor_import";
-    constructor(name, spawnRoom) {
-        super(EditorImportEvent.code, { detail: {
-            name: name,
-            spawnRoom: spawnRoom
-        }});
+    constructor(meta) {
+        super(EditorImportEvent.code, { detail: meta });
     }
 }
 
