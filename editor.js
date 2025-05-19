@@ -136,6 +136,7 @@ function load() {
     $("spawnRoom").addEventListener("change", metaUpdate("spawnRoom", parseInt));
     $("spawnX").addEventListener("change", metaUpdate("spawnX", parseInt));
     $("spawnY").addEventListener("change", metaUpdate("spawnY", parseInt));
+    $("spawnState").addEventListener("change", metaUpdate("playerState", balls));
 
     $("roomX").addEventListener("change", roomUpdate("x", parseInt));
     $("roomY").addEventListener("change", roomUpdate("y", parseInt));
@@ -235,6 +236,10 @@ function exportFile() {
         downloader.target = "_blank"; document.body.appendChild(downloader);
         downloader.click(); document.body.removeChild(downloader);
     }
+}
+
+function balls(v) { // i am so tired right now i can't be assed to name this function properly
+    return parseInt(v) + scene.level.rooms[scene.meta.spawnRoom] * 10;
 }
 
 addEventListener("contextmenu", (e) => { e.preventDefault() });

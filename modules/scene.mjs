@@ -24,7 +24,7 @@ export default class Scene {
         this.rooms.push(...rooms);
 
         addEventListener(RoomChangeEvent.code, (e) => {
-            this.curRoom = this.rooms[this.curRoom][e.detail].id;
+            this.curRoom = e.detail.id;
         });
     }
     /**

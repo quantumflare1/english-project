@@ -211,20 +211,21 @@ class Level extends Scene {
             const thisRoom = new Room(i.x, i.y, i.width, i.height, i.id);
     
             for (const j of rooms) {
-                if (j.pos.x + j.dimensions.x === i.x)
+                if (j.pos.x + j.dimensions.x === i.x && (i.y <= j.pos.y && i.y + i.height > j.pos.y || j.pos.y <= i.y && j.pos.y + j.dimensions.y > i.y))
                     thisRoom.connect(j, "left");
-                if (j.pos.x === i.x + i.width)
+                if (j.pos.x === i.x + i.width && (i.y <= j.pos.y && i.y + i.height > j.pos.y || j.pos.y <= i.y && j.pos.y + j.dimensions.y > i.y))
                     thisRoom.connect(j, "right");
-                if (j.pos.y + j.dimensions.y === i.y)
+                if (j.pos.y + j.dimensions.y === i.y && (i.x <= j.pos.x && i.x + i.width > j.pos.x || j.pos.x <= i.x && j.pos.x + j.dimensions.x > i.x))
                     thisRoom.connect(j, "up");
-                if (j.pos.y === i.y + i.height)
+                if (j.pos.y === i.y + i.height && (i.x <= j.pos.x && i.x + i.width > j.pos.x || j.pos.x <= i.x && j.pos.x + j.dimensions.x > i.x))
                     thisRoom.connect(j, "down");
             }
     
             rooms.push(thisRoom);
         }
+        console.log(rooms)
         this.addRooms(...rooms);
-        this.addNode(new Player(json.meta.spawnX, json.meta.spawnY, this));
+        this.addNode(new Player(json.meta.spawnX, json.meta.spawnY, this, json.meta.playerState));
 
         if (options.showFps) {
             const fpsDisplay = new Text(5, 14, 100, "60 FPS", "start", "12px font-Pixellari", "white", "follow");
