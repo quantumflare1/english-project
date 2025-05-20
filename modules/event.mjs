@@ -23,6 +23,7 @@ class RoomChangeEvent extends CustomEvent {
     static code = "game_roomchange";
     constructor(dir) {
         super(RoomChangeEvent.code, { detail: dir });
+        console.log(dir.id)
     }
 }
 
@@ -127,6 +128,13 @@ class EditorImportEvent extends CustomEvent {
     }
 }
 
+class PlayerKillEvent extends Event {
+    static code = "game_playerkill";
+    constructor() {
+        super(PlayerKillEvent.code);
+    }
+}
+
 export {
     CameraSnapEvent, CameraMoveEvent, CameraZoomEvent,              // camera
     AssetLoadEvent,                                                 // assets
@@ -135,6 +143,6 @@ export {
     RoomChangeEvent,                                                // room
     SettingsChangeEvent, CursorMoveEvent,                           // menu
     FPSUpdateEvent, TimeUpdateEvent,                                // ui
-    PlayerStateChangeEvent,                                         // player
+    PlayerStateChangeEvent, PlayerKillEvent,                        // player
     EditorRoomChangeEvent, EditorTileSelectEvent, EditorImportEvent // editor
 };

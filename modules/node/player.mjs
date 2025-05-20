@@ -1,6 +1,6 @@
 import { Level } from "../level.mjs";
 import Vector from "../misc/vector.mjs";
-import { CameraMoveEvent, CameraSnapEvent, CameraZoomEvent, PlayerStateChangeEvent, RoomChangeEvent } from "../event.mjs";
+import { CameraMoveEvent, CameraSnapEvent, CameraZoomEvent, PlayerKillEvent, PlayerStateChangeEvent, RoomChangeEvent } from "../event.mjs";
 import config from "../../data/config/player.json" with { type: "json" };
 import Rect from "./rect.mjs";
 import AnimatedSprite from "./animated_sprite.mjs";
@@ -136,19 +136,13 @@ export default class Player extends Entity {
         addEventListener(PlayerStateChangeEvent.code, (e) => {
             this.state = e.detail;
         });
+        addEventListener(PlayerKillEvent.code, this.respawn.bind(this));
     }
     update() {
         if (this.isDead) {
             this.respawnTime--;
-            this.vel.zero();
-            if (this.respawnTime <= 0) {
-                this.isDead = false;
-                super.move(new Vector(-this.pos.x + this.spawnX, -this.pos.y + this.spawnY));
-                this.jumpBufferTime = 0;
-                this.coyoteTime = 0;
-                this.respawnTime = RESPAWN_TICKS;
-                dispatchEvent(new CameraSnapEvent(this.pos.x + CAMERA_OFFSET.x, this.pos.y + CAMERA_OFFSET.y));
-            }
+            if (this.respawnTime <= 0)
+                this.respawn();
             return;
         }
 
@@ -238,11 +232,11 @@ export default class Player extends Entity {
             for (const i of this.level.rooms[this.level.curRoom].left)
                 if (this.pos.y >= i.lower && this.pos.y + HEIGHT <= i.upper)
                     dispatchEvent(new RoomChangeEvent(i.room));
-        if (this.pos.x > roomDimensions.y - HEIGHT/2 + roomPos.y)
+        if (this.pos.y > roomDimensions.y - HEIGHT/2 + roomPos.y)
             for (const i of this.level.rooms[this.level.curRoom].down)
                 if (this.pos.x >= i.lower && this.pos.x + WIDTH <= i.upper)
                     dispatchEvent(new RoomChangeEvent(i.room));
-        if (this.pos.x < -HEIGHT/2 + roomPos.y)
+        if (this.pos.y < -HEIGHT/2 + roomPos.y)
             for (const i of this.level.rooms[this.level.curRoom].up)
                 if (this.pos.x >= i.lower && this.pos.x + WIDTH <= i.upper)
                     dispatchEvent(new RoomChangeEvent(i.room));
@@ -459,7 +453,7 @@ export default class Player extends Entity {
                 if (i.facing === "left" && this.vel.x < 0) continue;
                 if (i.facing === "right" && this.vel.x > 0) continue;
 
-                this.isDead = true;
+                this.die();
             }
         }
 
@@ -506,6 +500,19 @@ export default class Player extends Entity {
         if (this.touching.get("right") || this.touching.get("left"))
             this.vel.x = 0;
         if (this.touching.get("up")) this.vel.y = 0;
+    }
+    die() {
+        this.isDead = true;
+        this.respawnTime = RESPAWN_TICKS;
+        this.vel.zero();
+    }
+    respawn() {
+        this.vel.zero();
+        this.isDead = false;
+        super.move(new Vector(-this.pos.x + this.spawnX, -this.pos.y + this.spawnY));
+        this.jumpBufferTime = 0;
+        this.coyoteTime = 0;
+        dispatchEvent(new CameraSnapEvent(this.pos.x + CAMERA_OFFSET.x, this.pos.y + CAMERA_OFFSET.y));
     }
     setSpawn(x, y) {
         this.spawnX = x;

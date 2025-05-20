@@ -1,6 +1,6 @@
 import Text from "../node/text.mjs";
 
-import { SceneChangeEvent, RoomChangeEvent, CameraZoomEvent, CursorMoveEvent } from "../event.mjs";
+import { SceneChangeEvent, PlayerKillEvent } from "../event.mjs";
 import { Level } from "../level.mjs";
 import Sprite from "../node/sprite.mjs";
 import Rect from "../node/rect.mjs";
@@ -38,18 +38,32 @@ const elements = [
                 }
             ],
             directions: {
-                down: 1
+                down: 1,
+                up: 2
             }
         },
         {
-            params: [40, 95, 10, "Quit to Title", "start", "16px font-NotJamUICondensed16", "white", "", true,
+            params: [40, 95, 10, "Retry", "start", "16px font-NotJamUICondensed16", "white", "", true,
+                (parent) => {
+                    dispatchEvent(new SceneChangeEvent(parent.prevScene));
+                    dispatchEvent(new PlayerKillEvent());
+                }
+            ],
+            directions: {
+                down: 2,
+                up: 0
+            }
+        },
+        {
+            params: [40, 120, 10, "Quit to Title", "start", "16px font-NotJamUICondensed16", "white", "", true,
                 () => {
                     const scene = createMainMenu();
                     dispatchEvent(new SceneChangeEvent(scene));
                 }
             ],
             directions: {
-                up: 0
+                up: 1,
+                down: 0
             }
         }
     ]
