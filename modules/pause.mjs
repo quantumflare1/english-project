@@ -1,4 +1,4 @@
-import { SceneChangeEvent, UnpauseEvent } from "./event.mjs";
+import { SceneChangeEvent } from "./event.mjs";
 import { input, keybinds } from "./inputs.mjs";
 import Scene from "./scene.mjs";
 

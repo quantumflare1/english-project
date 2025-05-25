@@ -4,7 +4,6 @@ import Camera from "./node/camera.mjs";
 import Entity from "./node/entity.mjs";
 import Sprite from "./node/sprite.mjs";
 import Rect from "./node/rect.mjs";
-import Hazard from "./node/hazard.mjs";
 import Assets from "./assets.mjs";
 import Vector from "./misc/vector.mjs";
 import Player from "./node/player.mjs";
@@ -25,7 +24,6 @@ import { createPauseMenu } from "./node/menu/pause_menu.mjs";
 
 class Level extends Scene {
     blockList = [];
-    hazardList = [];
     triggerList = [];
     specialList = [];
 
@@ -130,22 +128,6 @@ class Level extends Scene {
                             new Rect(texDetails[0], texDetails[1], texDetails[2], texDetails[3]),
                         1)));
                         this.blockList.push(blockRect);
-                    }
-    
-                    if (i.hazards[r][c] !== 0) {
-                        const thisHazard = tiles.hazard[i.hazards[r][c]-1];
-                        const thisHazardSprite = Assets.sprites[thisHazard.name];
-                        const textureId = thisHazardSprite.name[`facing_${thisHazard.facing}`];
-                        const texDetails = thisHazardSprite.sprite[textureId];
-                        const pixelPos = new Vector(globalPos.x + thisHazard.offX, globalPos.y + thisHazard.offY);
-                        //console.log(texDetails)
-                        
-                        const hazardRect = new Hazard(pixelPos.x, pixelPos.y, thisHazard.w, thisHazard.h, thisHazard.facing);
-                        this.addNode(new Entity(pixelPos.x, pixelPos.y, hazardRect, new Sprite(
-                            pixelPos.x + texDetails[4], pixelPos.y + texDetails[5], thisHazard.z,
-                            new Rect(texDetails[0], texDetails[1], texDetails[2], texDetails[3]),
-                        1)));
-                        this.hazardList.push(hazardRect);
                     }
     
                     if (i.decals[r][c] !== 0) {

@@ -1,6 +1,6 @@
 import { Level } from "../level.mjs";
 import Vector from "../misc/vector.mjs";
-import { CameraMoveEvent, CameraSnapEvent, CameraZoomEvent, PlayerKillEvent, PlayerStateChangeEvent, RoomChangeEvent } from "../event.mjs";
+import { CameraMoveEvent, CameraSnapEvent, PlayerStateChangeEvent, RoomChangeEvent } from "../event.mjs";
 import config from "../../data/config/player.json" with { type: "json" };
 import Rect from "./rect.mjs";
 import AnimatedSprite from "./animated_sprite.mjs";
@@ -12,109 +12,25 @@ import sprite from "../../data/img/sprite/player.json";
 
 const WIDTH = config.width;
 const HEIGHT = config.height;
-const ACCEL_TICKS = config.accelTime;
 const MAX_VEL = config.maxVel;
 const RUN_VEL = MAX_VEL * 0.7;
-const DECEL_TICKS = config.decelTime;
-const MAX_GRAPPLE_TICKS = config.maxGrappleTime;
-const GRAPPLE_VEL = config.grappleVel;
-const GRAPPLE_FREEZE_TICKS = config.grappleFreezeTime;
-const GRAPPLE_OFFSET = new Vector(config.grappleOffsetX, config.grappleOffsetY);
-const GRAPPLE_RANGE = config.grappleRange;
-const GRAPPLE_DEAD_ZONE = config.grappleDeadZone;
-const JUMP_HEIGHT = config.jumpHeight;
-const JUMP_TIME = config.jumpTime;
-const TERMINAL_VEL = config.terminalVel;
-const MIN_JUMP_FACTOR = config.minJumpFactor;
-const AIR_ACCEL_FACTOR = config.airAccelFactor;
-const AIR_DECEL_FACTOR = config.airDecelFactor;
-const RESPAWN_TICKS = config.respawnTime;
-const COYOTE_TICKS = config.coyoteTime;
-const BUFFER_TICKS = config.bufferTime;
 const TOUCH_THRESHOLD = 0.01;
 const CAMERA_OFFSET = new Vector(-160 + config.width / 2, -90 + config.height / 2);
-const LOOK_OFFSET = 40;
 
 export default class Player extends Entity {
-    static states = {
-        DEFAULT: 0,
-        INTRO: 1,
-        GRAPPLED: 2
-    };
-
-    static #accelPerTick = MAX_VEL / ACCEL_TICKS;
-    static #decelPerTick = MAX_VEL / DECEL_TICKS;
-    static #gravity = (JUMP_HEIGHT * 2) / (JUMP_TIME ** 2);
-    static #baseJumpVel = Math.sqrt(2 * this.#gravity * JUMP_HEIGHT);
-
     vel = new Vector();
     touching = new Map();
-    jumpTimer = 20;
-    jumpBufferTime = BUFFER_TICKS;
-    grappleBufferTime = BUFFER_TICKS;
-    coyoteTime = COYOTE_TICKS;
     facing = new Vector(1, 0);
-    looking = new Vector(0, 0);
-    lastFacedX = 1;
-    canGrapple = false;
-    grappleTime = 0;
-    grapple = new Vector();
-    state;
-    grappleStarted = false;
     inControl = true;
-    isDead = false;
-    respawnTime = RESPAWN_TICKS;
-    temp; spawnX; spawnY; level;
-    z;
-
-    /**
-     * Finds the nearest tile in the direction the player is facing
-     * @param {Vector} s The starting position of the ray
-     * @param {Vector} d The direction of the ray
-     * @returns A vector to the tile hit
-     */
-    #raycast(s, d) {
-        // note: diagonal grapples currently bugged
-        let pos = new Vector(s.x / 10, s.y / 10);
-        const step = Math.abs(d.x) > Math.abs(d.y) ? Math.abs(d.x) : Math.abs(d.y);
-        const delta = new Vector(d.x / step, d.y / step);
-
-        // compensate for room pos offset
-        pos.subtract(this.level.rooms[this.level.curRoom].pos);
-        if (pos.y >= this.level.rooms[this.level.curRoom].dimensions.y || pos.y < 0 || pos.x >= this.level.rooms[this.level.curRoom].dimensions.x || pos.x < 0) {
-            return null;
-        }
-        while (this.level.roomBlocks[this.level.curRoom][Math.floor(pos.y)][Math.floor(pos.x)] === 0) {
-            pos.add(delta);
-    
-            if (pos.y >= this.level.rooms[this.level.curRoom].dimensions.y || pos.y < 0 || pos.x >= this.level.rooms[this.level.curRoom].dimensions.x || pos.x < 0) {
-                return null;
-            }
-        }
-    
-        if (d.x > 0) pos.x = Math.floor(pos.x);
-        if (d.x < 0) pos.x = Math.ceil(pos.x);
-        if (d.y > 0) pos.y = Math.floor(pos.y);
-        if (d.y < 0) pos.y = Math.ceil(pos.y);
-    
-        pos.add(this.level.rooms[this.level.curRoom].pos);
-        pos.multiply(10);
-    
-        const rayLength = Math.sqrt((pos.y-s.y) ** 2 + (pos.x-s.x) ** 2);
-        if (rayLength < GRAPPLE_DEAD_ZONE || rayLength > GRAPPLE_RANGE) {
-            return null;
-        }
-        return pos;
-    }
+    spawnX; spawnY; level;
 
     /**
      * Creates a new player
      * @param {number} x The X coordinate of the player
      * @param {number} y The Y coordinate of the player
      * @param {Level} level The level this player is in. 
-     * @param {number} state The initial state of the player 
      */
-    constructor(x, y, level, state = Player.states.INTRO) {
+    constructor(x, y, level) {
         const texDetails = Assets.sprites.player.sprite;
         super(x, y, new Rect(x, y, WIDTH, HEIGHT),
         new AnimatedSprite(x + sprite.sprite[0][4], y + sprite.sprite[0][5], 0,
@@ -123,8 +39,6 @@ export default class Player extends Entity {
         this.spawnX = x;
         this.spawnY = y;
         this.level = level;
-        this.temp = this.#raycast(this.pos, this.facing);
-        this.state = state;
 
         this.touching.set("down", false);
         this.touching.set("up", false);
@@ -136,87 +50,34 @@ export default class Player extends Entity {
         addEventListener(PlayerStateChangeEvent.code, (e) => {
             this.state = e.detail;
         });
-        addEventListener(PlayerKillEvent.code, this.respawn.bind(this));
     }
     update() {
-        if (this.isDead) {
-            this.respawnTime--;
-            if (this.respawnTime <= 0)
-                this.respawn();
-            return;
-        }
-
-        if (!this.touching.get("down")) {
-            if (this.vel.y < TERMINAL_VEL)
-                this.vel.y += Player.#gravity;
-
-            if (this.grappleTime === 0) this.coyoteTime--;
-        } else {
-            this.vel.y = 0;
-            this.coyoteTime = COYOTE_TICKS;
-            if (this.grappleTime === 0) this.canGrapple = true;
-        }
-
         this.findFacingDirection();
-        this.processGrapple();
-
         this.changeRoom();
-
-        this.processJump();
         this.processRun();
-
-        if (this.grappleTime > 0) {
-            if (this.grapple !== null) {
-                this.vel.x = this.grapple.x;
-                this.vel.y = this.grapple.y;
-            }
-            this.grappleTime--;
-            this.coyoteTime = COYOTE_TICKS;
-        }
 
         this.prevX = this.pos.x;
         this.prevY = this.pos.y;
 
         this.setSprite();
         super.move(this.vel);
-        dispatchEvent(new CameraMoveEvent(this.pos.x + CAMERA_OFFSET.x + this.looking.x * LOOK_OFFSET, this.pos.y + CAMERA_OFFSET.y + this.looking.y * LOOK_OFFSET));
+        dispatchEvent(new CameraMoveEvent(this.pos.x + CAMERA_OFFSET.x, this.pos.y + CAMERA_OFFSET.y));
 
         this.collide();
-
-        //this.x = Math.round(this.x);
-        //this.y = Math.round(this.y);
     }
     findFacingDirection() {
         if (input.continuous.has(keybinds.right)) {
             this.facing.x = 1;
-            this.lastFacedX = 1;
-            this.looking.x = 1;
         }
         else if (input.continuous.has(keybinds.left)) {
             this.facing.x = -1;
-            this.lastFacedX = -1;
-            this.looking.x = -1;
         }
-        else {
-            this.facing.x = 0;
-            this.looking.x = 0;
-        }
-
-        if (input.continuous.has(keybinds.down)) {
+        else if (input.continuous.has(keybinds.down)) {
             this.facing.y = 1;
-            this.looking.y = 1;
         }
         else if (input.continuous.has(keybinds.up)) {
             this.facing.y = -1;
-            this.looking.y = -1;
         }
-        else {
-            this.facing.y = 0;
-            this.looking.y = 0;
-        }
-
-        if (this.facing.x === 0 && this.facing.y === 0)
-            this.facing.x = this.lastFacedX;
     }
     changeRoom() {
         const roomDimensions = new Vector(this.level.rooms[this.level.curRoom].dimensions.x, this.level.rooms[this.level.curRoom].dimensions.y);
@@ -242,89 +103,6 @@ export default class Player extends Entity {
                     dispatchEvent(new RoomChangeEvent(i.room));
     }
     processRun() {
-        const acceleration = this.touching.get("down") ? Player.#accelPerTick : Player.#accelPerTick * AIR_ACCEL_FACTOR;
-        const deceleration = this.touching.get("down") ? Player.#decelPerTick : Player.#decelPerTick * AIR_DECEL_FACTOR;
-        if (input.continuous.has(keybinds.right) && !this.touching.get("right")) {
-            if (this.vel.x < MAX_VEL)
-                this.vel.x += acceleration;
-            else if (this.vel.x > MAX_VEL) {
-                this.vel.x -= deceleration;
-                if (this.vel.x < 0.05)
-                    this.vel.x = 0;
-            }
-        } else if (this.vel.x > 0) {
-            this.vel.x -= deceleration;
-            if (this.vel.x < 0.05)
-                this.vel.x = 0;
-        }
-        if (input.continuous.has(keybinds.left) && !this.touching.get("left")) {
-            if (this.vel.x > -MAX_VEL)
-                this.vel.x -= acceleration;
-            else if (this.vel.x < -MAX_VEL) {
-                this.vel.x += deceleration;
-                if (this.vel.x > -0.05)
-                    this.vel.x = 0;
-            }
-        } else if (this.vel.x < 0) {
-            this.vel.x += deceleration;
-            if (this.vel.x > -0.05)
-                this.vel.x = 0;
-        }
-    }
-    processGrapple() {
-        if (this.state === Player.states.INTRO) return;
-        if (input.continuous.has(keybinds.grapple)) {
-            this.grappleBufferTime--;
-        } else {
-            this.grappleBufferTime = BUFFER_TICKS;
-            this.grappleTime = 0;
-        }
-
-        if (this.grappleStarted) {
-            this.temp = this.#raycast(new Vector(this.pos.x + GRAPPLE_OFFSET.x, this.pos.y + GRAPPLE_OFFSET.y), this.facing);
-            this.grappleStarted = false;
-            
-            if (this.temp) {
-                this.grapple = this.facing.normalize();
-                this.grapple.multiply(GRAPPLE_VEL);
-            }
-            else {
-                this.grapple = null;
-            }
-
-            if (this.temp) {
-                this.canGrapple = false;
-                this.grappleBufferTime = 0;
-                this.grappleTime = MAX_GRAPPLE_TICKS;
-            }
-        }
-
-        if (this.grappleBufferTime > 0 && this.canGrapple && input.impulse.has(keybinds.grapple) && !this.grappleStarted) { // start grapple
-            input.consumeInput(keybinds.grapple);
-            this.grappleStarted = true;
-            this.grappleBufferTime = 0;
-            const ev = new CustomEvent("game_freezetime", { detail: GRAPPLE_FREEZE_TICKS });
-            dispatchEvent(ev);
-        }
-    }
-    processJump() {
-        if (input.impulse.has(keybinds.jump)) // press jump
-            this.jumpBufferTime--;
-        else // release jump
-            this.jumpBufferTime = BUFFER_TICKS;
-        
-        if (!input.impulse.has(keybinds.jump) && this.vel.y < 0)
-            if (this.vel.y < -Player.#baseJumpVel * MIN_JUMP_FACTOR)
-                this.vel.y = -Player.#baseJumpVel * MIN_JUMP_FACTOR;
-
-        if (this.jumpBufferTime >= 0 && this.coyoteTime >= 0 && input.impulse.has(keybinds.jump)) { // start jump
-            input.consumeInput(keybinds.grapple);
-            this.vel.y = -Player.#baseJumpVel;
-            this.jumpTimer = 10;
-            this.coyoteTime = 0;
-            this.grappleTime = 0;
-            this.jumpBufferTime = 0;
-        }
     }
     setSprite() {
         if (input.continuous.has(keybinds.left) && this.vel.x > 0 || input.continuous.has(keybinds.right) && this.vel.x < 0) {
@@ -446,17 +224,6 @@ export default class Player extends Entity {
             this.grappleTime = 0;
         }
 
-        for (const i of this.level.hazardList) {
-            if (this.hitbox.collidesWith(i)) {
-                if (i.facing === "up" && this.vel.y < 0) continue;
-                if (i.facing === "down" && this.vel.y > 0) continue;
-                if (i.facing === "left" && this.vel.x < 0) continue;
-                if (i.facing === "right" && this.vel.x > 0) continue;
-
-                this.die();
-            }
-        }
-
         const touchingTiles = [];
         for (const i of this.level.blockList) {
             if (this.pos.x + WIDTH + TOUCH_THRESHOLD >= i.pos.x &&
@@ -500,19 +267,6 @@ export default class Player extends Entity {
         if (this.touching.get("right") || this.touching.get("left"))
             this.vel.x = 0;
         if (this.touching.get("up")) this.vel.y = 0;
-    }
-    die() {
-        this.isDead = true;
-        this.respawnTime = RESPAWN_TICKS;
-        this.vel.zero();
-    }
-    respawn() {
-        this.vel.zero();
-        this.isDead = false;
-        super.move(new Vector(-this.pos.x + this.spawnX, -this.pos.y + this.spawnY));
-        this.jumpBufferTime = 0;
-        this.coyoteTime = 0;
-        dispatchEvent(new CameraSnapEvent(this.pos.x + CAMERA_OFFSET.x, this.pos.y + CAMERA_OFFSET.y));
     }
     setSpawn(x, y) {
         this.spawnX = x;

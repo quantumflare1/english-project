@@ -1,23 +1,5 @@
 {
     "width": 8,
     "height": 12,
-    "accelTime": 8,
-    "maxVel": 1.5,
-    "decelTime": 4,
-    "maxGrappleTime": 36,
-    "grappleVel": 3.5,
-    "grappleFreezeTime": 3,
-    "grappleOffsetX": 4,
-    "grappleOffsetY": 6,
-    "grappleRange": 140,
-    "grappleDeadZone": 6,
-    "jumpHeight": 24,
-    "jumpTime": 18,
-    "terminalVel": 3,
-    "minJumpFactor": 0.3,
-    "airAccelFactor": 0.6,
-    "airDecelFactor": 0.2,
-    "respawnTime": 40,
-    "coyoteTime": 6,
-    "bufferTime": 8
+    "maxVel": 1.5
 }

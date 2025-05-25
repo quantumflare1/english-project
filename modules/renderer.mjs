@@ -1,7 +1,6 @@
 import Scene from "./scene.mjs";
-import Camera from "./node/camera.mjs";
 
-const BASE_SCALE = 20;
+const BASE_SCALE = 50;
 
 export default class Renderer {
     canvas;
@@ -37,12 +36,6 @@ export default class Renderer {
         this.ctx.setTransform(1, 0, 0, 1, 0, 0);
         this.ctx.fillStyle = this.gradient;
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-        /*
-        this.ctx.setTransform(1, 0, 0, 1, 0, 0);
-        this.ctx.fillStyle = "white";
-        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-        this.ctx.fillStyle = "black";
-        this.ctx.setTransform(1, 0, 0, 1, -this.camera.x, -this.camera.y);*/
 
         let tempX = 0;
         let tempY = 0;
@@ -51,8 +44,6 @@ export default class Renderer {
         while (scene.renderedObjects.length > 0) {
             const next = scene.renderedObjects.pop();
 
-            /*const diffX = next.x - next.prevX;
-            const diffY = next.y - next.prevY;*/
             const diffX = 0;
             const diffY = 0;
 
@@ -62,19 +53,7 @@ export default class Renderer {
                 this.ctx.setTransform(scene.camera.zoom, 0, 0, scene.camera.zoom, -scene.camera.pos.x, -scene.camera.pos.y);
             }
             else next.draw(this.ctx);
-
-            if (next.temp) {
-                this.ctx.strokeStyle = "red";
-                this.ctx.lineWidth = 1;
-                this.ctx.beginPath();
-                this.ctx.moveTo(next.x + 4, next.y + 4);
-                tempX = next.temp.x;
-                tempY = next.temp.y;
-            }
         }
-        this.ctx.lineTo(tempX, tempY);
 
-        this.ctx.stroke();
-        this.ctx.closePath();
     }
 }
