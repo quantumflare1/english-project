@@ -43,7 +43,7 @@ class Level extends Scene {
             for (let r = 0; r < i.height; r++) {
                 for (let c = 0; c < i.width; c++) {
                     const globalPos = new Vector(c + i.x, r + i.y);
-                    globalPos.multiply(10);
+                    globalPos.multiply(40);
     
                     if (i.blocks[r][c] !== 0) {
                         const thisBlock = tiles.block[i.blocks[r][c]-1];

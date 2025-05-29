@@ -17,8 +17,8 @@ let tps = 0;
 
 const debugCanvas = document.createElement("canvas");
 const debugCtx = debugCanvas.getContext("2d");
-debugCanvas.width = 752;
-debugCanvas.height = 180;
+debugCanvas.width = 1000;
+debugCanvas.height = 480;
 //document.body.appendChild(debugCanvas);
 
 function debugDraw() {

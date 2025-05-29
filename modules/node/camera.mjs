@@ -30,6 +30,8 @@ export default class Camera extends Node {
         this.targetZoom = zoom;
         this.zoom = zoom;
 
+        console.log(this.pos);
+
         addEventListener(CameraMoveEvent.code, (e) => {
             this.moveTo(e.detail);
         });
@@ -87,10 +89,10 @@ export default class Camera extends Node {
         this.zoom = lerp(this.prevZoom, this.targetZoom, this.zoomTime / Camera.FOLLOW_TICKS);
 
         if (room && !this.locked) {
-            if (this.pos.x < room.pos.x * 10) this.pos.x = room.pos.x * 10;
-            if (this.pos.x + Camera.BASE_DIMENSIONS.x > room.dimensions.x * 10 + room.pos.x * 10) this.pos.x = room.dimensions.x * 10 + room.pos.x * 10 - Camera.BASE_DIMENSIONS.x;
-            if (this.pos.y < room.pos.y * 10) this.pos.y = room.pos.y * 10;
-            if (this.pos.y + Camera.BASE_DIMENSIONS.y > room.dimensions.y * 10 + room.pos.y * 10) this.pos.y = room.dimensions.y * 10 + room.pos.y * 10 - Camera.BASE_DIMENSIONS.y;
+            if (this.pos.x < room.pos.x * 40) this.pos.x = room.pos.x * 40;
+            if (this.pos.x + Camera.BASE_DIMENSIONS.x > room.dimensions.x * 40 + room.pos.x * 40) this.pos.x = room.dimensions.x * 40 + room.pos.x * 40 - Camera.BASE_DIMENSIONS.x;
+            if (this.pos.y < room.pos.y * 40) this.pos.y = room.pos.y * 40;
+            if (this.pos.y + Camera.BASE_DIMENSIONS.y > room.dimensions.y * 40 + room.pos.y * 40) this.pos.y = room.dimensions.y * 40 + room.pos.y * 40 - Camera.BASE_DIMENSIONS.y;
         }
 
         this.x = Math.round(this.x);

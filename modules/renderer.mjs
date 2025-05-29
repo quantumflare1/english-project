@@ -1,6 +1,6 @@
 import Scene from "./scene.mjs";
 
-const BASE_SCALE = 50;
+const BASE_SCALE = 20;
 
 export default class Renderer {
     canvas;

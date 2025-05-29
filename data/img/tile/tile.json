@@ -27,6 +27,15 @@
             "name": "tile_templeplatform",
             "blockDir": "down",
             "connective": false
+        },
+        {
+            "offX": 0,
+            "offY": 0,
+            "w": 40,
+            "h": 40,
+            "z": 0,
+            "name": "tile_castle",
+            "connective": true
         }
     ],
     "hazard": [
@@ -121,15 +130,6 @@
             "z": -2,
             "name": "tile_checkpoint",
             "type": "checkpoint"
-        },
-        {
-            "offX": 1,
-            "offY": 1,
-            "w": 8,
-            "h": 8,
-            "z": -1,
-            "name": "tile_grapple",
-            "type": "grapple"
         }
     ]
 }

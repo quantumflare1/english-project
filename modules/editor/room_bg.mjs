@@ -5,7 +5,7 @@ export default class RoomBG extends Rect {
     color; z; id;
     fancy; hovering;
     constructor(x, y, w, h, id, z = -99) {
-        super(x*10, y*10, w*10, h*10);
+        super(x*40, y*40, w*40, h*40);
         this.z = z;
 
         this.id = id;

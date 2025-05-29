@@ -7,10 +7,6 @@ function test() {
     console.log("Activated!")
 }
 
-function pickUpGrapple() {
-    dispatchEvent(new PlayerStateChangeEvent(Player.states.DEFAULT));
-}
-
 function startMove(player, time, moveX, moveY) {
     this.targetTime = time;
     this.targetPos = new Vector(this.pos.x + moveX, this.pos.y + moveY);
@@ -33,11 +29,5 @@ function setSpawnPoint(player) {
     player.setSpawn(this.pos.x + (this.hitbox.dimensions.x - player.hitbox.dimensions.x) / 2, this.pos.y + (this.hitbox.dimensions.y - player.hitbox.dimensions.x) / 2);
     this.done = true;
 }
-// oh yeah i need to animate the checkpoints
 
-function givePlayerGrapple(player) {
-    player.state = Player.states.DEFAULT;
-    this.done = true;
-}
-
-export { test, pickUpGrapple, startMove, move, setSpawnPoint, givePlayerGrapple };
+export { test, startMove, move, setSpawnPoint };

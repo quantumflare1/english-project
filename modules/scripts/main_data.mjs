@@ -60,7 +60,7 @@ const elements = [
         {
             params: [160.5, 30, 10, "Play", "center", "16px font-NotJamUICondensed16", "black", "", true,
                 () => {
-                    const scene = new Level("./data/level/level.angle");
+                    const scene = new Level("./data/level/test.angle");
                     dispatchEvent(new SceneChangeEvent(scene));
                 }
             ],

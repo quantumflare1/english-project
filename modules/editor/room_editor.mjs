@@ -80,7 +80,7 @@ export default class Editor extends Scene {
     placeTile(pos, type) {
         if (type === "hazard") {
             const globalPos = new Vector(pos.x + this.room?.x, pos.y + this.room?.y);
-            globalPos.multiply(10);
+            globalPos.multiply(40);
             const thisHazard = tiles.hazard[this.room?.hazards[pos.y][pos.x]-1];
             const thisHazardSprite = Assets.sprites[thisHazard.name];
 
@@ -98,7 +98,7 @@ export default class Editor extends Scene {
         }
         else {
             const globalPos = new Vector(pos.x + this.room?.x, pos.y + this.room?.y);
-            globalPos.multiply(10);
+            globalPos.multiply(40);
             const thisBlock = tiles[type][this.room?.[`${type}s`][pos.y][pos.x]-1];
             const thisBlockSprite = Assets.sprites[thisBlock.name];
 
@@ -121,7 +121,7 @@ export default class Editor extends Scene {
         }
     }
     update() {
-        const mouseTile = new Vector(Math.floor((this.mouse.pos.x + this.camera.pos.x) / (10 * this.camera.zoom)) - this.room?.x, Math.floor((this.mouse.pos.y + this.camera.pos.y) / (10 * this.camera.zoom) - this.room?.y));
+        const mouseTile = new Vector(Math.floor((this.mouse.pos.x + this.camera.pos.x) / (40 * this.camera.zoom)) - this.room?.x, Math.floor((this.mouse.pos.y + this.camera.pos.y) / (40 * this.camera.zoom) - this.room?.y));
         
         if (this.mouse.pressed.has(0)) {
             if (this.curTile && this.state === "room") {
@@ -147,7 +147,7 @@ export default class Editor extends Scene {
             if (this.curType && this.state === "room") {
                 if (mouseTile.x >= 0 && mouseTile.x < this.room?.width && mouseTile.y >= 0 && mouseTile.y < this.room?.height && this.room?.[`${this.curType}s`][mouseTile.y][mouseTile.x] > 0) {
                     const thisTile = tiles[this.curType][this.room?.[`${this.curType}s`][mouseTile.y][mouseTile.x]-1];
-                    const tilePos = new Vector(mouseTile.x * 10 + thisTile.offX + this.room?.x * 10, mouseTile.y * 10 + thisTile.offY + this.room?.y * 10);
+                    const tilePos = new Vector(mouseTile.x * 40 + thisTile.offX + this.room?.x * 40, mouseTile.y * 40 + thisTile.offY + this.room?.y * 40);
 
                     this.room[`${this.curType}s`][mouseTile.y][mouseTile.x] = 0;
                     this.removeNode(this.findObjectWithProperty(this.nodes, { key: "pos", value: tilePos }, { key: "hitbox", value: new Rect(tilePos.x, tilePos.y, thisTile.w, thisTile.h) }));
@@ -196,10 +196,10 @@ export default class Editor extends Scene {
         switch (detail) {
             case "x":
             case "y":
-                this.roomIndicators[this.room?.id].pos[detail] = value * 10;
+                this.roomIndicators[this.room?.id].pos[detail] = value * 40;
                 break;
             case "width":
-                this.roomIndicators[this.room?.id].dimensions.x = value * 10;
+                this.roomIndicators[this.room?.id].dimensions.x = value * 40;
 
                 for (let i = 0; i < this.room.height; i++) {
                     for (let j = this.room.blocks[i].length; j < this.room.width; j++)
@@ -215,7 +215,7 @@ export default class Editor extends Scene {
                 }
                 break;
             case "height":
-                this.roomIndicators[this.room?.id].dimensions.y = value * 10;
+                this.roomIndicators[this.room?.id].dimensions.y = value * 40;
 
                 for (let i = this.room.blocks.length; i < this.room.height; i++) {
                     this.room.blocks[i] = [];
@@ -238,7 +238,7 @@ export default class Editor extends Scene {
         }
     }
     createRoom() {
-        const room = new RoomData(this.level.rooms.length, RoomData.DEFAULT_WIDTH, RoomData.DEFAULT_HEIGHT, Math.floor(this.camera.pos.x / (10 * this.camera.zoom)), Math.floor(this.camera.pos.y / (10 * this.camera.zoom)));
+        const room = new RoomData(this.level.rooms.length, RoomData.DEFAULT_WIDTH, RoomData.DEFAULT_HEIGHT, Math.floor(this.camera.pos.x / (40 * this.camera.zoom)), Math.floor(this.camera.pos.y / (40 * this.camera.zoom)));
         if (this.room) this.roomIndicators[this.room.id].fancy = false;
         
         this.room = room;

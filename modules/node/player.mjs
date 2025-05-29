@@ -3,17 +3,15 @@ import Vector from "../misc/vector.mjs";
 import { CameraMoveEvent, CameraSnapEvent, PlayerStateChangeEvent, RoomChangeEvent } from "../event.mjs";
 import config from "../../data/config/player.json" with { type: "json" };
 import Rect from "./rect.mjs";
-import AnimatedSprite from "./animated_sprite.mjs";
+import Sprite from "./sprite.mjs";
 import Entity from "./entity.mjs";
 import Assets from "../assets.mjs";
 import { input, keybinds } from "../inputs.mjs";
-import { convertToAnimSpriteList } from "../misc/util.mjs";
-import sprite from "../../data/img/sprite/player.json";
+import sprite from "../../data/img/sprite/ophelia.json";
 
 const WIDTH = config.width;
 const HEIGHT = config.height;
 const MAX_VEL = config.maxVel;
-const RUN_VEL = MAX_VEL * 0.7;
 const TOUCH_THRESHOLD = 0.01;
 const CAMERA_OFFSET = new Vector(-160 + config.width / 2, -90 + config.height / 2);
 
@@ -31,10 +29,10 @@ export default class Player extends Entity {
      * @param {Level} level The level this player is in. 
      */
     constructor(x, y, level) {
-        const texDetails = Assets.sprites.player.sprite;
+        const texDetails = Assets.sprites.ophelia.sprite[0];
         super(x, y, new Rect(x, y, WIDTH, HEIGHT),
-        new AnimatedSprite(x + sprite.sprite[0][4], y + sprite.sprite[0][5], 0,
-            convertToAnimSpriteList(texDetails),
+        new Sprite(x + texDetails[4], y + texDetails[5], 0,
+            new Rect(texDetails[0], texDetails[1], texDetails[2], texDetails[3]),
         0, 8));
         this.spawnX = x;
         this.spawnY = y;
@@ -59,7 +57,7 @@ export default class Player extends Entity {
         this.prevX = this.pos.x;
         this.prevY = this.pos.y;
 
-        this.setSprite();
+        //this.setSprite();
         super.move(this.vel);
         dispatchEvent(new CameraMoveEvent(this.pos.x + CAMERA_OFFSET.x, this.pos.y + CAMERA_OFFSET.y));
 
@@ -82,8 +80,8 @@ export default class Player extends Entity {
     changeRoom() {
         const roomDimensions = new Vector(this.level.rooms[this.level.curRoom].dimensions.x, this.level.rooms[this.level.curRoom].dimensions.y);
         const roomPos = new Vector(this.level.rooms[this.level.curRoom].pos.x, this.level.rooms[this.level.curRoom].pos.y);
-        roomDimensions.multiply(10);
-        roomPos.multiply(10);
+        roomDimensions.multiply(40);
+        roomPos.multiply(40);
 
         if (this.pos.x > roomDimensions.x - WIDTH/2 + roomPos.x)
             for (const i of this.level.rooms[this.level.curRoom].right)
@@ -103,7 +101,26 @@ export default class Player extends Entity {
                     dispatchEvent(new RoomChangeEvent(i.room));
     }
     processRun() {
+        if (input.continuous.has(keybinds.left) && !this.touching.get("left")) {
+            this.vel.x = -MAX_VEL;
+        }
+        else if (input.continuous.has(keybinds.right) && !this.touching.get("right")) {
+            this.vel.x = MAX_VEL;
+        }
+        else {
+            this.vel.x = 0;
+        }
+        if (input.continuous.has(keybinds.up) && !this.touching.get("up")) {
+            this.vel.y = -MAX_VEL;
+        }
+        else if (input.continuous.has(keybinds.down) && !this.touching.get("down")) {
+            this.vel.y = MAX_VEL;
+        }
+        else {
+            this.vel.y = 0;
+        }
     }
+    /*
     setSprite() {
         if (input.continuous.has(keybinds.left) && this.vel.x > 0 || input.continuous.has(keybinds.right) && this.vel.x < 0) {
             this.sprite.setStartFrame(sprite.name.turning);
@@ -134,7 +151,7 @@ export default class Player extends Entity {
             this.sprite.setEndFrame(sprite.name.facing_right);
         }
         this.sprite.update();
-    }
+    }*/
     collide() {
         let moveX = this.pos.x - this.prevX;
         let moveY = this.pos.y - this.prevY;
