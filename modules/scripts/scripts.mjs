@@ -2,12 +2,13 @@ import Player from "../node/player.mjs";
 import { PlayerStateChangeEvent } from "../event.mjs";
 import Vector from "../misc/vector.mjs";
 import { lerp } from "../misc/util.mjs";
+import Dialogue from "../node/dialogue.mjs";
 
 function test() {
     console.log("Activated!")
 }
 
-function startMove(player, time, moveX, moveY) {
+function startMove(scene, player, time, moveX, moveY) {
     this.targetTime = time;
     this.targetPos = new Vector(this.pos.x + moveX, this.pos.y + moveY);
     this.startPos = this.pos.copy();
@@ -25,9 +26,15 @@ function move() {
         this.active = false;
 }
 
-function setSpawnPoint(player) {
+function startDialogue(scene, player, path) {
+    const d = new Dialogue(path);
+    scene.addNode(d);
+    d.activate();
+}
+
+function setSpawnPoint(scene, player) {
     player.setSpawn(this.pos.x + (this.hitbox.dimensions.x - player.hitbox.dimensions.x) / 2, this.pos.y + (this.hitbox.dimensions.y - player.hitbox.dimensions.x) / 2);
     this.done = true;
 }
 
-export { test, startMove, move, setSpawnPoint };
+export { test, startMove, move, setSpawnPoint, startDialogue };

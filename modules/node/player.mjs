@@ -1,6 +1,6 @@
 import { Level } from "../level.mjs";
 import Vector from "../misc/vector.mjs";
-import { CameraMoveEvent, CameraSnapEvent, PlayerStateChangeEvent, RoomChangeEvent } from "../event.mjs";
+import { CameraMoveEvent, CameraSnapEvent, PlayerFreezeEvent, PlayerStateChangeEvent, PlayerUnfreezeEvent, RoomChangeEvent } from "../event.mjs";
 import config from "../../data/config/player.json" with { type: "json" };
 import Rect from "./rect.mjs";
 import Sprite from "./sprite.mjs";
@@ -21,6 +21,7 @@ export default class Player extends Entity {
     facing = new Vector(1, 0);
     inControl = true;
     spawnX; spawnY; level;
+    z = 0;
 
     /**
      * Creates a new player
@@ -48,6 +49,12 @@ export default class Player extends Entity {
         addEventListener(PlayerStateChangeEvent.code, (e) => {
             this.state = e.detail;
         });
+        addEventListener(PlayerFreezeEvent.code, () => {
+            this.inControl = false;
+        })
+        addEventListener(PlayerUnfreezeEvent.code, () => {
+            this.inControl = true;
+        })
     }
     update() {
         this.findFacingDirection();
@@ -64,16 +71,16 @@ export default class Player extends Entity {
         this.collide();
     }
     findFacingDirection() {
-        if (input.continuous.has(keybinds.right)) {
+        if (input.continuous.has(keybinds.right) && this.inControl) {
             this.facing.x = 1;
         }
-        else if (input.continuous.has(keybinds.left)) {
+        else if (input.continuous.has(keybinds.left) && this.inControl) {
             this.facing.x = -1;
         }
-        else if (input.continuous.has(keybinds.down)) {
+        else if (input.continuous.has(keybinds.down) && this.inControl) {
             this.facing.y = 1;
         }
-        else if (input.continuous.has(keybinds.up)) {
+        else if (input.continuous.has(keybinds.up) && this.inControl) {
             this.facing.y = -1;
         }
     }
@@ -101,19 +108,19 @@ export default class Player extends Entity {
                     dispatchEvent(new RoomChangeEvent(i.room));
     }
     processRun() {
-        if (input.continuous.has(keybinds.left) && !this.touching.get("left")) {
+        if (input.continuous.has(keybinds.left) && !this.touching.get("left") && this.inControl) {
             this.vel.x = -MAX_VEL;
         }
-        else if (input.continuous.has(keybinds.right) && !this.touching.get("right")) {
+        else if (input.continuous.has(keybinds.right) && !this.touching.get("right") && this.inControl) {
             this.vel.x = MAX_VEL;
         }
         else {
             this.vel.x = 0;
         }
-        if (input.continuous.has(keybinds.up) && !this.touching.get("up")) {
+        if (input.continuous.has(keybinds.up) && !this.touching.get("up") && this.inControl) {
             this.vel.y = -MAX_VEL;
         }
-        else if (input.continuous.has(keybinds.down) && !this.touching.get("down")) {
+        else if (input.continuous.has(keybinds.down) && !this.touching.get("down") && this.inControl) {
             this.vel.y = MAX_VEL;
         }
         else {

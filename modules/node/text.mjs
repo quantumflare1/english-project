@@ -25,9 +25,10 @@ export default class Text extends Node {
         this.z = z;
         this.font = font;
         this.color = color;
-        this.text = text;
         this.align = align;
         this.display = display;
+
+        this.setText(text);
     }
     /**
      * 
@@ -35,6 +36,9 @@ export default class Text extends Node {
      */
     update(move = new Vector()) {
         this.pos.add(move);
+    }
+    setText(text = "") {
+        this.text = text.split("\n");
     }
     /**
      * 
@@ -44,6 +48,12 @@ export default class Text extends Node {
         ctx.font = this.font;
         ctx.fillStyle = this.color;
         ctx.textAlign = this.align;
-        ctx.fillText(this.text, this.pos.x, this.pos.y);
+
+        const lineHeight = parseInt(this.font.substring(0, 2)); //blewhhh whatever
+        let linePos = 0;
+        for (const i of this.text) {
+            ctx.fillText(i, this.pos.x, this.pos.y + linePos);
+            linePos += lineHeight;
+        }
     }
 }

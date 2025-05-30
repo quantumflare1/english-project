@@ -71,7 +71,7 @@ class Level extends Scene {
                         const texVariant = thisBlockSprite.name;
     
                         // very readable autotiling code
-                        if (nw && n && ne && e && se && s && sw && w) textureId = texVariant.inner;
+                        if (!n && !e && !s && !w) textureId = texVariant.outer_all;
                         else if (!n && e && se && s && sw && w) textureId = texVariant.top;
                         else if (n && ne && e && se && s && !w) textureId = texVariant.left;
                         else if (nw && n && !e && s && sw && w) textureId = texVariant.right;
@@ -116,7 +116,7 @@ class Level extends Scene {
                         else if (!nw && n && !ne && e && !s && w) textureId = texVariant.bottom_corner_both;
                         else if (!nw && n && ne && e && !se && s && sw && w) textureId = texVariant.corner_opposite_left;
                         else if (nw && n && !ne && e && se && s && !sw && w) textureId = texVariant.corner_opposite_right;
-                        else textureId = texVariant.outer_all;
+                        else textureId = texVariant.inner;
     
                         const pixelPos = new Vector(globalPos.x + thisBlock.offX, globalPos.y + thisBlock.offY);
                         const texDetails = thisBlockSprite.sprite[textureId];
@@ -180,7 +180,7 @@ class Level extends Scene {
                             pixelPos.x + texDetails[4], pixelPos.y + texDetails[5], thisSpecial.z, convertToAnimSpriteList(thisSpecialSprite.sprite), 0, 5) : new Sprite(
                             pixelPos.x + texDetails[4], pixelPos.y + texDetails[5], thisSpecial.z,
                             new Rect(texDetails[0], texDetails[1], texDetails[2], texDetails[3]),
-                        1),
+                        1), this,
                         thisSpecialData?.ontouch?.func, thisSpecialData?.ontouch?.params, thisSpecialData?.whileActive?.func, thisSpecialData?.whileActive?.params)
 
                         this.addNode(special);

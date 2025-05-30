@@ -135,6 +135,20 @@ class PlayerKillEvent extends Event {
     }
 }
 
+class PlayerFreezeEvent extends Event {
+    static code = "game_playerfreeze";
+    constructor() {
+        super(PlayerFreezeEvent.code);
+    }
+}
+
+class PlayerUnfreezeEvent extends Event {
+    static code = "game_playerunfreeze";
+    constructor() {
+        super(PlayerUnfreezeEvent.code);
+    }
+}
+
 export {
     CameraSnapEvent, CameraMoveEvent, CameraZoomEvent,              // camera
     AssetLoadEvent,                                                 // assets
@@ -143,6 +157,6 @@ export {
     RoomChangeEvent,                                                // room
     SettingsChangeEvent, CursorMoveEvent,                           // menu
     FPSUpdateEvent, TimeUpdateEvent,                                // ui
-    PlayerStateChangeEvent, PlayerKillEvent,                        // player
+    PlayerStateChangeEvent, PlayerKillEvent, PlayerFreezeEvent, PlayerUnfreezeEvent,     // player
     EditorRoomChangeEvent, EditorTileSelectEvent, EditorImportEvent // editor
 };

@@ -1,0 +1,14 @@
+[
+    {
+        "speaker": "Hamlet",
+        "text": [
+            "O my dear Ophelia,",
+            "Of thy visage, doth my mind",
+            "turneth to."
+        ]
+    },
+    {
+        "speaker": "Ophelia",
+        "text": ["why are you talking like that"]
+    }
+]
