@@ -1,45 +1,41 @@
-import Room from "./node/room.mjs";
 import Scene from "./scene.mjs";
 import Camera from "./node/camera.mjs";
 import Entity from "./node/entity.mjs";
-import Sprite from "./node/sprite.mjs";
 import Rect from "./node/rect.mjs";
-import Assets from "./assets.mjs";
+import Dialogue from "./node/dialogue.mjs";
 import Vector from "./misc/vector.mjs";
-import Player from "./node/player.mjs";
-import Text from "./node/text.mjs";
-import Trigger from "./node/trigger.mjs";
-import Special from "./node/special.mjs";
-import Platform from "./node/platform.mjs";
+import FlatQueue from "https://cdn.jsdelivr.net/npm/flatqueue/+esm";
+import Assets from "./assets.mjs";
+import Sprite from "./node/sprite.mjs";
+import { Level } from "./level.mjs";
+import Room from "./node/room.mjs";
+import * as specialData from "./scripts/special_data.mjs";
 
 import tiles from "../data/img/tile/tile.json" with { type: "json" };
-import { options } from "./options.mjs";
-import * as triggers from "./scripts/scripts.mjs";
-import * as specialData from "./scripts/special_data.mjs";
-import AnimatedSprite from "./node/animated_sprite.mjs";
-import { convertToAnimSpriteList } from "./misc/util.mjs";
-import { FPSUpdateEvent, SceneChangeEvent, TimeUpdateEvent } from "./event.mjs";
-import { input, keybinds } from "./inputs.mjs";
-import { createPauseMenu } from "./node/menu/pause_menu.mjs";
+import { SceneChangeEvent } from "./event.mjs";
 
-class Level extends Scene {
-    blockList = [];
-    triggerList = [];
-    specialList = [];
+export default class Cutscene extends Scene {
+    data; actors; events;
+    curEvent; ticks; dialogue;
+    done; waiting;
+    loadState;
 
-    roomBlocks = [];
+    constructor(level, cutscene) {
+        super("cutscene", new Camera(0, 0, 1));
+        this.actors = {};
+        this.events = new FlatQueue();
+        this.done = false;
+        this.loadState = 0;
 
-    constructor(path) {
-        super("placeholder", new Camera(0, 0, 1));
-        this.init(path);
+        this.initLevel(level);
+        this.initCutscene(cutscene);
     }
-    async init(path) {
+    async initLevel(path) {
         const json = await (await fetch(path)).json();
     
         const rooms = [];
         // preprocess room data
         for (const i of json.rooms) {
-            this.roomBlocks.push(i.blocks);
             for (let r = 0; r < i.height; r++) {
                 for (let c = 0; c < i.width; c++) {
                     const globalPos = new Vector(c + i.x, r + i.y);
@@ -122,12 +118,10 @@ class Level extends Scene {
                         const texDetails = thisBlockSprite.sprite[textureId];
     
                         // incomprehensible
-                        const blockRect = new Platform(pixelPos.x, pixelPos.y, thisBlock.w, thisBlock.h, thisBlock.blockDir);
-                        this.addNode(new Entity(pixelPos.x, pixelPos.y, blockRect, new Sprite(
+                        this.addNode(new Sprite(
                             pixelPos.x + texDetails[4], pixelPos.y + texDetails[5], thisBlock.z,
                             new Rect(texDetails[0], texDetails[1], texDetails[2], texDetails[3]),
-                        1)));
-                        this.blockList.push(blockRect);
+                        1));
                     }
     
                     if (i.decals[r][c] !== 0) {
@@ -137,32 +131,10 @@ class Level extends Scene {
                         const texDetails = thisDecalSprite.sprite[textureId];
                         const pixelPos = new Vector(globalPos.x + thisDecal.offX, globalPos.y + thisDecal.offY);
                         
-                        this.addNode(new Entity(pixelPos.x, pixelPos.y, new Rect(), new Sprite(
+                        this.addNode(new Sprite(
                             pixelPos.x + texDetails[4], pixelPos.y + texDetails[5], thisDecal.z,
                             new Rect(texDetails[0], texDetails[1], texDetails[2], texDetails[3]),
-                        1)));
-                    }
-
-                    if (i.triggers[r][c] !== 0) {
-                        const thisTrigger = tiles.trigger[i.triggers[r][c]-1];
-                        const pixelPos = new Vector(globalPos.x + thisTrigger.offX, globalPos.y + thisTrigger.offY);
-                        
-                        const triggerRect = new Trigger(pixelPos.x, pixelPos.y, thisTrigger.w, thisTrigger.h, thisTrigger.trigger, thisTrigger.type, thisTrigger.maxActivations, triggers[thisTrigger.name]);
-
-                        if (thisTrigger.sprite) {
-                            const thisTriggerSprite = Assets.sprites[thisTrigger.sprite.name];
-                            const textureId = thisTriggerSprite.name.default; // placeholder!!
-                            const texDetails = thisTriggerSprite.sprite[textureId];
-
-                            this.addNode(new Entity(pixelPos.x, pixelPos.y, triggerRect, new Sprite(
-                                pixelPos.x + texDetails[4], pixelPos.y + texDetails[5], thisTrigger.z,
-                                new Rect(texDetails[0], texDetails[1], texDetails[2], texDetails[3]),
-                            1)));
-                        }
-                        else {
-                            this.addNode(triggerRect);
-                        }
-                        this.triggerList.push(triggerRect);
+                        1));
                     }
 
                     if (i.specials[r][c] !== 0) {
@@ -174,18 +146,13 @@ class Level extends Scene {
                         const textureId = thisSpecialSprite.name.default; // placeholder!!
                         const texDetails = thisSpecialSprite.sprite[textureId];
 
-                        // convertToAnimSpriteList(thisSpecialSprite.sprite)
-                        const special = new Special(pixelPos.x, pixelPos.y, new Rect(
-                            pixelPos.x, pixelPos.y, thisSpecial.w, thisSpecial.h), thisSpecialData?.animated ? new AnimatedSprite(
+                        const special = thisSpecialData?.animated ? new AnimatedSprite(
                             pixelPos.x + texDetails[4], pixelPos.y + texDetails[5], thisSpecial.z, convertToAnimSpriteList(thisSpecialSprite.sprite), 0, 5) : new Sprite(
                             pixelPos.x + texDetails[4], pixelPos.y + texDetails[5], thisSpecial.z,
                             new Rect(texDetails[0], texDetails[1], texDetails[2], texDetails[3]),
-                        1), this,
-                        thisSpecialData?.ontouch?.func, thisSpecialData?.ontouch?.params, thisSpecialData?.whileActive?.func, thisSpecialData?.whileActive?.params)
+                        1);
 
                         this.addNode(special);
-                        
-                        this.specialList.push(special);
                     }
                 }
             }
@@ -206,49 +173,77 @@ class Level extends Scene {
             rooms.push(thisRoom);
         }
         this.addRooms(...rooms);
-        this.addNode(new Player(json.meta.spawnX, json.meta.spawnY, this, json.meta.playerState));
+        this.loadState++;
+    }
+    async initCutscene(path) {
+        this.data = await (await fetch(path)).json();
+        
+        console.log(this.data)
+        Object.keys(this.data.actors).forEach((v) => {
+            const actor = this.data.actors[v];
+            const sprite = Assets.sprites[actor.sprite].sprite[0];
 
-        if (options.showFps) {
-            const fpsDisplay = new Text(5, 14, 100, "60 FPS", "start", "12px font-Pixellari", "white", "follow");
+            const entity = new Sprite(
+                actor.x + sprite[4], actor.y + sprite[5], 0,
+                new Rect(sprite[0], sprite[1], sprite[2], sprite[3]), 0
+            );
+            this.actors[v] = entity;
+            this.addNode(entity);
+        });
 
-            addEventListener(FPSUpdateEvent.code, (e) => {
-                fpsDisplay.text = e.detail + " FPS";
-            });
-            this.addNode(fpsDisplay);
+        for (const i of this.data.choreo) {
+            this.events.push(i, i.order);
         }
-        if (options.showTimer) {
-            const timerDisplay = new Text(315, 14, 100, "0.00", "end", "12px font-Pixellari", "white", "follow");
-            timerDisplay.ms = 0; // secret hardcoded hack
-            timerDisplay.startMs = document.timeline.currentTime;
-
-            addEventListener(TimeUpdateEvent.code, (e) => {
-                function force2Digits(num) {
-                    if (num < 10) return `0${num}`;
-                    return num;
-                }
-                timerDisplay.ms = e.detail - timerDisplay.startMs;
-
-                const cs = Math.floor(timerDisplay.ms / 10) % 100;
-                const sec = Math.floor(timerDisplay.ms / 1000) % 60;
-                const min = Math.floor(timerDisplay.ms / 60000);
-
-                if (min < 1) {
-                    timerDisplay.text = `${sec}.${force2Digits(cs)}`;
-                }
-                else {
-                    timerDisplay.text = `${min}:${force2Digits(sec)}.${force2Digits(cs)}`;
-                }
-            });
-            this.addNode(timerDisplay);
+        for (const i of this.data.script) {
+            this.events.push(i, i.order);
         }
+        this.loadState++;
+        this.nextEvent();
     }
     update() {
         super.update();
-        if (input.impulse.has(keybinds.pause)) {
-            input.consumeInput(keybinds.pause);
-            dispatchEvent(new SceneChangeEvent(createPauseMenu(this)));
+
+        if (this.done || this.loadState < 2) return;
+
+        if (this.dialogue) {
+            if (!this.dialogue.active) {
+                this.dialogue = null;
+                this.nextEvent();
+            }
+        }
+        else {
+            this.ticks++;
+
+            if (this.ticks >= this.curEvent.delay && this.waiting) {
+                this.ticks = 0;
+                this.waiting = false;
+                
+                if (this.curEvent.source) {
+                    this.dialogue = new Dialogue(this.curEvent.source);
+                    this.dialogue.activate();
+                    this.addNode(this.dialogue);
+                }
+            }
+            else if (!this.waiting) {
+                if (this.ticks >= this.curEvent.time) {
+                    this.nextEvent();
+                }
+                else {
+                    const dx = this.curEvent.moveX / this.curEvent.time; // epic division by zero
+                    const dy = this.curEvent.moveY / this.curEvent.time;
+                    this.actors[this.curEvent.target].move(new Vector(dx, dy));
+                }
+            }
+        }
+    }
+    nextEvent() {
+        this.curEvent = this.events.pop();
+        this.ticks = 0;
+        this.waiting = true;
+
+        if (!this.curEvent) {
+            this.done = true;
+            dispatchEvent(new SceneChangeEvent(new Level(this.data.afterScene)));
         }
     }
 }
-
-export { Level };

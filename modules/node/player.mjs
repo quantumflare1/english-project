@@ -71,16 +71,19 @@ export default class Player extends Entity {
         this.collide();
     }
     findFacingDirection() {
-        if (input.continuous.has(keybinds.right) && this.inControl) {
+        if (!this.inControl)
+            return;
+        
+        if (input.continuous.has(keybinds.right)) {
             this.facing.x = 1;
         }
-        else if (input.continuous.has(keybinds.left) && this.inControl) {
+        else if (input.continuous.has(keybinds.left)) {
             this.facing.x = -1;
         }
-        else if (input.continuous.has(keybinds.down) && this.inControl) {
+        else if (input.continuous.has(keybinds.down)) {
             this.facing.y = 1;
         }
-        else if (input.continuous.has(keybinds.up) && this.inControl) {
+        else if (input.continuous.has(keybinds.up)) {
             this.facing.y = -1;
         }
     }

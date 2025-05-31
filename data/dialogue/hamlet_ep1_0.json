@@ -1,14 +1,21 @@
 [
     {
+        "speaker": "Ophelia",
+        "text": [
+            "Thou hast called me, my lord,",
+            "How does your honor?"
+        ]
+    },
+    {
         "speaker": "Hamlet",
         "text": [
             "O my dear Ophelia,",
-            "Of thy visage, doth my mind",
-            "turneth to."
+            "mine own affections have always",
+            "tended towards thou."
         ]
     },
     {
         "speaker": "Ophelia",
-        "text": ["why are you talking like that"]
+        "text": ["...?!"]
     }
 ]

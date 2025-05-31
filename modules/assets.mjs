@@ -2,7 +2,7 @@ import assets from "../data/config/assets.json" with { type: "json" };
 import { AssetLoadEvent } from "./event.mjs";
 
 export default class Assets {
-    static spritesheet = new OffscreenCanvas(1000, 480); // couldn't figure dynamic resizing out so enjoy the hardcoded numbers
+    static spritesheet = new OffscreenCanvas(2000, 480); // couldn't figure dynamic resizing out so enjoy the hardcoded numbers
     static sprites = {};
     static spriteCtx = this.spritesheet.getContext("2d");
     static audio = [];
