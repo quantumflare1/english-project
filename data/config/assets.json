@@ -8,7 +8,7 @@
         "files": [
             ["bg_menu", "bg_temple"],
             ["tile_checkpoint", "ophelia", "hamlet"],
-            ["tile_temple", "tile_spike", "tile_temple2", "tile_placeholder", "tile_castle", "tile_bed", "tile_templeplatform", "tile_rue"]
+            ["tile_temple", "tile_spike", "tile_temple2", "tile_placeholder", "tile_castle", "tile_bed", "tile_templeplatform", "tile_rue", "tile_cobble", "tile_grass2", "tile_fence"]
         ]
     },
     "audio": {

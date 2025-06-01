@@ -20,13 +20,15 @@ export default class Cutscene extends Scene {
     curEvent; ticks; dialogue;
     done; waiting;
     loadState;
+    prevScene;
 
-    constructor(level, cutscene) {
+    constructor(level, cutscene, prevScene = null) {
         super("cutscene", new Camera(0, 0, 1));
         this.actors = {};
         this.events = new FlatQueue();
         this.done = false;
         this.loadState = 0;
+        this.prevScene = prevScene;
 
         this.initLevel(level);
         this.initCutscene(cutscene);
@@ -209,7 +211,10 @@ export default class Cutscene extends Scene {
         if (this.done) {
             this.ticks++;
             if (this.ticks >= Transition.transTime) {
-                dispatchEvent(new SceneChangeEvent(new Level(this.data.afterScene)));
+                if (this.prevScene) {
+                    dispatchEvent(new SceneChangeEvent(this.prevScene));
+                }
+                else dispatchEvent(new SceneChangeEvent(new Level(this.data.afterScene)));
             }
         }
         if (this.done || this.loadState < 2) return;

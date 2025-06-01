@@ -27,6 +27,11 @@ class Level extends Scene {
     blockList = [];
     triggerList = [];
     specialList = [];
+    quest = null;
+    day = 0;
+    // use triggers to add and complete quests
+    // quests represented by id
+    // also to increment the day count
 
     roomBlocks = [];
 

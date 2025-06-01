@@ -3,6 +3,8 @@ import { PlayerStateChangeEvent } from "../event.mjs";
 import Vector from "../misc/vector.mjs";
 import { lerp } from "../misc/util.mjs";
 import Dialogue from "../node/dialogue.mjs";
+import Quest from "../node/quest.mjs";
+import Text from "../node/text.mjs";
 
 function test() {
     console.log("Activated!")
@@ -37,4 +39,20 @@ function setSpawnPoint(scene, player) {
     this.done = true;
 }
 
-export { test, startMove, move, setSpawnPoint, startDialogue };
+function giveQuest(scene, player, description, id) {
+    scene.quest = new Quest(description, id);
+    scene.questTitle = new Text(20, 20, 99, "QUEST", "start", "16px font-Pixellari", "#ffff00", "follow");
+    scene.addNode(scene.quest);
+    scene.addNode(scene.questTitle);
+}
+
+function completeQuest(scene, player, id) {
+    if (scene.quest.id === id) {
+        scene.removeNode(scene.quest);
+        scene.removeNode(scene.questTitle);
+        scene.quest = null;
+        scene.questTitle = null;
+    }
+}
+
+export { test, startMove, move, setSpawnPoint, startDialogue, giveQuest, completeQuest };

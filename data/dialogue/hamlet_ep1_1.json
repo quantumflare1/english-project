@@ -1,0 +1,31 @@
+[
+    {
+        "speaker": "Hamlet",
+        "text": [
+            "From my speech grows the",
+            "roses of mine heart."
+        ]
+    },
+    {
+        "speaker": "Ophelia",
+        "text": [
+            "My lord...",
+            "Thou art most gracious."
+        ]
+    },
+    {
+        "speaker": "Hamlet",
+        "text": [
+            "Wonderful!",
+            "I would like to tender",
+            "you of mine love."
+        ]
+    },
+    {
+        "speaker": "Ophelia",
+        "text": [
+            "O!",
+            "Thank you, thank you."
+        ]
+    }
+]

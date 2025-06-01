@@ -10,12 +10,19 @@
         "speaker": "Hamlet",
         "text": [
             "O my dear Ophelia,",
-            "mine own affections have always",
-            "tended towards thou."
+            "mine affections have always",
+            "been tended towards thou."
         ]
     },
     {
         "speaker": "Ophelia",
         "text": ["...?!"]
+    },
+    {
+        "speaker": "Ophelia",
+        "text": [
+            "Marry, are thine",
+            "words true?"
+        ]
     }
 ]
