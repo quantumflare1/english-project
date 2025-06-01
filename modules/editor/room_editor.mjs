@@ -280,6 +280,8 @@ export default class Editor extends Scene {
                 }
             }
         }
+        this.room = newLevel.rooms[0];
+        console.log(newLevel.rooms)
         this.roomIndicators[this.room.id].fancy = true;
 
         dispatchEvent(new EditorImportEvent(newLevel.meta));

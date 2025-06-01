@@ -21,6 +21,7 @@ import { convertToAnimSpriteList } from "./misc/util.mjs";
 import { FPSUpdateEvent, SceneChangeEvent, TimeUpdateEvent } from "./event.mjs";
 import { input, keybinds } from "./inputs.mjs";
 import { createPauseMenu } from "./node/menu/pause_menu.mjs";
+import Transition from "./node/transition.mjs";
 
 class Level extends Scene {
     blockList = [];
@@ -241,6 +242,7 @@ class Level extends Scene {
             });
             this.addNode(timerDisplay);
         }
+        this.addNode(new Transition("fadein"));
     }
     update() {
         super.update();

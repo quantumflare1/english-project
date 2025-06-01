@@ -45,6 +45,15 @@
             "z": -1,
             "name": "tile_bed",
             "connective": false
+        },
+        {
+            "offX": 0,
+            "offY": 0,
+            "w": 40,
+            "h": 40,
+            "z": -1,
+            "name": "tile_rue",
+            "connective": true
         }
     ],
     "hazard": [

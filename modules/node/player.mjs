@@ -212,7 +212,7 @@ export default class Player extends Entity {
             if (moveX > 0) kickX = i.pos.x - (this.pos.x + WIDTH);
             else if (moveX < 0) kickX = (i.pos.x + i.dimensions.x) - this.pos.x;
             if (moveY > 0) kickY = i.pos.y - (this.pos.y + HEIGHT);
-            else if (moveY < 0) kickY = (i.pos.y + i.dimensions.x) - this.pos.y; // no clue if this should be i.pos.y + i.dimensions.y
+            else if (moveY < 0) kickY = (i.pos.y + i.dimensions.y) - this.pos.y; // no clue if this should be i.pos.y + i.dimensions.y
 
             const kickXVec = new Vector(kickX);
             const kickYVec = new Vector(0, kickY);

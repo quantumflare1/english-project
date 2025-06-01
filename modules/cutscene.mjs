@@ -12,7 +12,8 @@ import Room from "./node/room.mjs";
 import * as specialData from "./scripts/special_data.mjs";
 
 import tiles from "../data/img/tile/tile.json" with { type: "json" };
-import { SceneChangeEvent } from "./event.mjs";
+import { CameraSnapEvent, SceneChangeEvent } from "./event.mjs";
+import Transition from "./node/transition.mjs";
 
 export default class Cutscene extends Scene {
     data; actors; events;
@@ -185,7 +186,7 @@ export default class Cutscene extends Scene {
 
             const entity = new Sprite(
                 actor.x + sprite[4], actor.y + sprite[5], 0,
-                new Rect(sprite[0], sprite[1], sprite[2], sprite[3]), 0
+                new Rect(sprite[0], sprite[1], sprite[2], sprite[3]), actor.z
             );
             this.actors[v] = entity;
             this.addNode(entity);
@@ -197,12 +198,20 @@ export default class Cutscene extends Scene {
         for (const i of this.data.script) {
             this.events.push(i, i.order);
         }
+        dispatchEvent(new CameraSnapEvent(this.data.initialX, this.data.initialY));
+        this.curRoom = this.data.initialRoom;
         this.loadState++;
         this.nextEvent();
     }
     update() {
         super.update();
 
+        if (this.done) {
+            this.ticks++;
+            if (this.ticks >= Transition.transTime) {
+                dispatchEvent(new SceneChangeEvent(new Level(this.data.afterScene)));
+            }
+        }
         if (this.done || this.loadState < 2) return;
 
         if (this.dialogue) {
@@ -243,7 +252,8 @@ export default class Cutscene extends Scene {
 
         if (!this.curEvent) {
             this.done = true;
-            dispatchEvent(new SceneChangeEvent(new Level(this.data.afterScene)));
+            this.ticks = 0;
+            this.addNode(new Transition("fadeout"));
         }
     }
 }
