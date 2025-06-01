@@ -96,7 +96,7 @@ export default class Editor extends Scene {
 
             this.addNode(entity);
         }
-        else {
+        else if (type !== "trigger") {
             const globalPos = new Vector(pos.x + this.room?.x, pos.y + this.room?.y);
             globalPos.multiply(40);
             const thisBlock = tiles[type][this.room?.[`${type}s`][pos.y][pos.x]-1];

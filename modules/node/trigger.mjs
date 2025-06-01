@@ -6,10 +6,11 @@ import Rect from "./rect.mjs";
  */
 
 export default class Trigger extends Rect {
-    trigger; type;
-    func;
+    scene;
     disabled; done;
     activations; maxActivations;
+
+    touchScript; touchParams;
 
     /**
      * 
@@ -18,20 +19,24 @@ export default class Trigger extends Rect {
      * @param {number} w 
      * @param {number} h 
      * @param {string} trigger 
-     * @param {cb} func 
+     * @param {cb} ontouch 
      */
-    constructor(x, y, w, h, trigger, type, maxActivations, func) {
+    constructor(x, y, w, h, scene, maxActivations, ontouch, touchParams) {
         super(x, y, w, h);
-        this.trigger = trigger;
-        this.type = type;
+        this.scene = scene;
         this.disabled = false;
         this.done = false;
         this.activations = 0;
         this.maxActivations = maxActivations;
-        this.func = func.bind(this);
+
+        this.touchScript = ontouch.bind(this);
+        this.touchParams = touchParams;
     }
     update() {
         if (this.activations === this.maxActivations)
             this.done = true;
+    }
+    ontouch(player) {
+        this.touchScript(this.scene, player, ...this.touchParams);
     }
 }

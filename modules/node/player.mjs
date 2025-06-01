@@ -173,10 +173,10 @@ export default class Player extends Entity {
 
         // probably should move this to trigger class
         for (const i of this.level.triggerList) {
-            if (i.trigger === "touch" && this.hitbox.collidesWith(i)) {
+            if (this.hitbox.collidesWith(i)) {
                 if (!i.disabled && !i.done) {
-                    i.func();
-                    if (i.type === "impulse") i.disabled = true;
+                    i.ontouch(this);
+                    i.disabled = true;
                 }
             }
             else {

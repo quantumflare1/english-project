@@ -41,7 +41,7 @@ function setSpawnPoint(scene, player) {
 
 function giveQuest(scene, player, description, id) {
     scene.quest = new Quest(description, id);
-    scene.questTitle = new Text(20, 20, 99, "QUEST", "start", "16px font-Pixellari", "#ffff00", "follow");
+    scene.questTitle = new Text(10, 20, 99, "QUEST", "start", "16px font-Pixellari", "#ffff00", "follow");
     scene.addNode(scene.quest);
     scene.addNode(scene.questTitle);
 }

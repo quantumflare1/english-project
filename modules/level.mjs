@@ -14,7 +14,7 @@ import Platform from "./node/platform.mjs";
 
 import tiles from "../data/img/tile/tile.json" with { type: "json" };
 import { options } from "./options.mjs";
-import * as triggers from "./scripts/scripts.mjs";
+import * as triggerData from "./scripts/trigger_data.mjs";
 import * as specialData from "./scripts/special_data.mjs";
 import AnimatedSprite from "./node/animated_sprite.mjs";
 import { convertToAnimSpriteList } from "./misc/util.mjs";
@@ -153,21 +153,9 @@ class Level extends Scene {
                         const thisTrigger = tiles.trigger[i.triggers[r][c]-1];
                         const pixelPos = new Vector(globalPos.x + thisTrigger.offX, globalPos.y + thisTrigger.offY);
                         
-                        const triggerRect = new Trigger(pixelPos.x, pixelPos.y, thisTrigger.w, thisTrigger.h, thisTrigger.trigger, thisTrigger.type, thisTrigger.maxActivations, triggers[thisTrigger.name]);
+                        const triggerRect = new Trigger(pixelPos.x, pixelPos.y, thisTrigger.w, thisTrigger.h, this, thisTrigger.maxActivations, triggerData[thisTrigger.name].ontouch.func, triggerData[thisTrigger.name].ontouch.params);
 
-                        if (thisTrigger.sprite) {
-                            const thisTriggerSprite = Assets.sprites[thisTrigger.sprite.name];
-                            const textureId = thisTriggerSprite.name.default; // placeholder!!
-                            const texDetails = thisTriggerSprite.sprite[textureId];
-
-                            this.addNode(new Entity(pixelPos.x, pixelPos.y, triggerRect, new Sprite(
-                                pixelPos.x + texDetails[4], pixelPos.y + texDetails[5], thisTrigger.z,
-                                new Rect(texDetails[0], texDetails[1], texDetails[2], texDetails[3]),
-                            1)));
-                        }
-                        else {
-                            this.addNode(triggerRect);
-                        }
+                        this.addNode(triggerRect);
                         this.triggerList.push(triggerRect);
                     }
 
