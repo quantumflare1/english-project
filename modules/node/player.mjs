@@ -7,7 +7,6 @@ import Sprite from "./sprite.mjs";
 import Entity from "./entity.mjs";
 import Assets from "../assets.mjs";
 import { input, keybinds } from "../inputs.mjs";
-import sprite from "../../data/img/sprite/ophelia.json";
 
 const WIDTH = config.width;
 const HEIGHT = config.height;
