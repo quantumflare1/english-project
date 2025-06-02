@@ -34,7 +34,8 @@ const elements = [
         {
             params: [300, 104, 10, "Play?", "end", "28px font-NotJamSlab14", "black", "", true,
                 () => {
-                    const scene = new Cutscene("./data/level/episode1.angle", "./data/cutscene/cutscene_ep1_0.json");
+                    //const scene = new Cutscene("./data/level/episode1.angle", "./data/cutscene/cutscene_ep1_0.json");
+                    const scene = new Level("./data/level/episode1.angle");
                     dispatchEvent(new SceneChangeEvent(scene));
                 }
             ],

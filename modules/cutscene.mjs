@@ -208,15 +208,6 @@ export default class Cutscene extends Scene {
     update() {
         super.update();
 
-        if (this.done) {
-            this.ticks++;
-            if (this.ticks >= Transition.transTime) {
-                if (this.prevScene) {
-                    dispatchEvent(new SceneChangeEvent(this.prevScene));
-                }
-                else dispatchEvent(new SceneChangeEvent(new Level(this.data.afterScene)));
-            }
-        }
         if (this.done || this.loadState < 2) return;
 
         if (this.dialogue) {
@@ -258,7 +249,14 @@ export default class Cutscene extends Scene {
         if (!this.curEvent) {
             this.done = true;
             this.ticks = 0;
-            this.addNode(new Transition("fadeout"));
+
+            if (this.prevScene) {
+                this.addNode(new Transition("fadeout", this.prevScene, this));
+                this.prevScene.progress++;
+            }
+            else {
+                this.addNode(new Transition("fadeout", new Level(this.data.afterScene), this));
+            }
         }
     }
 }

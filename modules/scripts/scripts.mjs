@@ -5,6 +5,7 @@ import { lerp } from "../misc/util.mjs";
 import Dialogue from "../node/dialogue.mjs";
 import Quest from "../node/quest.mjs";
 import Text from "../node/text.mjs";
+import Transition from "../node/transition.mjs";
 
 function test() {
     console.log("Activated!")
@@ -40,19 +41,29 @@ function setSpawnPoint(scene, player) {
 }
 
 function giveQuest(scene, player, description, id) {
-    scene.quest = new Quest(description, id);
-    scene.questTitle = new Text(10, 20, 99, "QUEST", "start", "16px font-Pixellari", "#ffff00", "follow");
-    scene.addNode(scene.quest);
-    scene.addNode(scene.questTitle);
+    if (scene.progress === id) {
+        scene.quest = new Quest(description, id);
+        scene.questTitle = new Text(10, 20, 99, "QUEST", "start", "16px font-Pixellari", "#ffff00", "follow");
+        scene.addNode(scene.quest);
+        scene.addNode(scene.questTitle);
+    }
 }
 
 function completeQuest(scene, player, id) {
-    if (scene.quest.id === id) {
+    if (scene.quest?.id === id) {
         scene.removeNode(scene.quest);
         scene.removeNode(scene.questTitle);
         scene.quest = null;
         scene.questTitle = null;
+        console.log(this)
     }
 }
 
-export { test, startMove, move, setSpawnPoint, startDialogue, giveQuest, completeQuest };
+function sleep(scene, player) {
+    if (scene.progress > scene.day) {
+        scene.day++;
+        scene.addNode(new Transition("fadeout", scene, scene, 30));
+    }
+}
+
+export { test, startMove, move, setSpawnPoint, startDialogue, giveQuest, completeQuest, sleep };

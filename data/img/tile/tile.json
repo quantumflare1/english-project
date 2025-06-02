@@ -177,10 +177,26 @@
         {
             "offX": 0,
             "offY": 0,
-            "w": 10,
-            "h": 10,
+            "w": 40,
+            "h": 40,
             "name": "quest1",
             "maxActivations": 1
+        },
+        {
+            "offX": 0,
+            "offY": 0,
+            "w": 120,
+            "h": 120,
+            "name": "doneQuest1",
+            "maxActivations": -1
+        },
+        {
+            "offX": 0,
+            "offY": 0,
+            "w": 120,
+            "h": 120,
+            "name": "sleep",
+            "maxActivations": -1
         }
     ],
     "special": [

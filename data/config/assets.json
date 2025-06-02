@@ -7,7 +7,7 @@
         ],
         "files": [
             ["bg_menu", "bg_temple"],
-            ["tile_checkpoint", "ophelia", "hamlet"],
+            ["tile_checkpoint", "ophelia", "hamlet", "laertes", "polonius"],
             ["tile_temple", "tile_spike", "tile_temple2", "tile_placeholder", "tile_castle",
             "tile_bed", "tile_templeplatform", "tile_rue", "tile_cobble", "tile_grass2",
             "tile_fence", "tile_stairsvertical", "tile_stairshorizontal", "tile_doorvertical", "tile_doorhorizontal"]

@@ -1,0 +1,56 @@
+{
+    "actors": {
+        "ophelia": {
+            "x": -326,
+            "y": -570,
+            "z": 2,
+            "sprite": "ophelia"
+        },
+        "laertes": {
+            "x": -320,
+            "y": -600,
+            "z": 1,
+            "sprite": "laertes"
+        },
+        "polonius": {
+            "x": -280,
+            "y": -600,
+            "z": 1,
+            "sprite": "polonius"
+        }
+    },
+    "choreo": [
+        {
+            "order": 1,
+            "delay": 60,
+            "target": "laertes",
+            "moveX": 0,
+            "moveY": -200,
+            "time": 200
+        },
+        {
+            "order": 2,
+            "delay": 30,
+            "target": "polonius",
+            "moveX": -40,
+            "moveY": 0,
+            "time": 40
+        }
+    ],
+    "script": [
+        {
+            "order": 0,
+            "delay": 60,
+            "source": "./data/dialogue/laertes_ep1_0.json"
+        },
+        {
+            "order": 3,
+            "delay": 60,
+            "source": "./data/dialogue/polonius_ep1_0.json"
+        }
+    ],
+    "initialX": -400,
+    "initialY": -670,
+    "initialRoom": 3,
+    "afterScene": "./data/level/episode1.angle"
+}

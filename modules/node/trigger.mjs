@@ -11,6 +11,7 @@ export default class Trigger extends Rect {
     activations; maxActivations;
 
     touchScript; touchParams;
+    interactScript; interactParams;
 
     /**
      * 
@@ -18,10 +19,10 @@ export default class Trigger extends Rect {
      * @param {number} y 
      * @param {number} w 
      * @param {number} h 
-     * @param {string} trigger 
      * @param {cb} ontouch 
+     * @param {cb} oninteract 
      */
-    constructor(x, y, w, h, scene, maxActivations, ontouch, touchParams) {
+    constructor(x, y, w, h, scene, maxActivations, ontouch = () => {}, touchParams = [], oninteract = () => {}, interactParams = []) {
         super(x, y, w, h);
         this.scene = scene;
         this.disabled = false;
@@ -31,6 +32,8 @@ export default class Trigger extends Rect {
 
         this.touchScript = ontouch.bind(this);
         this.touchParams = touchParams;
+        this.interactScript = oninteract.bind(this);
+        this.interactParams = interactParams;
     }
     update() {
         if (this.activations === this.maxActivations)
@@ -38,5 +41,10 @@ export default class Trigger extends Rect {
     }
     ontouch(player) {
         this.touchScript(this.scene, player, ...this.touchParams);
+        this.activations++;
+    }
+    oninteract(player) {
+        this.interactScript(this.scene, player, ...this.interactParams);
+        this.activations++;
     }
 }

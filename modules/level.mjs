@@ -28,10 +28,9 @@ class Level extends Scene {
     triggerList = [];
     specialList = [];
     quest = null;
+    progress = 0;
     day = 0;
-    // use triggers to add and complete quests
-    // quests represented by id
-    // also to increment the day count
+    sprites = []; // im hardcoding this idc anymore
 
     roomBlocks = [];
 
@@ -153,7 +152,7 @@ class Level extends Scene {
                         const thisTrigger = tiles.trigger[i.triggers[r][c]-1];
                         const pixelPos = new Vector(globalPos.x + thisTrigger.offX, globalPos.y + thisTrigger.offY);
                         
-                        const triggerRect = new Trigger(pixelPos.x, pixelPos.y, thisTrigger.w, thisTrigger.h, this, thisTrigger.maxActivations, triggerData[thisTrigger.name].ontouch.func, triggerData[thisTrigger.name].ontouch.params);
+                        const triggerRect = new Trigger(pixelPos.x, pixelPos.y, thisTrigger.w, thisTrigger.h, this, thisTrigger.maxActivations, triggerData[thisTrigger.name]?.ontouch?.func, triggerData[thisTrigger.name]?.ontouch?.params, triggerData[thisTrigger.name]?.oninteract?.func, triggerData[thisTrigger.name]?.oninteract?.params);
 
                         this.addNode(triggerRect);
                         this.triggerList.push(triggerRect);
@@ -235,7 +234,23 @@ class Level extends Scene {
             });
             this.addNode(timerDisplay);
         }
-        this.addNode(new Transition("fadein"));
+
+        if (this.progress === 0) {
+            const laertes = Assets.sprites.laertes.sprite[0];
+            const polonius = Assets.sprites.polonius.sprite[0];
+            this.sprites.push(new Sprite(-320, -600, -1, new Rect(laertes[0], laertes[1], laertes[2], laertes[3]), 0));
+            this.sprites.push(new Sprite(-280, -600, -1, new Rect(polonius[0], polonius[1], polonius[2], polonius[3]), 0));
+
+            this.addNode(this.sprites[0]);
+            this.addNode(this.sprites[1]);
+        }
+
+        // im going insane idc anymore
+        if (path.includes("episode1")) {
+            this.totalQs = 2;
+        }
+
+        this.addNode(new Transition("fadein", this, this));
     }
     update() {
         super.update();

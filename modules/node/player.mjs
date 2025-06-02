@@ -174,9 +174,15 @@ export default class Player extends Entity {
         // probably should move this to trigger class
         for (const i of this.level.triggerList) {
             if (this.hitbox.collidesWith(i)) {
+                console.log(i.done)
                 if (!i.disabled && !i.done) {
                     i.ontouch(this);
                     i.disabled = true;
+                }
+                if (!i.done && input.impulse.has(keybinds.select)) {
+                    input.consumeInput(keybinds.select);
+
+                    i.oninteract(this);
                 }
             }
             else {
