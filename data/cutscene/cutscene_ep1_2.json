@@ -1,0 +1,45 @@
+{
+    "actors": {
+        "ophelia": {
+            "x": 244,
+            "y": -80,
+            "z": 2,
+            "sprite": "ophelia"
+        },
+        "messenger": {
+            "x": 240,
+            "y": -120,
+            "z": 1,
+            "sprite": "messenger"
+        }
+    },
+    "choreo": [
+        {
+            "order": 1,
+            "delay": 80,
+            "target": "messenger",
+            "moveX": -20,
+            "moveY": 0,
+            "time": 40
+        },
+        {
+            "order": 2,
+            "delay": 50,
+            "target": "messenger",
+            "moveX": -180,
+            "moveY": 0,
+            "time": 150
+        }
+    ],
+    "script": [
+        {
+            "order": 0,
+            "delay": 30,
+            "source": "./data/dialogue/messenger_ep1_0.json"
+        }
+    ],
+    "initialX": 80,
+    "initialY": -180,
+    "initialRoom": 1,
+    "afterScene": "./data/level/episode1.json"
+}

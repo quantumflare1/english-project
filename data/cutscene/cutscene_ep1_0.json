@@ -70,5 +70,5 @@
     "initialX": -100,
     "initialY": 0,
     "initialRoom": 2,
-    "afterScene": "./data/level/episode1.angle"
+    "afterScene": "./data/level/episode1.json"
 }

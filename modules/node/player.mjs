@@ -3,10 +3,13 @@ import Vector from "../misc/vector.mjs";
 import { CameraMoveEvent, CameraSnapEvent, PlayerFreezeEvent, PlayerStateChangeEvent, PlayerUnfreezeEvent, RoomChangeEvent } from "../event.mjs";
 import config from "../../data/config/player.json" with { type: "json" };
 import Rect from "./rect.mjs";
-import Sprite from "./sprite.mjs";
+import { convertToAnimSpriteList } from "../misc/util.mjs";
 import Entity from "./entity.mjs";
 import Assets from "../assets.mjs";
 import { input, keybinds } from "../inputs.mjs";
+import AnimatedSprite from "./animated_sprite.mjs";
+
+import sprite from "../../data/img/sprite/ophelia.json" with { type: "json" };
 
 const WIDTH = config.width;
 const HEIGHT = config.height;
@@ -20,6 +23,7 @@ export default class Player extends Entity {
     facing = new Vector(1, 0);
     inControl = true;
     spawnX; spawnY; level;
+    facing = new Vector(0, 1);
     z = 0;
 
     /**
@@ -29,10 +33,10 @@ export default class Player extends Entity {
      * @param {Level} level The level this player is in. 
      */
     constructor(x, y, level) {
-        const texDetails = Assets.sprites.ophelia.sprite[0];
+        const texDetails = Assets.sprites.ophelia.sprite;
         super(x, y, new Rect(x, y, WIDTH, HEIGHT),
-        new Sprite(x + texDetails[4], y + texDetails[5], 0,
-            new Rect(texDetails[0], texDetails[1], texDetails[2], texDetails[3]),
+        new AnimatedSprite(x + texDetails[0][4], y + texDetails[0][5], 0,
+            convertToAnimSpriteList(texDetails),
         0, 8));
         this.spawnX = x;
         this.spawnY = y;
@@ -63,7 +67,7 @@ export default class Player extends Entity {
         this.prevX = this.pos.x;
         this.prevY = this.pos.y;
 
-        //this.setSprite();
+        this.setSprite();
         super.move(this.vel);
         dispatchEvent(new CameraMoveEvent(this.pos.x + CAMERA_OFFSET.x, this.pos.y + CAMERA_OFFSET.y));
 
@@ -129,38 +133,17 @@ export default class Player extends Entity {
             this.vel.y = 0;
         }
     }
-    /*
     setSprite() {
-        if (input.continuous.has(keybinds.left) && this.vel.x > 0 || input.continuous.has(keybinds.right) && this.vel.x < 0) {
-            this.sprite.setStartFrame(sprite.name.turning);
-            this.sprite.setEndFrame(sprite.name.turning);
-        }
-        else if (input.continuous.has(keybinds.right) && this.vel.x >= RUN_VEL) {
-            this.sprite.setStartFrame(sprite.name.run_right1);
-            this.sprite.setEndFrame(sprite.name.run_right2);
-        }
-        else if (input.continuous.has(keybinds.right)) {
-            this.sprite.setStartFrame(sprite.name.walk_right1);
-            this.sprite.setEndFrame(sprite.name.walk_right2);
-        }
-        else if (input.continuous.has(keybinds.left) && this.vel.x <= -RUN_VEL) {
-            this.sprite.setStartFrame(sprite.name.run_left1);
-            this.sprite.setEndFrame(sprite.name.run_left2);
-        }
-        else if (input.continuous.has(keybinds.left)) {
-            this.sprite.setStartFrame(sprite.name.walk_left1);
-            this.sprite.setEndFrame(sprite.name.walk_left2);
-        }
-        else if (this.facing.x < 0) {
-            this.sprite.setStartFrame(sprite.name.facing_left);
-            this.sprite.setEndFrame(sprite.name.facing_left);
+        if (this.facing.y < 0) {
+            this.sprite.setStartFrame(sprite.name.up);
+            this.sprite.setEndFrame(sprite.name.up);
         }
         else {
-            this.sprite.setStartFrame(sprite.name.facing_right);
-            this.sprite.setEndFrame(sprite.name.facing_right);
+            this.sprite.setStartFrame(sprite.name.down);
+            this.sprite.setEndFrame(sprite.name.down);
         }
         this.sprite.update();
-    }*/
+    }
     collide() {
         let moveX = this.pos.x - this.prevX;
         let moveY = this.pos.y - this.prevY;
@@ -173,7 +156,6 @@ export default class Player extends Entity {
         // probably should move this to trigger class
         for (const i of this.level.triggerList) {
             if (this.hitbox.collidesWith(i)) {
-                console.log(i.done)
                 if (!i.disabled && !i.done) {
                     i.ontouch(this);
                     i.disabled = true;

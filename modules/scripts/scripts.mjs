@@ -1,11 +1,12 @@
 import Player from "../node/player.mjs";
-import { PlayerStateChangeEvent } from "../event.mjs";
+import { PlayerStateChangeEvent, SceneChangeEvent } from "../event.mjs";
 import Vector from "../misc/vector.mjs";
 import { lerp } from "../misc/util.mjs";
 import Dialogue from "../node/dialogue.mjs";
 import Quest from "../node/quest.mjs";
 import Text from "../node/text.mjs";
 import Transition from "../node/transition.mjs";
+import Cutscene from "../cutscene.mjs";
 
 function test() {
     console.log("Activated!")
@@ -41,6 +42,7 @@ function setSpawnPoint(scene, player) {
 }
 
 function giveQuest(scene, player, description, id) {
+    console.log("PRGOERS" ,scene.progress, id)
     if (scene.progress === id) {
         scene.quest = new Quest(description, id);
         scene.questTitle = new Text(10, 20, 99, "QUEST", "start", "16px font-Pixellari", "#ffff00", "follow");
@@ -55,15 +57,20 @@ function completeQuest(scene, player, id) {
         scene.removeNode(scene.questTitle);
         scene.quest = null;
         scene.questTitle = null;
-        console.log(this)
     }
 }
 
 function sleep(scene, player) {
-    if (scene.progress > scene.day) {
+    if (scene.progress >= scene.dayProg[scene.day]) {
         scene.day++;
-        scene.addNode(new Transition("fadeout", scene, scene, 30));
+        scene.addNode(new Transition("fadeout", scene, scene, 60));
     }
 }
 
-export { test, startMove, move, setSpawnPoint, startDialogue, giveQuest, completeQuest, sleep };
+function encounter(scene, player, day, prog, level, cutscene, callback, ...args) {
+    if (scene.day === day && scene.progress === prog) { // prog for progesterone babyyyyyy
+        scene.addNode(new Transition("fadeout", new Cutscene(level, cutscene, scene), scene, 0, callback, ...args));
+    }
+}
+
+export { test, startMove, move, setSpawnPoint, startDialogue, giveQuest, completeQuest, sleep, encounter };

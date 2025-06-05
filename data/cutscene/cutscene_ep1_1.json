@@ -22,15 +22,15 @@
     "choreo": [
         {
             "order": 1,
-            "delay": 60,
+            "delay": 40,
             "target": "laertes",
             "moveX": 0,
-            "moveY": -200,
-            "time": 200
+            "moveY": -140,
+            "time": 140
         },
         {
             "order": 2,
-            "delay": 30,
+            "delay": 0,
             "target": "polonius",
             "moveX": -40,
             "moveY": 0,
@@ -52,5 +52,5 @@
     "initialX": -400,
     "initialY": -670,
     "initialRoom": 3,
-    "afterScene": "./data/level/episode1.angle"
+    "afterScene": "./data/level/episode1.json"
 }

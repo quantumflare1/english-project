@@ -23,7 +23,6 @@ class RoomChangeEvent extends CustomEvent {
     static code = "game_roomchange";
     constructor(dir) {
         super(RoomChangeEvent.code, { detail: dir });
-        console.log(dir.id)
     }
 }
 

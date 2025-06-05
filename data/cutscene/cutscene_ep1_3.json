@@ -1,0 +1,111 @@
+{
+    "actors": {
+        "ophelia": {
+            "x": 244,
+            "y": 40,
+            "z": 20,
+            "sprite": "ophelia"
+        },
+        "hamlet": {
+            "x": 240,
+            "y": -40,
+            "z": 1,
+            "sprite": "hamlet"
+        }
+    },
+    "choreo": [
+        {
+            "order": 0,
+            "delay": 20,
+            "target": "hamlet",
+            "moveX": 0,
+            "moveY": 60,
+            "time": 30
+        },
+        {
+            "order": 1,
+            "delay": 0,
+            "target": "ophelia",
+            "moveX": 0,
+            "moveY": 40,
+            "time": 40
+        },
+        {
+            "order": 2,
+            "delay": 50,
+            "target": "hamlet",
+            "moveX": 0,
+            "moveY": 50,
+            "time": 75
+        },
+        {
+            "order": 3,
+            "delay": 180,
+            "target": "hamlet",
+            "moveX": 0,
+            "moveY": -4,
+            "time": 14
+        },
+        {
+            "order": 4,
+            "delay": 6,
+            "target": "hamlet",
+            "moveX": 0,
+            "moveY": 4,
+            "time": 14
+        },
+        {
+            "order": 5,
+            "delay": 6,
+            "target": "hamlet",
+            "moveX": 0,
+            "moveY": -4,
+            "time": 14
+        },
+        {
+            "order": 6,
+            "delay": 6,
+            "target": "hamlet",
+            "moveX": 0,
+            "moveY": 4,
+            "time": 14
+        },
+        {
+            "order": 7,
+            "delay": 6,
+            "target": "hamlet",
+            "moveX": 0,
+            "moveY": -4,
+            "time": 14
+        },
+        {
+            "order": 8,
+            "delay": 6,
+            "target": "hamlet",
+            "moveX": 0,
+            "moveY": 4,
+            "time": 14
+        },
+        {
+            "order": 9,
+            "delay": 80,
+            "target": "hamlet",
+            "moveX": 0,
+            "moveY": -20,
+            "time": 40
+        },
+        {
+            "order": 10,
+            "delay": 80,
+            "target": "hamlet",
+            "moveX": 0,
+            "moveY": -100,
+            "time": 150
+        }
+    ],
+    "script": [],
+    "initialX": 80,
+    "initialY": 0,
+    "initialRoom": 0,
+    "afterScene": "./data/level/episode1.json"
+}

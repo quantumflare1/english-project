@@ -197,6 +197,30 @@
             "h": 120,
             "name": "sleep",
             "maxActivations": -1
+        },
+        {
+            "offX": 0,
+            "offY": 0,
+            "w": 20,
+            "h": 20,
+            "name": "messenger",
+            "maxActivations": -1
+        },
+        {
+            "offX": 0,
+            "offY": 0,
+            "w": 40,
+            "h": 40,
+            "name": "madHamlet",
+            "maxActivations": -1
+        },
+        {
+            "offX": -20,
+            "offY": -20,
+            "w": 80,
+            "h": 80,
+            "name": "doneQuest2",
+            "maxActivations": -1
         }
     ],
     "special": [

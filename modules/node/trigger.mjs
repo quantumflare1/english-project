@@ -12,6 +12,7 @@ export default class Trigger extends Rect {
 
     touchScript; touchParams;
     interactScript; interactParams;
+    z = 40;
 
     /**
      * 
@@ -46,5 +47,9 @@ export default class Trigger extends Rect {
     oninteract(player) {
         this.interactScript(this.scene, player, ...this.interactParams);
         this.activations++;
+    }
+    draw(ctx) {
+        ctx.fillStyle = "rgba(255,0,0,0.5)";
+        ctx.fillRect(this.pos.x, this.pos.y, this.dimensions.x, this.dimensions.y);
     }
 }

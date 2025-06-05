@@ -1,0 +1,28 @@
+{
+    "actors": {
+        "ophelia": {
+            "x": -276,
+            "y": -570,
+            "z": 2,
+            "sprite": "ophelia"
+        },
+        "polonius": {
+            "x": -280,
+            "y": -600,
+            "z": 1,
+            "sprite": "polonius"
+        }
+    },
+    "choreo": [],
+    "script": [
+        {
+            "order": 0,
+            "delay": 30,
+            "source": "./data/dialogue/polonius_ep1_1.json"
+        }
+    ],
+    "initialX": -400,
+    "initialY": -670,
+    "initialRoom": 3,
+    "afterScene": "./data/level/episode1.json"
+}

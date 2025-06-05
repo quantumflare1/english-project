@@ -6,7 +6,7 @@ import { CameraMoveEvent, CameraSnapEvent, CameraZoomEvent } from "../event.mjs"
 
 export default class Camera extends Node {
     static BASE_DIMENSIONS = new Vector(320, 180);
-    static FOLLOW_TICKS = 30;
+    static FOLLOW_TICKS = 20;
 
     pos = new Vector();
     prevPos = new Vector();
@@ -29,8 +29,6 @@ export default class Camera extends Node {
         this.prevZoom = zoom;
         this.targetZoom = zoom;
         this.zoom = zoom;
-
-        console.log(this.pos);
 
         addEventListener(CameraMoveEvent.code, (e) => {
             this.moveTo(e.detail);

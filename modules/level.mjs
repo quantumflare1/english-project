@@ -23,13 +23,15 @@ import { input, keybinds } from "./inputs.mjs";
 import { createPauseMenu } from "./node/menu/pause_menu.mjs";
 import Transition from "./node/transition.mjs";
 
+
 class Level extends Scene {
+    dayProg = [2, 1];
     blockList = [];
     triggerList = [];
     specialList = [];
     quest = null;
-    progress = 0;
-    day = 0;
+    progress = 3;
+    day = 1;
     sprites = []; // im hardcoding this idc anymore
 
     roomBlocks = [];
@@ -39,6 +41,7 @@ class Level extends Scene {
         this.init(path);
     }
     async init(path) {
+        console.log(path)
         const json = await (await fetch(path)).json();
     
         const rooms = [];
@@ -235,7 +238,8 @@ class Level extends Scene {
             this.addNode(timerDisplay);
         }
 
-        if (this.progress === 0) {
+        // im going insane idc anymore
+        if (path.includes("episode1")) {
             const laertes = Assets.sprites.laertes.sprite[0];
             const polonius = Assets.sprites.polonius.sprite[0];
             this.sprites.push(new Sprite(-320, -600, -1, new Rect(laertes[0], laertes[1], laertes[2], laertes[3]), 0));
@@ -243,10 +247,6 @@ class Level extends Scene {
 
             this.addNode(this.sprites[0]);
             this.addNode(this.sprites[1]);
-        }
-
-        // im going insane idc anymore
-        if (path.includes("episode1")) {
             this.totalQs = 2;
         }
 

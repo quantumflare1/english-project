@@ -30,6 +30,8 @@ export default class Cutscene extends Scene {
         this.loadState = 0;
         this.prevScene = prevScene;
 
+        this.prevScene.progress++;
+
         this.initLevel(level);
         this.initCutscene(cutscene);
     }
@@ -252,7 +254,6 @@ export default class Cutscene extends Scene {
 
             if (this.prevScene) {
                 this.addNode(new Transition("fadeout", this.prevScene, this));
-                this.prevScene.progress++;
             }
             else {
                 this.addNode(new Transition("fadeout", new Level(this.data.afterScene), this));

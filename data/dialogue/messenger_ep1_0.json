@@ -1,0 +1,51 @@
+[
+    {
+        "speaker": "Ophelia",
+        "text": [
+            "?!"
+        ]
+    },
+    {
+        "speaker": "Courier",
+        "text": [
+            "My deepest apologies, my lady.",
+            "But the Lord Hamlet hast given",
+            "me charge to deliver this letter."
+        ]
+    },
+    {
+        "speaker": "Ophelia",
+        "text": [
+            "(O, what a dilemma...)",
+            "(Obey my lord, or my father?)",
+            "(I...)"
+        ]
+    },
+    {
+        "speaker": "Ophelia",
+        "text": [
+            "I must decline, good sir."
+        ]
+    },
+    {
+        "speaker": "Courier",
+        "text": [
+            "Eh?"
+        ]
+    },
+    {
+        "speaker": "Ophelia",
+        "text": [
+            "I must charge thee also,",
+            "to return this package",
+            "from whence it came."
+        ]
+    },
+    {
+        "speaker": "Courier",
+        "text": [
+            "I... see.",
+            "My apologies again, my lady."
+        ]
+    }
+]
