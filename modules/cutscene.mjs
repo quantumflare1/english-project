@@ -28,9 +28,11 @@ export default class Cutscene extends Scene {
         this.events = new FlatQueue();
         this.done = false;
         this.loadState = 0;
-        this.prevScene = prevScene;
+        if (prevScene) {
+            this.prevScene = prevScene;
 
-        this.prevScene.progress++;
+            this.prevScene.progress++;
+        }
 
         this.initLevel(level);
         this.initCutscene(cutscene);
@@ -202,13 +204,13 @@ export default class Cutscene extends Scene {
         for (const i of this.data.script) {
             this.events.push(i, i.order);
         }
-        dispatchEvent(new CameraSnapEvent(this.data.initialX, this.data.initialY));
         this.curRoom = this.data.initialRoom;
         this.loadState++;
         this.nextEvent();
     }
     update() {
         super.update();
+        dispatchEvent(new CameraSnapEvent(this.data.initialX, this.data.initialY));
 
         if (this.done || this.loadState < 2) return;
 

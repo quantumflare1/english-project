@@ -1,0 +1,65 @@
+{
+    "actors": {
+        "ophelia": {
+            "x": 240,
+            "y": 160,
+            "z": 2,
+            "sprite": "ophelia"
+        },
+        "hamlet": {
+            "x": 320,
+            "y": 320,
+            "z": 1,
+            "sprite": "hamlet"
+        }
+    },
+    "choreo": [
+        {
+            "order": 0,
+            "delay": 15,
+            "target": "hamlet",
+            "moveX": 0,
+            "moveY": -160,
+            "time": 160
+        },
+        {
+            "order": 1,
+            "delay": 0,
+            "target": "hamlet",
+            "moveX": -55,
+            "moveY": 0,
+            "time": 55
+        }
+    ],
+    "script": [
+        {
+            "order": 2,
+            "delay": 30,
+            "source": "./data/dialogue/hamlet_ep2_2.json"
+        },
+        {
+            "order": 3,
+            "delay": 300,
+            "source": "./data/dialogue/hamlet_ep2_3.json"
+        },
+        {
+            "order": 4,
+            "delay": 420,
+            "source": "./data/dialogue/hamlet_ep2_4.json"
+        },
+        {
+            "order": 5,
+            "delay": 600,
+            "source": "./data/dialogue/hamlet_ep2_5.json"
+        },
+        {
+            "order": 5,
+            "delay": 480,
+            "source": "./data/dialogue/hamlet_ep2_6.json"
+        }
+    ],
+    "initialX": 100,
+    "initialY": 80,
+    "initialRoom": 0,
+    "afterScene": "./data/level/episode2.json"
+}

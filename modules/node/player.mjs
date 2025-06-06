@@ -160,7 +160,7 @@ export default class Player extends Entity {
                     i.ontouch(this);
                     i.disabled = true;
                 }
-                if (!i.done && input.impulse.has(keybinds.select)) {
+                if (!i.done && input.impulse.has(keybinds.select) && this.inControl) {
                     input.consumeInput(keybinds.select);
 
                     i.oninteract(this);

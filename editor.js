@@ -82,6 +82,7 @@ function load() {
                         defaultSprite = "default";
                 }
                 const thisTile = Assets.sprites[i.name];
+                console.log(i.name)
                 const spr = thisTile.sprite[thisTile.name[defaultSprite]];
                 const osc = new OffscreenCanvas(spr[2], spr[3]); // ??
                 const osctx = osc.getContext("2d");

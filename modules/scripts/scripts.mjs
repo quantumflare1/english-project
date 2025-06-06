@@ -1,5 +1,6 @@
 import Player from "../node/player.mjs";
 import { PlayerStateChangeEvent, SceneChangeEvent } from "../event.mjs";
+import { Level } from "../level.mjs";
 import Vector from "../misc/vector.mjs";
 import { lerp } from "../misc/util.mjs";
 import Dialogue from "../node/dialogue.mjs";
@@ -41,9 +42,8 @@ function setSpawnPoint(scene, player) {
     this.done = true;
 }
 
-function giveQuest(scene, player, description, id) {
-    console.log("PRGOERS" ,scene.progress, id)
-    if (scene.progress === id) {
+function giveQuest(scene, player, description, id, day) {
+    if (scene.progress === id && scene.day === day && !scene.quest) {
         scene.quest = new Quest(description, id);
         scene.questTitle = new Text(10, 20, 99, "QUEST", "start", "16px font-Pixellari", "#ffff00", "follow");
         scene.addNode(scene.quest);
@@ -60,10 +60,18 @@ function completeQuest(scene, player, id) {
     }
 }
 
-function sleep(scene, player) {
-    if (scene.progress >= scene.dayProg[scene.day]) {
-        scene.day++;
-        scene.addNode(new Transition("fadeout", scene, scene, 60));
+function sleep(scene, player, auto = false) {
+    if (scene.progress >= scene.dayProg[scene.episode][scene.day] || auto) {
+        if (scene.dayProg[scene.episode]?.length - 1 === scene.day && !auto) {
+            nextEpisode(scene, player, `./data/level/episode${scene.episode+2}.json`);
+        }
+        else {
+            if (scene.episode === 1 && scene.day === 1 && scene.progress === 3) {
+                giveQuest(scene, player, "See your father", 3, 1);
+            }
+            scene.day++;
+            scene.addNode(new Transition("fadeout", scene, scene, 60));
+        }
     }
 }
 
@@ -73,4 +81,13 @@ function encounter(scene, player, day, prog, level, cutscene, callback, ...args)
     }
 }
 
-export { test, startMove, move, setSpawnPoint, startDialogue, giveQuest, completeQuest, sleep, encounter };
+function ending(scene, player) {
+    console.log("enbd")
+    scene.addNode(new Transition("fadeout", new Cutscene("./data/level/episode3.json", "./data/cutscene/cutscene_ep3_0.json"), scene));
+}
+
+function nextEpisode(scene, player, newEpisode) {
+    scene.addNode(new Transition("fadeout", new Level(newEpisode, scene.episode+1), scene, 150));
+}
+
+export { test, startMove, move, setSpawnPoint, startDialogue, giveQuest, completeQuest, sleep, encounter, ending };

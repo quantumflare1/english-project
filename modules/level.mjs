@@ -11,6 +11,7 @@ import Text from "./node/text.mjs";
 import Trigger from "./node/trigger.mjs";
 import Special from "./node/special.mjs";
 import Platform from "./node/platform.mjs";
+import * as Scripts from "./scripts/scripts.mjs"
 
 import tiles from "../data/img/tile/tile.json" with { type: "json" };
 import { options } from "./options.mjs";
@@ -25,19 +26,24 @@ import Transition from "./node/transition.mjs";
 
 
 class Level extends Scene {
-    dayProg = [2, 1];
+    episode;
+    dayProg = [
+        [2, 4],
+        [2, 3, 3]
+    ];
     blockList = [];
     triggerList = [];
     specialList = [];
     quest = null;
-    progress = 3;
-    day = 1;
+    progress = 0;
+    day = 0;
     sprites = []; // im hardcoding this idc anymore
 
     roomBlocks = [];
 
-    constructor(path) {
+    constructor(path, episode) {
         super("placeholder", new Camera(0, 0, 1));
+        this.episode = episode;
         this.init(path);
     }
     async init(path) {
@@ -247,6 +253,10 @@ class Level extends Scene {
 
             this.addNode(this.sprites[0]);
             this.addNode(this.sprites[1]);
+            this.totalQs = 2;
+        }
+        else if (path.includes("episode2")) {
+            Scripts.giveQuest(this, null, "Return Hamlet's letters", 0, 0);
             this.totalQs = 2;
         }
 

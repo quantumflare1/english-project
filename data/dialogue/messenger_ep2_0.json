@@ -1,0 +1,50 @@
+[
+    {
+        "speaker": "Ophelia",
+        "text": [
+            "?!"
+        ]
+    },
+    {
+        "speaker": "Courier",
+        "text": [
+            "O great tragedy!",
+            "Lady, I bear galling news,",
+            "which won't be to thy liking."
+        ]
+    },
+    {
+        "speaker": "Ophelia",
+        "text": [
+            "Speak, sir, and quickly.",
+            "I will stomach it, for my lord",
+            "calls me."
+        ]
+    },
+    {
+        "speaker": "Courier",
+        "text": [
+            "Maiden, it pains me, but thy",
+            "father is slain."
+        ]
+    },
+    {
+        "speaker": "Ophelia",
+        "text": [
+            "What?"
+        ]
+    },
+    {
+        "speaker": "Ophelia",
+        "text": [
+            "Nay, you lie!"
+        ]
+    },
+    {
+        "speaker": "Courier",
+        "text": [
+            "I am merely tragedy's messenger.",
+            "My condolences lie with thou."
+        ]
+    }
+]
