@@ -209,10 +209,10 @@ export default class Cutscene extends Scene {
         this.nextEvent();
     }
     update() {
+        if (this.done || this.loadState < 2) return;
+
         super.update();
         dispatchEvent(new CameraSnapEvent(this.data.initialX, this.data.initialY));
-
-        if (this.done || this.loadState < 2) return;
 
         if (this.dialogue) {
             if (!this.dialogue.active) {
