@@ -24,7 +24,7 @@ export default class Player extends Entity {
     inControl = true;
     spawnX; spawnY; level;
     facing = new Vector(0, 1);
-    z = 0;
+    z = 2;
 
     /**
      * Creates a new player
@@ -35,7 +35,7 @@ export default class Player extends Entity {
     constructor(x, y, level) {
         const texDetails = Assets.sprites.ophelia.sprite;
         super(x, y, new Rect(x, y, WIDTH, HEIGHT),
-        new AnimatedSprite(x + texDetails[0][4], y + texDetails[0][5], 0,
+        new AnimatedSprite(x + texDetails[0][4], y + texDetails[0][5], 2,
             convertToAnimSpriteList(texDetails),
         0, 8));
         this.spawnX = x;

@@ -8,8 +8,8 @@
         "files": [
             ["bg_menu"],
             ["ophelia", "hamlet", "laertes", "polonius", "messenger"],
-            ["tile_placeholder", "tile_castle", "tile_black",
-            "tile_bed", "tile_templeplatform", "tile_rue", "tile_cobble", "tile_grass2",
+            ["tile_placeholder", "tile_castle", "tile_black", "tile_water", "tile_dresser", "trunk",
+            "tile_bed", "tile_templeplatform", "tile_rue", "tile_cobble", "tile_grass2", "willow",
             "tile_fence", "tile_stairsvertical", "tile_stairshorizontal", "tile_doorvertical", "tile_doorhorizontal"]
         ]
     },

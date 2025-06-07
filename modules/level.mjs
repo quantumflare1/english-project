@@ -41,7 +41,7 @@ class Level extends Scene {
 
     roomBlocks = [];
 
-    constructor(path, episode) {
+    constructor(path, episode = 0) {
         super("placeholder", new Camera(0, 0, 1));
         this.episode = episode;
         this.init(path);

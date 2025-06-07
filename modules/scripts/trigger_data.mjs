@@ -115,6 +115,12 @@ inspectDrawer2 = {
         params: ["./data/dialogue/check_drawer2.json", "./data/dialogue/check_drawer3.json"]
     }
 },
+inspectDrawer3 = {
+    oninteract: {
+        func: Scripts.startDialogue,
+        params: ["./data/dialogue/check_drawer3.json"]
+    }
+},
 nunnery = {
     ontouch: {
         func: (s, p, i) => {
@@ -167,4 +173,4 @@ final = {
 };
 
 export { quest1, doneQuest1, sleep, messenger, madHamlet, doneQuest2, inspectColumbine, inspectDaisy, inspectFennel, inspectPansy, inspectRosemary, inspectRue, inspectViolet,
-    inspectViolet2, inspectDrawer, inspectDrawer2, nunnery, seePlay, lastEncounter, alwaysSleep, pushDown, final };
+    inspectViolet2, inspectDrawer, inspectDrawer2, nunnery, seePlay, lastEncounter, alwaysSleep, pushDown, final, inspectDrawer3 };

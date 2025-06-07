@@ -191,7 +191,7 @@ export default class Cutscene extends Scene {
             const sprite = Assets.sprites[actor.sprite].sprite[0];
 
             const entity = new Sprite(
-                actor.x + sprite[4], actor.y + sprite[5], 0,
+                actor.x + sprite[4], actor.y + sprite[5], actor.z,
                 new Rect(sprite[0], sprite[1], sprite[2], sprite[3]), actor.z
             );
             this.actors[v] = entity;

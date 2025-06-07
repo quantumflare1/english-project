@@ -61,7 +61,8 @@ function completeQuest(scene, player, id) {
 }
 
 function sleep(scene, player, auto = false) {
-    if (scene.progress >= scene.dayProg[scene.episode][scene.day] || auto) {
+    console.log(auto)
+    if (auto || scene.progress >= scene.dayProg[scene.episode][scene.day]) {
         if (scene.dayProg[scene.episode]?.length - 1 === scene.day && !auto) {
             nextEpisode(scene, player, `./data/level/episode${scene.episode+2}.json`);
         }

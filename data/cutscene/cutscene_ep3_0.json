@@ -1,8 +1,8 @@
 {
     "actors": {
         "ophelia": {
-            "x": 2604,
-            "y": 1400,
+            "x": 2644,
+            "y": 1420,
             "z": 2,
             "sprite": "ophelia"
         }
@@ -10,15 +10,15 @@
     "choreo": [
         {
             "order": 0,
-            "delay": 60,
+            "delay": 120,
             "target": "ophelia",
             "moveX": 60,
-            "moveY": 40,
-            "time": 160
+            "moveY": -40,
+            "time": 300
         },
         {
             "order": 0,
-            "delay": 180,
+            "delay": 60,
             "target": "ophelia",
             "moveX": 0,
             "moveY": 0,
@@ -26,8 +26,8 @@
         }
     ],
     "script": [],
-    "initialX": 2460,
-    "initialY": 1350,
+    "initialX": 2500,
+    "initialY": 1370,
     "initialRoom": 13,
     "afterScene": "./data/level/dark.json"
 }

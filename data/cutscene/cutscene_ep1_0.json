@@ -67,7 +67,7 @@
             "source": "./data/dialogue/hamlet_ep1_1.json"
         }
     ],
-    "initialX": -100,
+    "initialX": -350,
     "initialY": 0,
     "initialRoom": 2,
     "afterScene": "./data/level/episode1.json"
